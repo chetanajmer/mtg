@@ -136,32 +136,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
                         <input type="hidden" name="id" value="{{$items->id}}" id="product_id">
 
-                        <div class="card-box" style="padding-bottom:0;margin-bottom:20px;">
-
-                          <ul class="nav nav-tabs navtab-bg nav-justified" id="productTabs">
-
-                            <li class="active"><a href="#tab-basic" data-toggle="tab" aria-expanded="true"><span class="visible-xs"><i class="fa fa-info"></i></span><span class="hidden-xs">Basic Info</span></a></li>
-
-                            <li><a href="#tab-pricing" data-toggle="tab"><span class="visible-xs"><i class="fa fa-money"></i></span><span class="hidden-xs">Pricing &amp; MOQ</span></a></li>
-
-                            <li><a href="#tab-media" data-toggle="tab"><span class="visible-xs"><i class="fa fa-image"></i></span><span class="hidden-xs">Media</span></a></li>
-
-                            <li><a href="#tab-desc" data-toggle="tab"><span class="visible-xs"><i class="fa fa-file-text"></i></span><span class="hidden-xs">Description &amp; Specs</span></a></li>
-
-                            <li><a href="#tab-tags" data-toggle="tab"><span class="visible-xs"><i class="fa fa-tags"></i></span><span class="hidden-xs">Tags</span></a></li>
-
-                            <li><a href="#tab-seo" data-toggle="tab"><span class="visible-xs"><i class="fa fa-search"></i></span><span class="hidden-xs">SEO / Meta</span></a></li>
-
-                            <li><a href="#tab-reviews" data-toggle="tab"><span class="visible-xs"><i class="fa fa-star"></i></span><span class="hidden-xs">Reviews</span></a></li>
-
-                          </ul>
-
-                        </div>
-
-                        <div class="tab-content" id="productTabContent">
-
-                        <div class="tab-pane active" id="tab-basic">
-
                         <div class="row">
 
                             <div class="col-lg-12">
@@ -285,7 +259,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                         <div class="row">
 
-                            <div class="col-lg-12">
+                            <div class="col-lg-6">
 
                                 <div class="card-box">
 
@@ -378,364 +352,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                         </div> -->
 
-                                        <!-- <div class="form-group m-b-20">
-
-                                            <label>Product Warranty</label>
-
-                                                <select class="form-control select2" name="product_warranty">
-
-                                                    <option value="">Select Warranty</option>
-
-                                                    <option value="No Warranty" @if($items->product_warranty=="No Warranty")selected=""@endif>No Warranty</option>
-
-                                                    <option value="1 Month Warranty" @if($items->product_warranty=="1 Month Warranty")selected=""@endif>1 Month Warranty</option>
-
-                                                    <option value="2 Month Warranty"@if($items->product_warranty=="2 Month Warranty")selected=""@endif>2 Month Warranty</option>
-
-                                                    <option value="3 Month Warranty"@if($items->product_warranty=="3 Month Warranty")selected=""@endif>3 Month Warranty</option>
-
-                                                    <option value="6 Month Warranty" @if($items->product_warranty=="6 Month Warranty")selected=""@endif>6 Month Warranty</option>
-
-                                                    <option value="1 Year Warranty" @if($items->product_warranty=="1 Year Warranty")selected=""@endif>1 Year Warranty</option>
-
-                                                    <option value="2 Year Warranty" @if($items->product_warranty=="2 Year Warranty")selected=""@endif>2 Year Warranty</option>
-
-                                                </select>
-
-                                        </div> -->
-
-                                        <div class="form-group m-b-20">
-
-                                            <label class="m-b-15">Status <span class="text-danger">*</span></label>  <br/>
-
-                                                <div class="radio radio-inline">
-
-                                                    <input type="radio" id="inlineRadio1" value="online" name="is_active" @if($items->is_active=="online")checked=""@endif>
-
-                                                        <label for="inlineRadio1"> Online </label>
-
-                                                </div>
-
-                                                <div class="radio radio-inline">
-
-                                                    <input type="radio" id="inlineRadio2" value="offline" name="is_active" @if($items->is_active=="offline")checked=""@endif>
-
-                                                        <label for="inlineRadio2"> Offline </label>
-
-                                                </div>
-
-                                        </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        </div>
-
-                        <div class="tab-pane" id="tab-reviews">
-
-                        <div class="row">
-
-                            <div class="col-lg-12">
-
-                                <div class="card-box">
-
-                                    <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Ratings &amp; Reviews</b></h5>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Rating</label>
-
-                                                <input type="number" step="0.1" min="0" max="5" class="form-control" placeholder="4.5" name="rating" value="{{$items->rating}}">
-
-                                            <p style="color:blue">Enter rating between 0.0 - 5.0 (Eg. 4.5)</p>
-
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Review Count</label>
-
-                                                <input type="number" min="0" class="form-control" placeholder="120" name="review_count" value="{{$items->review_count}}">
-
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-
-                                            <input type="checkbox" name="reviews_enabled" id="reviews_enabled" value="yes" @if($items->reviews_enabled=="yes" || empty($items->reviews_enabled)) checked="" @endif data-plugin="switchery" data-color="#81C868" data-size="small">
-
-                                            <label for="reviews_enabled"> Enable Reviews</label>
-
-                                        </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        </div>
-
-                        <div class="tab-pane" id="tab-media">
-
-                        <div class="row">
-
-                            <div class="col-lg-4">
-
-                                <div class="card-box">
-
-                                    <h5 class="text-muted text-uppercase m-t-0"><b>Product Thumbnail Image</b></h5>
-
-                                    <p>Image Size Should be 300px X 300px</p>
-
-                                    @if($items->brand!='42')
-
-                                      @if($items->thumbnail)
-
-                                      <img id="imagethumbpreview" class="img-rounded" src="{{ URL::asset('upload/product/thumbnail/'.$items->thumbnail) }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;">
-
-                                    @else
-
-                                      <img id="imagethumbpreview" class="img-rounded" src="{{URL::asset('assets/images/upload.png')}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;display: inline-block;">
-
-                                    @endif
-
-                                    <input type="hidden" name="oldthumbimage" value="{{$items->thumbnail}}">
-
-                                    <input type="file" id="thumbnailval" name="thumbnailval" class=""  >
-
-                                    @else
-
-                                    <img id="imagethumbpreview" class="img-rounded" src="{{$items->thumbnail}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;">
-
-                                    @endif
-
-
-                                </div>  
-
-                            </div>
-
-                            <div class="col-lg-4">
-
-                                 <div class="card-box">
-
-                                    <h5 class="text-muted text-uppercase m-t-0"><b>Product Gallery Image</b></h5>
-
-                                        <p>Image size should be 650px X 650px </p>
-                                        @if($items->brand!='42')
-                                          @if(!empty($items->bulk_image))
-                                            <div class="row" style="margin-bottom: 10px;">
-                                              @php
-                                                $bulkimg=explode(',',$items->bulk_image)
-                                              @endphp
-
-                                              @foreach($bulkimg as $img)
-                                              <div class="col-lg-4">
-                                                <img id="imagepreview1" class="img-rounded" src="{{ URL::asset('upload/product/'.$img) }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">  
-                                                <center> 
-                                                  <a style="background-color:white; position: absolute; top:-5px; right:49px; border:1px solid #ddd; padding:2px; cursor:pointer;color:grey; border-radius:50%; width:25px;" onclick="deletebulkimage('{{$img}}')"  >X</a> 
-                                                </center>
-                                              </div>
-                                              @endforeach
-                                            </div>
-                                            @endif
-                                            <input type="file" id="bulk_image" name="bulk_image[]" class=""  multiple="">
-                                             <input type="hidden" id="bulk_image" name="old_bulk_image" class="" value="{{$items->bulk_image}}"  >
-                                            
-                                          @else
-
-                                              @if(!empty($items->bulk_image))
-                                            <div class="row" style="margin-bottom: 10px;">
-                                              @php
-                                                $bulkimg=explode(',',$items->bulk_image)
-                                              @endphp
-
-                                              @foreach($bulkimg as $img)
-                                              <div class="col-lg-4">
-                                                <img id="imagepreview1" class="img-rounded" src="{{$img}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">  
-                                              </div>
-                                              @endforeach
-                                            </div>
-                                            @endif
-
-
-                                          @endif
-                                            
-
-                                        </div>
-
-                            </div>
-
-                            <div class="col-lg-4">
-
-                                 <div class="card-box">
-
-                                    <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Product Video</b></h5>
-
-                                        @if(!empty($items->video))
-                                        <div class="form-group m-b-20">
-                                          <label>Current Video</label>
-                                          <p>
-                                          @if(Str::startsWith($items->video,'http'))
-                                            <a href="{{$items->video}}" target="_blank">{{$items->video}}</a>
-                                          @else
-                                            <a href="{{URL::asset('upload/product/video/'.$items->video)}}" target="_blank">{{$items->video}}</a>
-                                          @endif
-                                          </p>
-                                        </div>
-                                        @endif
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Video URL</label>
-
-                                                <input type="text" name="video" class="form-control" placeholder="e.g : https://youtube.com/watch?v=..." value="@if(Str::startsWith($items->video,'http')){{$items->video}}@endif">
-
-                                            <p style="color:blue">Paste a video URL or upload a video file below.</p>
-
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Upload Video File</label>
-
-                                            <input type="file" name="video_file" accept="video/*">
-
-                                            <p style="color:blue">If both are provided, the uploaded file will be used.</p>
-
-                                        </div>
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-                        </div>
-
-                        <div class="tab-pane" id="tab-seo">
-
-                        <div class="row">
-
-                            <div class="col-lg-12">
-
-                                <div class="card-box">
-
-                                    <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Meta Data</b></h5>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Meta title</label>
-
-                                                <input type="text" name="metatitle" class="form-control" placeholder="Enter title" value="{{$items->metatitle}}">
-
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Meta Keywords</label>
-
-                                                <input type="text" name="metakey" class="form-control" placeholder="Enter keywords" value="{{$items->metakey}}">
-
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Meta Description </label>
-
-                                                <textarea class="form-control" name="metadesc" rows="5" placeholder="Please enter description">{{$items->metadesc}}</textarea>
-
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-                                          <label>Title</label>
-                                          <input type="text" class="form-control" name="title" placeholder="Enter title" value="{{$items->title}}" >
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-                                          <label>OG Type</label>
-                                          <input type="text" class="form-control" name="og_type" placeholder="Enter Og Type" value="{{$items->og_type}}" >
-                                        </div>
-                                        
-                                        <div class="form-group m-b-20">
-                                          <label>Og Url</label>
-                                          <input type="text" class="form-control" name="og_url" placeholder="Enter Og Url" value="{{$items->og_url}}" >
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-                                          <label>Twitter Card</label>
-                                          <input type="text" class="form-control" name="twitter_card" placeholder="Enter Twitter Card" value="{{$items->twitter_card}}" >
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-                                          <label>Twitter Url</label>
-                                          <input type="text" class="form-control" name="twitter_url" placeholder="Enter Twitter Url" value="{{$items->twitter_url}}" >
-                                          </div>
-
-                                </div>
-
-                               <!--  <div class="card-box">
-
-                                    <h5 class="text-muted text-uppercase m-t-0"><b>Inventory</b></h5>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Quantity<span class="text-danger"></span></label>
-
-                                                <input type="number" class="form-control" name="quantity" value="{{$items->quantity}}">
-
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label class="m-b-15">Stock </label><br/>
-
-                                                <div class="radio radio-inline">
-
-                                                    <input type="radio" id="radio1" value="1" name="stock" @if($items->stock=='1')checked="" @endif>
-
-                                                        <label for="radio1"> In Stock </label><br>
-
-                                                </div>
-
-                                                <div class="radio radio-inline">
-
-                                                    <input type="radio" id="radio2" value="0" name="stock" @if($items->stock=='0')checked=""@endif>
-
-                                                    <label for="radio2"> Out of Stock </label>
-
-                                                </div>
-
-                                        </div>
-
-                                        <div class="form-group m-b-20">
-
-                                            <label>Low Stock<span class="text-danger"></span></label>
-
-                                                <input type="number" class="form-control" name="low_stock" value="{{$items->low_stock}}">
-
-                                        </div>
-
-                                </div> -->  
-
-                            </div>
-
-                        </div>
-
-                        </div>
-
-                        <div class="tab-pane" id="tab-pricing">
-
-                        <div class="row">
-
-                            <div class="col-lg-12">
-
-                                <div class="card-box">
-
-                                    <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Product Pricing</b></h5>
-
                                         <div class="form-group m-b-20">
 
                                             <label>Base Price <span class="text-danger">*</span></label>
@@ -806,7 +422,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                         </div>
 
-
+                                        
 
                                         @else
 
@@ -834,11 +450,312 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                             </div>
 
-
+                                        
 
                                         @endif
 
+                                        <!-- <div class="form-group m-b-20">
+
+                                            <label>Product Warranty</label>
+
+                                                <select class="form-control select2" name="product_warranty">
+
+                                                    <option value="">Select Warranty</option>
+
+                                                    <option value="No Warranty" @if($items->product_warranty=="No Warranty")selected=""@endif>No Warranty</option>
+
+                                                    <option value="1 Month Warranty" @if($items->product_warranty=="1 Month Warranty")selected=""@endif>1 Month Warranty</option>
+
+                                                    <option value="2 Month Warranty"@if($items->product_warranty=="2 Month Warranty")selected=""@endif>2 Month Warranty</option>
+
+                                                    <option value="3 Month Warranty"@if($items->product_warranty=="3 Month Warranty")selected=""@endif>3 Month Warranty</option>
+
+                                                    <option value="6 Month Warranty" @if($items->product_warranty=="6 Month Warranty")selected=""@endif>6 Month Warranty</option>
+
+                                                    <option value="1 Year Warranty" @if($items->product_warranty=="1 Year Warranty")selected=""@endif>1 Year Warranty</option>
+
+                                                    <option value="2 Year Warranty" @if($items->product_warranty=="2 Year Warranty")selected=""@endif>2 Year Warranty</option>
+
+                                                </select>
+
+                                        </div> -->
+
+                                        <div class="form-group m-b-20">
+
+                                            <label class="m-b-15">Status <span class="text-danger">*</span></label>  <br/>
+
+                                                <div class="radio radio-inline">
+
+                                                    <input type="radio" id="inlineRadio1" value="online" name="is_active" @if($items->is_active=="online")checked=""@endif>
+
+                                                        <label for="inlineRadio1"> Online </label>
+
+                                                </div>
+
+                                                <div class="radio radio-inline">
+
+                                                    <input type="radio" id="inlineRadio2" value="offline" name="is_active" @if($items->is_active=="offline")checked=""@endif>
+
+                                                        <label for="inlineRadio2"> Offline </label>
+
+                                                </div>
+
+                                        </div>
+
                                 </div>
+
+                                <div class="card-box">
+
+                                    <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Ratings &amp; Reviews</b></h5>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Rating</label>
+
+                                                <input type="number" step="0.1" min="0" max="5" class="form-control" placeholder="4.5" name="rating" value="{{$items->rating}}">
+
+                                            <p style="color:blue">Enter rating between 0.0 - 5.0 (Eg. 4.5)</p>
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Review Count</label>
+
+                                                <input type="number" min="0" class="form-control" placeholder="120" name="review_count" value="{{$items->review_count}}">
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+
+                                            <input type="checkbox" name="reviews_enabled" id="reviews_enabled" value="yes" @if($items->reviews_enabled=="yes" || empty($items->reviews_enabled)) checked="" @endif data-plugin="switchery" data-color="#81C868" data-size="small">
+
+                                            <label for="reviews_enabled"> Enable Reviews</label>
+
+                                        </div>
+
+                                </div>
+
+                                <div class="card-box">
+
+                                    <h5 class="text-muted text-uppercase m-t-0"><b>Product Thumbnail Image</b></h5>
+
+                                    <p>Image Size Should be 300px X 300px</p>
+
+                                    @if($items->brand!='42')
+
+                                      @if($items->thumbnail)
+
+                                      <img id="imagethumbpreview" class="img-rounded" src="{{ URL::asset('upload/product/thumbnail/'.$items->thumbnail) }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;">
+
+                                    @else
+
+                                      <img id="imagethumbpreview" class="img-rounded" src="{{URL::asset('assets/images/upload.png')}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;display: inline-block;">
+
+                                    @endif
+
+                                    <input type="hidden" name="oldthumbimage" value="{{$items->thumbnail}}">
+
+                                    <input type="file" id="thumbnailval" name="thumbnailval" class=""  >
+
+                                    @else
+
+                                    <img id="imagethumbpreview" class="img-rounded" src="{{$items->thumbnail}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;">
+
+                                    @endif
+
+
+                                </div>  
+
+                                 <div class="card-box">
+
+                                    <h5 class="text-muted text-uppercase m-t-0"><b>Product Gallery Image</b></h5>
+
+                                        <p>Image size should be 650px X 650px </p>
+                                        @if($items->brand!='42')
+                                          @if(!empty($items->bulk_image))
+                                            <div class="row" style="margin-bottom: 10px;">
+                                              @php
+                                                $bulkimg=explode(',',$items->bulk_image)
+                                              @endphp
+
+                                              @foreach($bulkimg as $img)
+                                              <div class="col-lg-4">
+                                                <img id="imagepreview1" class="img-rounded" src="{{ URL::asset('upload/product/'.$img) }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">  
+                                                <center> 
+                                                  <a style="background-color:white; position: absolute; top:-5px; right:49px; border:1px solid #ddd; padding:2px; cursor:pointer;color:grey; border-radius:50%; width:25px;" onclick="deletebulkimage('{{$img}}')"  >X</a> 
+                                                </center>
+                                              </div>
+                                              @endforeach
+                                            </div>
+                                            @endif
+                                            <input type="file" id="bulk_image" name="bulk_image[]" class=""  multiple="">
+                                             <input type="hidden" id="bulk_image" name="old_bulk_image" class="" value="{{$items->bulk_image}}"  >
+                                            
+                                          @else
+
+                                              @if(!empty($items->bulk_image))
+                                            <div class="row" style="margin-bottom: 10px;">
+                                              @php
+                                                $bulkimg=explode(',',$items->bulk_image)
+                                              @endphp
+
+                                              @foreach($bulkimg as $img)
+                                              <div class="col-lg-4">
+                                                <img id="imagepreview1" class="img-rounded" src="{{$img}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">  
+                                              </div>
+                                              @endforeach
+                                            </div>
+                                            @endif
+
+
+                                          @endif
+                                            
+
+                                        </div>
+
+                                 <div class="card-box">
+
+                                    <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Product Video</b></h5>
+
+                                        @if(!empty($items->video))
+                                        <div class="form-group m-b-20">
+                                          <label>Current Video</label>
+                                          <p>
+                                          @if(Str::startsWith($items->video,'http'))
+                                            <a href="{{$items->video}}" target="_blank">{{$items->video}}</a>
+                                          @else
+                                            <a href="{{URL::asset('upload/product/video/'.$items->video)}}" target="_blank">{{$items->video}}</a>
+                                          @endif
+                                          </p>
+                                        </div>
+                                        @endif
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Video URL</label>
+
+                                                <input type="text" name="video" class="form-control" placeholder="e.g : https://youtube.com/watch?v=..." value="@if(Str::startsWith($items->video,'http')){{$items->video}}@endif">
+
+                                            <p style="color:blue">Paste a video URL or upload a video file below.</p>
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Upload Video File</label>
+
+                                            <input type="file" name="video_file" accept="video/*">
+
+                                            <p style="color:blue">If both are provided, the uploaded file will be used.</p>
+
+                                        </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="col-lg-6">
+
+                                <div class="card-box">
+
+                                    <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Meta Data</b></h5>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Meta title</label>
+
+                                                <input type="text" name="metatitle" class="form-control" placeholder="Enter title" value="{{$items->metatitle}}">
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Meta Keywords</label>
+
+                                                <input type="text" name="metakey" class="form-control" placeholder="Enter keywords" value="{{$items->metakey}}">
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Meta Description </label>
+
+                                                <textarea class="form-control" name="metadesc" rows="5" placeholder="Please enter description">{{$items->metadesc}}</textarea>
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+                                          <label>Title</label>
+                                          <input type="text" class="form-control" name="title" placeholder="Enter title" value="{{$items->title}}" >
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+                                          <label>OG Type</label>
+                                          <input type="text" class="form-control" name="og_type" placeholder="Enter Og Type" value="{{$items->og_type}}" >
+                                        </div>
+                                        
+                                        <div class="form-group m-b-20">
+                                          <label>Og Url</label>
+                                          <input type="text" class="form-control" name="og_url" placeholder="Enter Og Url" value="{{$items->og_url}}" >
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+                                          <label>Twitter Card</label>
+                                          <input type="text" class="form-control" name="twitter_card" placeholder="Enter Twitter Card" value="{{$items->twitter_card}}" >
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+                                          <label>Twitter Url</label>
+                                          <input type="text" class="form-control" name="twitter_url" placeholder="Enter Twitter Url" value="{{$items->twitter_url}}" >
+                                          </div>
+                                        </div>
+
+                                </div>
+
+                               <!--  <div class="card-box">
+
+                                    <h5 class="text-muted text-uppercase m-t-0"><b>Inventory</b></h5>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Quantity<span class="text-danger"></span></label>
+
+                                                <input type="number" class="form-control" name="quantity" value="{{$items->quantity}}">
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label class="m-b-15">Stock </label><br/>
+
+                                                <div class="radio radio-inline">
+
+                                                    <input type="radio" id="radio1" value="1" name="stock" @if($items->stock=='1')checked="" @endif>
+
+                                                        <label for="radio1"> In Stock </label><br>
+
+                                                </div>
+
+                                                <div class="radio radio-inline">
+
+                                                    <input type="radio" id="radio2" value="0" name="stock" @if($items->stock=='0')checked=""@endif>
+
+                                                    <label for="radio2"> Out of Stock </label>
+
+                                                </div>
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Low Stock<span class="text-danger"></span></label>
+
+                                                <input type="number" class="form-control" name="low_stock" value="{{$items->low_stock}}">
+
+                                        </div>
+
+                                </div> -->  
 
                             </div>
 
@@ -956,10 +873,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
                         </div>
 
-                        </div>
-
-                        <div class="tab-pane" id="tab-tags">
-
                         <div class="row">
 
                             <div class="col-lg-12">
@@ -1021,8 +934,6 @@ window.location.href = "{{url('/admin')}}";</script>
                                 </div>
 
                             </div>
-
-                        </div>
 
                         </div>
 
@@ -1154,8 +1065,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                 </div>  --> 
 
-                                <div class="tab-pane" id="tab-desc">
-
                                 <div class="row">
 
                                     <div class="col-lg-12">
@@ -1248,8 +1157,6 @@ window.location.href = "{{url('/admin')}}";</script>
                                         </div>    
 
                                     </div>
-
-                                </div>
 
                                 </div>  
 
@@ -1582,8 +1489,6 @@ window.location.href = "{{url('/admin')}}";</script>
                                         </div>  
 
                                         @endif -->
-
-                                </div>
 
                                 <div class="row">
 
@@ -3071,38 +2976,10 @@ function delete_variation_image($value)
         if(!exists){ $input.tagsinput('add', tag); }
     });
 
-    $(document).on('click', '#productTabs a[data-toggle="tab"]', function(e){
-        e.preventDefault();
-        var target = $(this).attr('href');
-        $('#productTabs li').removeClass('active');
-        $(this).closest('li').addClass('active');
-        $('#productTabContent .tab-pane').removeClass('active');
-        $(target).addClass('active');
-    });
-
-    var choiceForm = document.getElementById('choice_form');
-    if(choiceForm){
-        choiceForm.addEventListener('invalid', function(e){
-            var pane = e.target && e.target.closest ? e.target.closest('.tab-pane') : null;
-            if(pane && !pane.classList.contains('active')){
-                $('#productTabs a[href="#'+pane.id+'"]').tab('show');
-            }
-        }, true);
-    }
-
 </script>
 
 <style>
     .bootstrap-tagsinput{width: 100%;}
-    .navtab-bg{background:transparent;padding:0;}
-    #productTabs{border-bottom:2px solid #e9edf3;margin:0 -10px 0 -10px;}
-    #productTabs > li > a{border:none;color:#64748b;padding:14px 18px;font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:.5px;border-bottom:3px solid transparent;margin-bottom:-2px;border-radius:0;}
-    #productTabs > li > a:hover{background:transparent;color:#4a76fd;border-bottom-color:#c7d6fe;}
-    #productTabs > li.active > a,
-    #productTabs > li.active > a:hover,
-    #productTabs > li.active > a:focus{color:#4a76fd;background:transparent;border:none;border-bottom:3px solid #4a76fd;}
-    .tab-content{padding-top:22px;}
-    .tab-content .card-box{margin-bottom:20px;}
 </style>
 @endpush
 

@@ -2300,8 +2300,13 @@ $('#radio2').on('change',function(e)
 
 <style>
     .bootstrap-tagsinput{width: 100%;}
-    .navtab-bg{background:#f5f7fa;padding:10px 10px 0;}
-    #productTabs > li > a{font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:.5px;}
+    .navtab-bg{background:transparent;padding:0;}
+    #productTabs{border-bottom:2px solid #e9edf3;margin:0 -10px 0 -10px;}
+    #productTabs > li > a{border:none;color:#64748b;padding:14px 18px;font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:.5px;border-bottom:3px solid transparent;margin-bottom:-2px;border-radius:0;}
+    #productTabs > li > a:hover{background:transparent;color:#4a76fd;border-bottom-color:#c7d6fe;}
+    #productTabs > li.active > a,
+    #productTabs > li.active > a:hover,
+    #productTabs > li.active > a:focus{color:#4a76fd;background:transparent;border:none;border-bottom:3px solid #4a76fd;}
     .tab-content{padding-top:22px;}
     .tab-content .card-box{margin-bottom:20px;}
 </style>

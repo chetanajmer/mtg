@@ -753,7 +753,7 @@ figure figcaption {
                     $year = date("Y"); 
 
                     @endphp
-                    © {{$year}} {{$settings->site_name}}.  All rights reserved. Developed By {{$settings->develop_company}} © {{$settings->cms_version}}
+                    © {{$year}} {{$settings->site_name}}.  All rights reserved. Developed By {{$settings->develop_company}} 🇮🇳 © {{$settings->cms_version}}
                 </footer>
 
             </div>
