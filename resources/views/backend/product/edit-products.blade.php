@@ -350,11 +350,11 @@ window.location.href = "{{url('/admin')}}";</script>
                                             <input type="number"  step="any" class="form-control" placeholder="2.5" value ="{{$items->weight}}" name="weight">
                                             <p style="color:blue">Please Enter Weight in kg. (Eg. For 2.5 Kg enter 2.5)</p>
 
-                                        </div>
+                                        </div> -->
 
                                         <div class="form-group m-b-20">
 
-                                            <label>Price <span class="text-danger">*</span></label>
+                                            <label>Base Price <span class="text-danger">*</span></label>
 
                                                 <input type="number" required name="price" class="form-control" value="{{$items->price}}">
 
@@ -362,7 +362,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                         <div class="form-group m-b-20">
 
-                                            <label>Sale Price </label>
+                                            <label>Discounted Price (Sale Price)</label>
 
                                                 <div class="row">
 
@@ -454,7 +454,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                         @endif
 
-                                        <div class="form-group m-b-20">
+                                        <!-- <div class="form-group m-b-20">
 
                                             <label>Product Warranty</label>
 
