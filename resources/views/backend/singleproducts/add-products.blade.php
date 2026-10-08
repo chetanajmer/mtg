@@ -579,7 +579,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
 
                                                     </div>
-                                                </div>
 
                 </div>
 
