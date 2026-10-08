@@ -136,21 +136,33 @@ figure figcaption {
           .content{background-image:none !important;background:#f1f3f7;}
           .page-title{color:#334155;}
 
-          /* Sidebar — dark slate */
-          .side-menu.left{background:#263241;}
-          #sidebar-menu > ul > li > a{color:#a9bdd0;border-left:3px solid transparent;}
-          #sidebar-menu > ul > li > a:hover{color:#ffffff;background:#2e3d50;}
-          #sidebar-menu > ul > li > a.active{background:#2e3d50 !important;border-left:3px solid #6c8bef;color:#ffffff !important;}
-          #sidebar-menu ul li .menu-arrow{color:#7d93ad;}
-          #sidebar-menu ul ul{background:#202b3a;}
-          #sidebar-menu ul ul a{color:#8fa3b8;}
-          #sidebar-menu ul ul a:hover{color:#ffffff;}
-          #sidebar-menu ul ul li.active a{color:#ffffff;}
-          #sidebar-menu .subdrop{background:#2e3d50 !important;border-left:3px solid #6c8bef;color:#ffffff !important;}
-          .menu-title{color:#6b7f95;}
+          /* Topbar — light grey */
+          .navbar-default{background-color:#f8fafc;border-bottom:1px solid #e2e8f0;}
+          .topbar{box-shadow:0 1px 3px rgba(15,23,42,.06);}
+          .topbar .topbar-left{background-color:#ffffff;border-right:1px solid #e2e8f0;}
+          .nav > li > a{color:#475569 !important;}
+          .button-menu-mobile{color:#64748b !important;}
+          .navbar-default .navbar-nav > .open > a,
+          .navbar-default .navbar-nav > .open > a:focus,
+          .navbar-default .navbar-nav > .open > a:hover{background-color:rgba(15,23,42,.05);}
 
-          /* Logo area matches sidebar */
-          .topbar .topbar-left{background-color:#263241;}
+          /* Sidebar — clean white */
+          .side-menu.left{background:#ffffff;border-right:1px solid #e9edf3;}
+          #sidebar-menu > ul > li > a{color:#475569;border-left:3px solid transparent;}
+          #sidebar-menu > ul > li > a:hover{color:#4a76fd;background:#f8fafc;}
+          #sidebar-menu > ul > li > a.active{background:#f4f8fb !important;border-left:3px solid #4a76fd;color:#4a76fd !important;}
+          #sidebar-menu ul li .menu-arrow{color:#94a3b8;}
+          #sidebar-menu ul ul{background:#ffffff;}
+          #sidebar-menu ul ul a{color:#64748b;}
+          #sidebar-menu ul ul a:hover{color:#4a76fd;}
+          #sidebar-menu ul ul li.active a{color:#4a76fd;}
+          #sidebar-menu .subdrop{background:#f4f8fb !important;border-left:3px solid #4a76fd;color:#4a76fd !important;}
+          .menu-title{color:#94a3b8;}
+
+          /* Collapsed sidebar — same white theme */
+          #wrapper.enlarged .left.side-menu{background:#ffffff;border-right:1px solid #e9edf3;}
+          #wrapper.enlarged #sidebar-menu ul ul{background-color:#ffffff;border:1px solid #e2e8f0;}
+          #wrapper.enlarged .left.side-menu #sidebar-menu ul > li:hover > a{background:#f4f8fb;color:#4a76fd;border-color:#4a76fd;}
         </style>
 
         @stack('header-scripts')
@@ -172,7 +184,7 @@ figure figcaption {
                 <div class="topbar-left">
                     
                         <a href="{{url('/')}}" class="logo">
-                            <img src="/assets/images/logo_light.png" alt="logo-img" class="large_logo">
+                            <img src="/assets/images/logo.png" alt="logo-img" class="large_logo">
                             <img src="/assets/images/logo_small.png" alt="logo-img" class="small_logo">
                         </a>
                         
