@@ -98,32 +98,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
             {{ csrf_field() }}
 
-            <div class="card-box" style="padding-bottom:0;">
-
-              <ul class="nav nav-tabs navtab-bg nav-justified" id="productTabs">
-
-                <li class="active"><a href="#tab-basic" data-toggle="tab" aria-expanded="true"><span class="visible-xs"><i class="fa fa-info"></i></span><span class="hidden-xs">Basic Info</span></a></li>
-
-                <li><a href="#tab-pricing" data-toggle="tab"><span class="visible-xs"><i class="fa fa-money"></i></span><span class="hidden-xs">Pricing &amp; MOQ</span></a></li>
-
-                <li><a href="#tab-media" data-toggle="tab"><span class="visible-xs"><i class="fa fa-image"></i></span><span class="hidden-xs">Media</span></a></li>
-
-                <li><a href="#tab-desc" data-toggle="tab"><span class="visible-xs"><i class="fa fa-file-text"></i></span><span class="hidden-xs">Description &amp; Specs</span></a></li>
-
-                <li><a href="#tab-tags" data-toggle="tab"><span class="visible-xs"><i class="fa fa-tags"></i></span><span class="hidden-xs">Tags</span></a></li>
-
-                <li><a href="#tab-seo" data-toggle="tab"><span class="visible-xs"><i class="fa fa-search"></i></span><span class="hidden-xs">SEO / Meta</span></a></li>
-
-                <li><a href="#tab-reviews" data-toggle="tab"><span class="visible-xs"><i class="fa fa-star"></i></span><span class="hidden-xs">Reviews</span></a></li>
-
-              </ul>
-
-            </div>
-
-            <div class="tab-content" id="productTabContent">
-
-            <div class="tab-pane active" id="tab-basic">
-
             <div class="row">
 
               <div class="col-lg-12">
@@ -228,7 +202,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
             <div class="row">
 
-              <div class="col-lg-12">
+              <div class="col-lg-6">
 
                 <div class="card-box">
 
@@ -303,6 +277,60 @@ window.location.href = "{{url('/admin')}}";</script>
 
                   </div> -->
 
+                  <div class="form-group m-b-20">
+
+                    <label>Base Price <span class="text-danger">*</span></label>
+
+                    <input type="number"  name="price" class="form-control" value="" required>
+
+                  </div>
+
+                  <div class="form-group m-b-20">
+
+                    <label>Discounted Price (Sale Price)</label>
+
+                    <div class="row">
+
+                      <div class="col-md-10">
+
+                        <input type="number" name="sprice" class="form-control" value="">
+
+                      </div>
+
+                      <div class="col-md-2" style="padding-top: 8px">
+
+                        <a href="javascript:void(0);" style="text-decoration: underline;" id="show_schedule">Schedule</a>
+
+                        <a href="javascript:void(0);" style="text-decoration: underline;display: none" id="hide_schedule">Cancel</a>
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                  <div class="form-group m-b-20" style="display: none" id="sale_date_div">
+
+                    <label>Sale Price Dates</label>
+
+                    <div class="row">
+
+                      <div class="col-lg-6">
+
+                        From: <input type="date" name="date_sale_price_start" class="form-control" value="" id="date_sale_price_start">
+
+                      </div>
+
+                      <div class="col-lg-6">
+
+                       To: <input type="date"  name="date_sale_price_ends" class="form-control" value="" id="date_sale_price_ends">
+
+                      </div>
+
+                    </div>
+
+                  </div>
+
                   <!-- <div class="form-group m-b-20">
 
                     <label>Product Warranty</label>
@@ -355,18 +383,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
                 </div>
 
-              </div>
-
-            </div>
-
-            </div>
-
-            <div class="tab-pane" id="tab-reviews">
-
-            <div class="row">
-
-              <div class="col-lg-12">
-
                 <div class="card-box">
 
                   <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Ratings &amp; Reviews</b></h5>
@@ -399,18 +415,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
                 </div>
 
-              </div>
-
-            </div>
-
-            </div>
-
-            <div class="tab-pane" id="tab-media">
-
-            <div class="row">
-
-              <div class="col-lg-4">
-
                 <div class="card-box">
 
                 <h5 class="text-muted text-uppercase m-t-0"><b>Product Thumbnail Image</b></h5>
@@ -423,9 +427,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
                 </div>
 
-              </div>
-
-              <div class="col-lg-4">
 
                  <div class="card-box">
 
@@ -438,10 +439,6 @@ window.location.href = "{{url('/admin')}}";</script>
                 <input type="file" id="bulk_image" name="bulk_image[]" class=""  multiple="">
 
               </div>
-
-              </div>
-
-              <div class="col-lg-4">
 
                  <div class="card-box">
 
@@ -471,15 +468,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
               </div>
 
-            </div>
-
-            </div>
-
-            <div class="tab-pane" id="tab-seo">
-
-            <div class="row">
-
-              <div class="col-lg-12">
+              <div class="col-lg-6">
 
                 <div class="card-box">
 
@@ -631,78 +620,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
             </div>
 
-            </div>
-
-            <div class="tab-pane" id="tab-pricing">
-
-            <div class="row">
-
-              <div class="col-lg-12">
-
-                <div class="card-box">
-
-                  <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Product Pricing</b></h5>
-
-                  <div class="form-group m-b-20">
-
-                    <label>Base Price <span class="text-danger">*</span></label>
-
-                    <input type="number"  name="price" class="form-control" value="" required>
-
-                  </div>
-
-                  <div class="form-group m-b-20">
-
-                    <label>Discounted Price (Sale Price)</label>
-
-                    <div class="row">
-
-                      <div class="col-md-10">
-
-                        <input type="number" name="sprice" class="form-control" value="">
-
-                      </div>
-
-                      <div class="col-md-2" style="padding-top: 8px">
-
-                        <a href="javascript:void(0);" style="text-decoration: underline;" id="show_schedule">Schedule</a>
-
-                        <a href="javascript:void(0);" style="text-decoration: underline;display: none" id="hide_schedule">Cancel</a>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                  <div class="form-group m-b-20" style="display: none" id="sale_date_div">
-
-                    <label>Sale Price Dates</label>
-
-                    <div class="row">
-
-                      <div class="col-lg-6">
-
-                        From: <input type="date" name="date_sale_price_start" class="form-control" value="" id="date_sale_price_start">
-
-                      </div>
-
-                      <div class="col-lg-6">
-
-                       To: <input type="date"  name="date_sale_price_ends" class="form-control" value="" id="date_sale_price_ends">
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
             <div class="row">
 
               <div class="col-lg-12">
@@ -791,10 +708,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
             </div>
 
-            </div>
-
-            <div class="tab-pane" id="tab-tags">
-
             <div class="row">
 
               <div class="col-lg-12">
@@ -856,8 +769,6 @@ window.location.href = "{{url('/admin')}}";</script>
                 </div>
 
               </div>
-
-            </div>
 
             </div>
 
@@ -930,8 +841,6 @@ window.location.href = "{{url('/admin')}}";</script>
             </div>
 
           </div>  --> 
-
-          <div class="tab-pane" id="tab-desc">
 
           <div class="row">
 
@@ -1016,8 +925,6 @@ window.location.href = "{{url('/admin')}}";</script>
               </div>    
 
             </div>
-
-          </div>
 
           </div>  
 
@@ -1140,8 +1047,6 @@ window.location.href = "{{url('/admin')}}";</script>
                                              
                                         </div>    
                 </div> -->
-
-          </div>
 
           <div class="row">
 
@@ -2278,33 +2183,10 @@ $('#radio2').on('change',function(e)
         if(!exists){ $input.tagsinput('add', tag); }
     });
 
-    $(document).on('click', '#productTabs a[data-toggle="tab"]', function(e){
-        e.preventDefault();
-        var target = $(this).attr('href');
-        $('#productTabs li').removeClass('active');
-        $(this).closest('li').addClass('active');
-        $('#productTabContent .tab-pane').removeClass('active');
-        $(target).addClass('active');
-    });
-
-    var choiceForm = document.getElementById('choice_form');
-    if(choiceForm){
-        choiceForm.addEventListener('invalid', function(e){
-            var pane = e.target && e.target.closest ? e.target.closest('.tab-pane') : null;
-            if(pane && !pane.classList.contains('active')){
-                $('#productTabs a[href="#'+pane.id+'"]').tab('show');
-            }
-        }, true);
-    }
-
 </script>
 
 <style>
     .bootstrap-tagsinput{width: 100%;}
-    .navtab-bg{background:#f5f7fa;padding:10px 10px 0;}
-    #productTabs > li > a{font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:.5px;}
-    .tab-content{padding-top:10px;}
-    .tab-content .card-box{margin-bottom:15px;}
 </style>
 @endpush
 
