@@ -781,6 +781,8 @@ class ProductController extends Controller
 
           'ai_tags' => $request->ai_tags,
 
+          'tier_pricing_enabled' => $request->tier_pricing_enabled ? 'yes' : 'no',
+
           'description' => $request->description,
 
           'support_heading1'=>$request->support_heading1,
@@ -1619,6 +1621,12 @@ class ProductController extends Controller
 
             ->update(['related_product' =>'']);
 
+        }
+
+        $pid=DB::table('products')->where('slug',$slug)->value('id');
+        if(!empty($pid))
+        {
+            $this->syncTierPrices($request,$pid);
         }
 
         $request->session()->flash('success','Saved Successfully!');
@@ -2864,6 +2872,35 @@ class ProductController extends Controller
         return $names;
     }
 
+    private function syncTierPrices($request,$product_id)
+    {
+        DB::table('product_tier_prices')->where('product_id',$product_id)->delete();
+        if(empty($request->tier_min))
+        {
+            return;
+        }
+        $sort=0;
+        foreach($request->tier_min as $i=>$min)
+        {
+            $min=(int)$min;
+            $max=isset($request->tier_max[$i])?(int)$request->tier_max[$i]:0;
+            $price=isset($request->tier_price[$i])?(float)$request->tier_price[$i]:0;
+            if($min<=0 || $price<=0)
+            {
+                continue;
+            }
+            DB::table('product_tier_prices')->insert(array(
+                'product_id'=>$product_id,
+                'min_qty'=>$min,
+                'max_qty'=>$max>0?$max:null,
+                'price'=>$price,
+                'sort_order'=>$sort++,
+                'created_at'=>date('Y-m-d H:i:s'),
+                'updated_at'=>date('Y-m-d H:i:s')
+            ));
+        }
+    }
+
     public function single_product_add(Request $request)
     {
        // echo "<pre>";print_r($_POST);die;
@@ -2951,6 +2988,8 @@ class ProductController extends Controller
        $product->review_count=$request->review_count;
 
        $product->reviews_enabled=$request->reviews_enabled ? 'yes' : 'no';
+
+       $product->tier_pricing_enabled=$request->tier_pricing_enabled ? 'yes' : 'no';
 
        $product->sku=$request->sku;
 
@@ -3419,7 +3458,7 @@ class ProductController extends Controller
 
         $product_id=$product->id;
 
-
+        $this->syncTierPrices($request,$product_id);
 
         $installation_title=$request->installation_title;
 

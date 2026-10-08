@@ -668,6 +668,52 @@ window.location.href = "{{url('/admin')}}";</script>
 
                 <div class="card-box">
 
+                  <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Tier Pricing</b></h5>
+
+                  <div class="form-group m-b-20">
+
+                    <input type="checkbox" name="tier_pricing_enabled" id="tier_pricing_enabled" value="yes" data-plugin="switchery" data-color="#81C868" data-size="small">
+
+                    <label for="tier_pricing_enabled"> Enable Tier Pricing for this product</label>
+
+                  </div>
+
+                  <div id="tier_pricing_body" style="display:none;">
+
+                    <div class="row" style="font-weight:bold;margin-bottom:10px;">
+
+                      <div class="col-md-2">Min Qty</div>
+
+                      <div class="col-md-2">Max Qty</div>
+
+                      <div class="col-md-3">Price / Piece</div>
+
+                      <div class="col-md-3">Savings</div>
+
+                      <div class="col-md-2"></div>
+
+                    </div>
+
+                    <div id="tier_rows"></div>
+
+                    <a href="javascript:void(0);" id="add_tier_row" class="btn btn-purple btn-sm waves-effect waves-light">Add Tier</a>
+
+                    <p style="color:blue;margin-top:10px;">Leave Max Qty blank for "Unlimited". Savings % is auto-calculated against the base product price.</p>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <div class="row">
+
+              <div class="col-lg-12">
+
+                <div class="card-box">
+
                   <h5 class="text-muted text-uppercase m-t-0 m-b-20"><b>Occasions, Preferences &amp; Search Tags</b></h5>
 
                   <div class="form-group m-b-20">
@@ -2075,6 +2121,54 @@ $('#radio2').on('change',function(e)
         var row = $(this).closest('.spec-row');
         row.next('.spec-row').after(row);
     });
+
+    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50"></div><div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited"></div><div class="col-md-3"><input type="number" step="0.01" min="0" name="tier_price[]" class="form-control" placeholder="e.g : 45"></div><div class="col-md-3 tier-savings" style="padding-top:8px;">-</div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
+
+    function tierBasePrice(){
+        var p = parseFloat($('input[name="price"]').val());
+        return (!isNaN(p) && p > 0) ? p : 0;
+    }
+
+    function recalcTierSavings(){
+        var base = tierBasePrice();
+        $('.tier-row').each(function(){
+            var tp = parseFloat($(this).find('input[name="tier_price[]"]').val());
+            var cell = $(this).find('.tier-savings');
+            if(base > 0 && !isNaN(tp) && tp > 0 && tp < base){
+                cell.text(Math.round((base - tp) / base * 100) + '%');
+            } else {
+                cell.text('-');
+            }
+        });
+    }
+
+    function toggleTierBody(){
+        if($('input[name="tier_pricing_enabled"]').is(':checked')){
+            $('#tier_pricing_body').show();
+            if($('#tier_rows .tier-row').length === 0){ $('#tier_rows').append(tierRowHtml); }
+        } else {
+            $('#tier_pricing_body').hide();
+        }
+    }
+
+    $('#add_tier_row').on('click', function(){
+        $('#tier_rows').append(tierRowHtml);
+        recalcTierSavings();
+    });
+
+    $(document).on('click', '.tier-remove', function(){
+        $(this).closest('.tier-row').remove();
+    });
+
+    $(document).on('input change', '.tier-row input, input[name="price"]', function(){
+        recalcTierSavings();
+    });
+
+    $(document).on('change', 'input[name="tier_pricing_enabled"]', function(){
+        toggleTierBody();
+    });
+
+    toggleTierBody();
 
     $('input[name="occasion_tags"], input[name="preferences"], input[name="ai_tags"]').tagsinput();
 

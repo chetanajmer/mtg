@@ -37,7 +37,11 @@ if(!empty($items->variations))
             $qty = $items->current_stock;
                                                     
         }
-}        
+}
+
+$tier_prices = (!empty($items->tier_pricing_enabled) && $items->tier_pricing_enabled == 'yes')
+    ? \DB::table('product_tier_prices')->where('product_id', $items->id)->orderBy('min_qty')->orderBy('id')->get()
+    : collect();
 @endphp
 
 @extends('layouts.frontapp')
@@ -244,6 +248,38 @@ if(!empty($items->variations))
                                                 
                                                 
 											<input type="submit" class="shop-button bg-dark addcart-link font-bold text-uppercase" id="addtocart" value="Add to Cart">										</div>
+											@if($tier_prices->count())
+											<div class="tier-pricing-table" style="margin:15px 0;">
+												<label class="title-attr">Bulk Pricing:</label>
+												<table class="table table-bordered table-striped" style="margin-top:8px;">
+													<thead>
+														<tr>
+															<th>Min Qty</th>
+															<th>Max Qty</th>
+															<th>Price / Piece</th>
+															<th>Savings</th>
+														</tr>
+													</thead>
+													<tbody>
+														@foreach($tier_prices as $tier)
+														@php
+															$tier_savings = (!empty($items->price) && $items->price > 0 && $tier->price < $items->price) ? round(($items->price - $tier->price) / $items->price * 100) . '%' : '-';
+														@endphp
+														<tr data-min="{{$tier->min_qty}}" data-max="{{$tier->max_qty ? $tier->max_qty : 999999999}}" data-price="{{$tier->price}}">
+															<td>{{$tier->min_qty}}</td>
+															<td>{{$tier->max_qty ? $tier->max_qty : 'Unlimited'}}</td>
+															<td>{{$homesettings->currencysymbol}} {{number_format($tier->price, 2)}}</td>
+															<td>{{$tier_savings}}</td>
+														</tr>
+														@endforeach
+													</tbody>
+												</table>
+												<p class="tier-price-note" style="display:none;font-weight:bold;">Your slab price: {{$homesettings->currencysymbol}} <span id="tier-unit-price"></span> / piece</p>
+											</div>
+											<style>
+												.tier-pricing-table tr.active-tier td{background:#81C868;color:#fff;}
+											</style>
+											@endif
 											<div class="detail-extra-link">
 												<a value="{{$items->id}}" class="wishlist-link" onclick="addtowishlist(event,{{$items->id}})" style="cursor:pointer">
 													<i class="fa fa-heart-o"></i><span>Add to Wishlist</span></a>
@@ -877,6 +913,31 @@ if(!empty($items->variations))
 			if(minus){
 				minus.addEventListener('click', function(){ setTimeout(clamp, 0); });
 			}
+		}
+
+		var tierRows = document.querySelectorAll('.tier-pricing-table tr[data-min]');
+		if(tierRows.length){
+			var qtyInput = document.getElementById('quantity');
+			var note = document.querySelector('.tier-price-note');
+			var notePrice = document.getElementById('tier-unit-price');
+			var highlightTier = function(){
+				var q = parseInt(qtyInput.value) || 0;
+				var found = false;
+				tierRows.forEach(function(r){
+					var min = parseInt(r.getAttribute('data-min'));
+					var max = parseInt(r.getAttribute('data-max'));
+					var match = q >= min && q <= max;
+					r.classList.toggle('active-tier', match);
+					if(match){ notePrice.textContent = r.getAttribute('data-price'); found = true; }
+				});
+				if(note){ note.style.display = found ? 'block' : 'none'; }
+			};
+			qtyInput.addEventListener('change', highlightTier);
+			qtyInput.addEventListener('keyup', highlightTier);
+			document.querySelectorAll('.product_qty .qty-up, .product_qty .qty-down').forEach(function(s){
+				s.addEventListener('click', function(){ setTimeout(highlightTier, 0); });
+			});
+			highlightTier();
 		}
 	});
 	</script>
