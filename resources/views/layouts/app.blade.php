@@ -129,6 +129,30 @@ figure figcaption {
           }
         </style> -->
 
+        <style>
+          /* ===== Admin theme — clean & decent ===== */
+          body{background:#f1f3f7;}
+          .content-page{background-color:#f1f3f7;}
+          .content{background-image:none !important;background:#f1f3f7;}
+          .page-title{color:#334155;}
+
+          /* Sidebar — dark slate */
+          .side-menu.left{background:#263241;}
+          #sidebar-menu > ul > li > a{color:#a9bdd0;border-left:3px solid transparent;}
+          #sidebar-menu > ul > li > a:hover{color:#ffffff;background:#2e3d50;}
+          #sidebar-menu > ul > li > a.active{background:#2e3d50 !important;border-left:3px solid #6c8bef;color:#ffffff !important;}
+          #sidebar-menu ul li .menu-arrow{color:#7d93ad;}
+          #sidebar-menu ul ul{background:#202b3a;}
+          #sidebar-menu ul ul a{color:#8fa3b8;}
+          #sidebar-menu ul ul a:hover{color:#ffffff;}
+          #sidebar-menu ul ul li.active a{color:#ffffff;}
+          #sidebar-menu .subdrop{background:#2e3d50 !important;border-left:3px solid #6c8bef;color:#ffffff !important;}
+          .menu-title{color:#6b7f95;}
+
+          /* Logo area matches sidebar */
+          .topbar .topbar-left{background-color:#263241;}
+        </style>
+
         @stack('header-scripts')
     </head>
 
@@ -148,7 +172,7 @@ figure figcaption {
                 <div class="topbar-left">
                     
                         <a href="{{url('/')}}" class="logo">
-                            <img src="/assets/images/logo.png" alt="logo-img" class="large_logo">
+                            <img src="/assets/images/logo_light.png" alt="logo-img" class="large_logo">
                             <img src="/assets/images/logo_small.png" alt="logo-img" class="small_logo">
                         </a>
                         

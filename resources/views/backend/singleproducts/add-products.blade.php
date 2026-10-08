@@ -98,7 +98,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
             {{ csrf_field() }}
 
-            <div class="card-box" style="padding-bottom:0;">
+            <div class="card-box" style="padding-bottom:0;margin-bottom:20px;">
 
               <ul class="nav nav-tabs navtab-bg nav-justified" id="productTabs">
 
@@ -2302,8 +2302,8 @@ $('#radio2').on('change',function(e)
     .bootstrap-tagsinput{width: 100%;}
     .navtab-bg{background:#f5f7fa;padding:10px 10px 0;}
     #productTabs > li > a{font-weight:600;text-transform:uppercase;font-size:12px;letter-spacing:.5px;}
-    .tab-content{padding-top:10px;}
-    .tab-content .card-box{margin-bottom:15px;}
+    .tab-content{padding-top:22px;}
+    .tab-content .card-box{margin-bottom:20px;}
 </style>
 @endpush
 
