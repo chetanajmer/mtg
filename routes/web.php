@@ -25,6 +25,7 @@ use App\Http\Controllers\Backend\ColorController;
 use App\Http\Controllers\Backend\BrandingOptionController;
 use App\Http\Controllers\Backend\OccasionController;
 use App\Http\Controllers\Backend\PreferenceController;
+use App\Http\Controllers\Backend\ExhibitionEventController;
 use App\Http\Controllers\Backend\CouponController;
 use App\Http\Controllers\Backend\RewardController;
 use App\Http\Controllers\Backend\FilterController;
@@ -360,6 +361,20 @@ Route::any('find-preference', [PreferenceController::class, 'find'])->name('find
 Route::any('update-preference', [PreferenceController::class, 'update'])->name('updatepreference');
 Route::any('delete-preference', [PreferenceController::class, 'delete'])->name('deletepreference');
 
+/*Exhibition Events*/
+Route::any('exhibition-events', [ExhibitionEventController::class, 'index']);
+Route::any('add-exhibition-event', [ExhibitionEventController::class, 'add'])->name('addexhibitionevent');
+Route::any('find-exhibition-event', [ExhibitionEventController::class, 'find'])->name('findexhibitionevent');
+Route::any('update-exhibition-event', [ExhibitionEventController::class, 'update'])->name('updateexhibitionevent');
+Route::any('delete-exhibition-event', [ExhibitionEventController::class, 'delete'])->name('deleteexhibitionevent');
+
+/*Tier Pricing*/
+Route::any('tier-pricing', [ProductController::class, 'tierPricing'])->name('tier_pricing');
+Route::any('add-tier-pricing', [ProductController::class, 'addTierPricing'])->name('add_tier_pricing');
+Route::any('find-tier-pricing', [ProductController::class, 'findTierPricing'])->name('find_tier_pricing');
+Route::any('update-tier-pricing', [ProductController::class, 'updateTierPricing'])->name('update_tier_pricing');
+Route::any('delete-tier-pricing', [ProductController::class, 'deleteTierPricing'])->name('delete_tier_pricing');
+
 
 /*Variation */
 Route::any('variation', [VariationController::class, 'variation']);
@@ -439,8 +454,16 @@ Route::any('reviews', [ReviewController::class, 'index']);
 
 /*Frontend Homepage*/
 
+Route::get('web-frontend', function () {
+    return view('web-frontend.index');
+});
+
+Route::get('web-frontend/product', function () {
+    return view('web_frontend.product');
+});
+
 Route::any('/', [HomepageController::class, 'index']);
-Route::any('product/{slug}', [HomepageController::class, 'product']);
+Route::get('product/{slug}', [HomepageController::class, 'webProduct'])->name('web.product');
 Route::any('product/{product_slug}/{slug}', [HomepageController::class, 'variationproduct'])->name('variationproduct');
 /*Route::any('addtocart', [HomepageController::class, 'addtocart'])->name('addtocart'); */
 Route::any('variant_price', [HomepageController::class, 'variant_price'])->name('variant_price'); 
@@ -491,6 +514,12 @@ Route::any('/store/dologout', [UsersController::class, 'dostorelogout'])->name('
 Route::any('/store/register', [UsersController::class, 'storeregister']);
 Route::any('/store/doregister', [UsersController::class, 'dostoreregister'])->name('dostoreregister'); 
 Route::any('/store/myaccount', [UsersController::class, 'myaccount']);
+Route::any('/corporate-portal', function () {
+    return view('web_frontend.myaccount');
+});
+Route::any('/cart', function () {
+    return view('web_frontend.cart');
+});
 Route::any('/store/resetpassword', [UsersController::class, 'resetpassword']);
 Route::any('/store/doresetpassword', [UsersController::class, 'doresetpassword'])->name('doresetpassword'); 
 Route::any('updateuserdetails', [UsersController::class, 'updateuserdetails'])->name('updateuserdetails');

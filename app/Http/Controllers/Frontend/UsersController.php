@@ -136,7 +136,7 @@ class UsersController extends Controller
     	      {	
               $items_array=Cartorder::orderbyDesc('id')->where('userid',$userid)->get()->unique('orderid');
             	$userdetails=DB::table('storeusers')->select('*')->where('id', $userid)->first();
-        	    return view('frontend.myaccount',compact('userdetails','items_array','footerlevel1','contact'));
+        	    return view('web_frontend.myaccount',compact('userdetails','items_array','footerlevel1','contact'));
             }
             else
             {

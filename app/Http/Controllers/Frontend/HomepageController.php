@@ -51,11 +51,21 @@ class HomepageController extends Controller
 
 	public function product($slug)
 	{
-		$items=Product::where('slug',$slug)->where('is_active',"online")->first();	
+		$items=Product::where('slug',$slug)->where('is_active',"online")->first();
 		$brands=Brand::where('is_active','online')->where('featured','online')->orderby('ranking')->get()->take(3);
 		return view('frontend.product',compact('items','brands'));
 	}
-	
+
+	public function webProduct($slug)
+	{
+		$product=Product::where('slug',$slug)->where('is_active',"online")->first();
+		if(!$product) {
+			abort(404);
+		}
+		$tier_prices=\DB::table('product_tier_prices')->where('product_id',$product->id)->orderBy('min_qty')->orderBy('id')->get();
+		return view('web_frontend.product',compact('product','tier_prices'));
+	}
+
 	 public function myaccount()
 	{
 		$footerlevel1=Footerlevel1::findorFail(1);	

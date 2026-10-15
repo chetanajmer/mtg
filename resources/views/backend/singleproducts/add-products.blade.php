@@ -268,22 +268,48 @@ window.location.href = "{{url('/admin')}}";</script>
 
                   <div class="form-group m-b-20" >
                     <label>Product Color</label>
-                    <select  name="product_colors[]" class="selectpicker" multiple data-style="btn-white">
+                    <div id="product_colors_container">
+                    </div>
+                    <div class="color-swatch-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
                       @foreach($color as $val)
-                      <option style="background-color:{{ $val->code }} " value="{{ $val->code }}">{{ $val->name }}
-                      </option>   
-                      @endforeach                       
-                    </select>  
+                      <div class="color-swatch" data-color="{{ $val->code }}" data-name="{{ $val->name }}"
+                           style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+                                  background-color: {{ $val->code }};
+                                  border: 2px solid #ddd; transition: all 0.2s; position: relative; z-index: 1; pointer-events: auto;"
+                           title="{{ $val->name }}">
+                      </div>
+                      @endforeach
+                    </div>
                   </div>
 
                   <div class="form-group m-b-20" >
                     <label>Branding Options</label>
-                    <select  name="branding_options[]" class="selectpicker" multiple data-style="btn-white">
+                    <div id="branding-options-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
                       @foreach($branding_options as $bo)
-                      <option value="{{ $bo->name }}">{{ $bo->name }}
-                      </option>   
-                      @endforeach                       
-                    </select>  
+                      <div class="branding-option-card" data-value="{{ $bo->name }}" style="border: 1px solid #d8dde3; border-radius: 5px; padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: #fff; transition: all 0.2s;">
+                        <div class="branding-option-icon" style="width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                          <i class="fa fa-check" style="display: none; color: #fff; font-size: 12px;"></i>
+                        </div>
+                        <span style="font-size: 13px; color: #333;">{{ $bo->name }}</span>
+                      </div>
+                      @endforeach
+                    </div>
+                    <input type="hidden" name="branding_options" id="branding_options_hidden" value="">
+                  </div>
+
+                  <div class="form-group m-b-20" >
+                    <label>Exhibition Events</label>
+                    <div id="exhibition-events-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                      @foreach($exhibition_events as $ee)
+                      <div class="exhibition-event-card" data-value="{{ $ee->name }}" style="border: 1px solid #d8dde3; border-radius: 5px; padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: #fff; transition: all 0.2s;">
+                        <div class="exhibition-event-icon" style="width: 20px; height: 20px; border: 2px solid #ccc; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                          <i class="fa fa-check" style="display: none; color: #fff; font-size: 12px;"></i>
+                        </div>
+                        <span style="font-size: 13px; color: #333;">{{ $ee->name }}</span>
+                      </div>
+                      @endforeach
+                    </div>
+                    <input type="hidden" name="exhibition_events" id="exhibition_events_hidden" value="">
                   </div>
 
                   <!-- <div class="form-group m-b-20">
@@ -644,9 +670,17 @@ window.location.href = "{{url('/admin')}}";</script>
 
                   <div class="form-group m-b-20">
 
-                    <label>Base Price <span class="text-danger">*</span></label>
+                    <label>Cost Price <span class="text-danger">*</span></label>
 
                     <input type="number"  name="price" class="form-control" value="" required>
+
+                  </div>
+
+                  <div class="form-group m-b-20">
+
+                    <label>Base Price</label>
+
+                    <input type="number"  name="base_price" class="form-control" value="" placeholder="Enter base price">
 
                   </div>
 
@@ -764,13 +798,11 @@ window.location.href = "{{url('/admin')}}";</script>
 
                     <div class="row" style="font-weight:bold;margin-bottom:10px;">
 
-                      <div class="col-md-2">Min Qty</div>
+                      <div class="col-md-3">Min Qty</div>
 
-                      <div class="col-md-2">Max Qty</div>
+                      <div class="col-md-3">Max Qty</div>
 
-                      <div class="col-md-3">Price / Piece</div>
-
-                      <div class="col-md-3">Savings</div>
+                      <div class="col-md-4">Price</div>
 
                       <div class="col-md-2"></div>
 
@@ -2216,38 +2248,57 @@ $('#radio2').on('change',function(e)
         row.next('.spec-row').after(row);
     });
 
-    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50"></div><div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited"></div><div class="col-md-3"><input type="number" step="0.01" min="0" name="tier_price[]" class="form-control" placeholder="e.g : 45"></div><div class="col-md-3 tier-savings" style="padding-top:8px;">-</div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
+    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-3"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50"></div><div class="col-md-3"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited"></div><div class="col-md-4"><input type="number" step="0.01" min="0" name="tier_percentage[]" class="form-control tier-percentage-input" placeholder="e.g : 10" data-original="0"></div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
 
-    function tierBasePrice(){
-        var p = parseFloat($('input[name="price"]').val());
-        return (!isNaN(p) && p > 0) ? p : 0;
+    function toggleTierBody(){
+        var isChecked = $('input[name="tier_pricing_enabled"]').is(':checked');
+        
+        if(isChecked){
+            $('#tier_pricing_body').show();
+            if($('#tier_rows .tier-row').length === 0){
+                // Load tier pricing from database
+                @if(!empty($tier_pricing))
+                    @foreach($tier_pricing as $tier)
+                    var tierRow = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-3"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50" value="{{$tier->min_qty}}"></div><div class="col-md-3"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited" value="{{$tier->max_qty ?? ''}}"></div><div class="col-md-4"><input type="number" step="0.01" min="0" name="tier_percentage[]" class="form-control tier-percentage-input" placeholder="e.g : 10" value="{{$tier->percentage}}" data-original="{{$tier->percentage}}"></div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
+                    $('#tier_rows').append(tierRow);
+                    @endforeach
+                @else
+                    $('#tier_rows').append(tierRowHtml);
+                @endif
+            }
+            // Apply Cost Price + Percentage integration when toggle is ON
+            applyCostPriceIntegration();
+        } else {
+            $('#tier_pricing_body').hide();
+            // Restore original values when toggle is OFF
+            restoreOriginalPercentages();
+        }
     }
 
-    function recalcTierSavings(){
-        var base = tierBasePrice();
+    function applyCostPriceIntegration(){
+        var costPrice = parseFloat($('input[name="price"]').val()) || 0;
         $('.tier-row').each(function(){
-            var tp = parseFloat($(this).find('input[name="tier_price[]"]').val());
-            var cell = $(this).find('.tier-savings');
-            if(base > 0 && !isNaN(tp) && tp > 0 && tp < base){
-                cell.text(Math.round((base - tp) / base * 100) + '%');
-            } else {
-                cell.text('-');
-            }
+            var $percentageInput = $(this).find('.tier-percentage-input');
+            var originalPercentage = parseFloat($percentageInput.data('original')) || 0;
+            var newPercentage = originalPercentage + costPrice;
+            $percentageInput.val(newPercentage.toFixed(2));
         });
     }
 
-    function toggleTierBody(){
-        if($('input[name="tier_pricing_enabled"]').is(':checked')){
-            $('#tier_pricing_body').show();
-            if($('#tier_rows .tier-row').length === 0){ $('#tier_rows').append(tierRowHtml); }
-        } else {
-            $('#tier_pricing_body').hide();
-        }
+    function restoreOriginalPercentages(){
+        $('.tier-row').each(function(){
+            var $percentageInput = $(this).find('.tier-percentage-input');
+            var originalPercentage = parseFloat($percentageInput.data('original')) || 0;
+            $percentageInput.val(originalPercentage.toFixed(2));
+        });
     }
 
     $('#add_tier_row').on('click', function(){
         $('#tier_rows').append(tierRowHtml);
-        recalcTierSavings();
+        // Apply Cost Price integration if toggle is ON
+        if($('input[name="tier_pricing_enabled"]').is(':checked')){
+            applyCostPriceIntegration();
+        }
     });
 
     $(document).on('click', '.tier-remove', function(){
@@ -2258,6 +2309,22 @@ $('#radio2').on('change',function(e)
         recalcTierSavings();
     });
 
+    // Handle manual percentage edits - update original value
+    $(document).on('input change', '.tier-percentage-input', function(){
+        var newValue = parseFloat($(this).val()) || 0;
+        $(this).data('original', newValue);
+    });
+
+    // Cost Price change event - apply integration only if toggle is ON
+    $('input[name="price"]').on('input change', function(){
+        var isTierPricingEnabled = $('input[name="tier_pricing_enabled"]').is(':checked');
+        
+        if(isTierPricingEnabled){
+            applyCostPriceIntegration();
+        }
+    });
+
+    // Toggle change event using Switchery library
     $(document).on('change', 'input[name="tier_pricing_enabled"]', function(){
         toggleTierBody();
     });
@@ -2286,6 +2353,41 @@ $('#radio2').on('change',function(e)
         $(target).addClass('active');
     });
 
+    // Color swatch selection - use event delegation
+    $(document).on('click', '.color-swatch', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var colorCode = $(this).data('color');
+        var $container = $('#product_colors_container');
+
+        if($(this).hasClass('selected')){
+            // Deselect color
+            $(this).removeClass('selected');
+            $(this).css('border', '2px solid #ddd');
+            $(this).css('box-shadow', 'none');
+            $(this).find('.check-icon').remove();
+
+            // Remove hidden input for this color
+            $container.find('input[value="' + colorCode + '"]').remove();
+        } else {
+            // Select color
+            $(this).addClass('selected');
+            $(this).css('border', '3px solid #4a76fd');
+            $(this).css('box-shadow', '0 0 8px rgba(74, 118, 253, 0.5)');
+            $(this).append('<div class="check-icon" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px; font-weight: bold; text-shadow: 0 0 3px rgba(0,0,0,0.5); pointer-events: none;">✓</div>');
+
+            // Add hidden input for this color
+            $container.append('<input type="hidden" name="product_colors[]" value="' + colorCode + '" class="color-hidden-input">');
+        }
+
+        // Log for debugging
+        var selectedColors = [];
+        $container.find('input.color-hidden-input').each(function(){
+            selectedColors.push($(this).val());
+        });
+        console.log('Selected colors:', selectedColors);
+    });
+
     var choiceForm = document.getElementById('choice_form');
     if(choiceForm){
         choiceForm.addEventListener('invalid', function(e){
@@ -2295,6 +2397,184 @@ $('#radio2').on('change',function(e)
             }
         }, true);
     }
+
+    // SEO Auto-fill functionality
+    var seoFields = {
+        metatitle: false,
+        metakey: false,
+        metadesc: false,
+        slug: false
+    };
+
+    // Track if SEO fields have been manually edited
+    $('input[name="metatitle"]').on('input', function(){ seoFields.metatitle = true; });
+    $('input[name="metakey"]').on('input', function(){ seoFields.metakey = true; });
+    $('textarea[name="metadesc"]').on('input', function(){ seoFields.metadesc = true; });
+    $('input[name="slug"]').on('input', function(){ seoFields.slug = true; });
+
+    // Function to generate SEO-friendly slug
+    function generateSlug(text) {
+        return text.toString().toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .replace(/\-\-+/g, '-');
+    }
+
+    // Function to truncate text
+    function truncateText(text, maxLength) {
+        if (text.length <= maxLength) return text;
+        return text.substr(0, maxLength - 3) + '...';
+    }
+
+    // Auto-fill SEO fields when SEO tab is clicked
+    $(document).on('click', '#productTabs a[href="#tab-seo"]', function(e){
+        e.preventDefault();
+
+        var productName = $('input[name="name"]').val();
+        var subheading = $('input[name="subheading"]').val();
+        var description = $('textarea[name="description"]').val();
+        var shortDesc = $('textarea[name="shortdescription"]').val();
+        var category = $('#category_select option:selected').text();
+        var brand = $('#brand option:selected').text();
+
+        // Auto-fill Meta Title if not manually edited
+        if (!seoFields.metatitle && productName) {
+            var metaTitle = productName;
+            if (subheading) {
+                metaTitle += ' - ' + subheading;
+            }
+            if (category && category !== 'Select Category') {
+                metaTitle += ' | ' + category;
+            }
+            $('input[name="metatitle"]').val(truncateText(metaTitle, 60));
+        }
+
+        // Auto-fill Meta Description if not manually edited
+        if (!seoFields.metadesc) {
+            var metaDesc = '';
+            if (shortDesc) {
+                metaDesc = shortDesc;
+            } else if (description) {
+                // Strip HTML tags from description
+                var tempDiv = $('<div>').html(description);
+                metaDesc = tempDiv.text().trim();
+            }
+
+            if (productName && !metaDesc.includes(productName)) {
+                metaDesc = productName + ' - ' + metaDesc;
+            }
+
+            if (metaDesc) {
+                $('textarea[name="metadesc"]').val(truncateText(metaDesc, 160));
+            }
+        }
+
+        // Auto-fill Meta Keywords if not manually edited
+        if (!seoFields.metakey && productName) {
+            var keywords = [productName];
+
+            if (brand && brand !== 'Select Supplier') {
+                keywords.push(brand);
+            }
+
+            if (category && category !== 'Select Category') {
+                keywords.push(category);
+            }
+
+            if (subheading) {
+                // Extract words from subheading
+                var subheadingWords = subheading.split(/\s+/).filter(function(word){
+                    return word.length > 3;
+                });
+                keywords = keywords.concat(subheadingWords.slice(0, 3));
+            }
+
+            // Remove duplicates and join with commas
+            keywords = [...new Set(keywords)];
+            $('input[name="metakey"]').val(keywords.join(', '));
+        }
+
+        // Auto-fill Slug if not manually edited and empty
+        if (!seoFields.slug && productName) {
+            var currentSlug = $('input[name="slug"]').val();
+            if (!currentSlug) {
+                $('input[name="slug"]').val(generateSlug(productName));
+            }
+        }
+
+        // Show the tab
+        $('#productTabs li').removeClass('active');
+        $(this).closest('li').addClass('active');
+        $('#productTabContent .tab-pane').removeClass('active');
+        $('#tab-seo').addClass('active');
+    });
+
+    // Branding Options Selection
+    $(document).on('click', '.branding-option-card', function(){
+        var $card = $(this);
+        var value = $card.data('value');
+        var $icon = $card.find('.branding-option-icon');
+        var $check = $icon.find('.fa-check');
+
+        if($card.hasClass('selected')){
+            // Deselect
+            $card.removeClass('selected');
+            $card.css('border-color', '#d8dde3');
+            $card.css('background', '#fff');
+            $icon.css('background', 'transparent');
+            $icon.css('border-color', '#ccc');
+            $check.hide();
+        } else {
+            // Select
+            $card.addClass('selected');
+            $card.css('border-color', '#b27622');
+            $card.css('background', '#fff');
+            $icon.css('background', '#b27622');
+            $icon.css('border-color', '#b27622');
+            $check.show();
+        }
+
+        // Update hidden input
+        var selectedValues = [];
+        $('.branding-option-card.selected').each(function(){
+            selectedValues.push($(this).data('value'));
+        });
+        $('#branding_options_hidden').val(selectedValues.join(','));
+    });
+
+    // Exhibition Events Selection
+    $(document).on('click', '.exhibition-event-card', function(){
+        var $card = $(this);
+        var value = $card.data('value');
+        var $icon = $card.find('.exhibition-event-icon');
+        var $check = $icon.find('.fa-check');
+
+        if($card.hasClass('selected')){
+            // Deselect
+            $card.removeClass('selected');
+            $card.css('border-color', '#d8dde3');
+            $card.css('background', '#fff');
+            $icon.css('background', 'transparent');
+            $icon.css('border-color', '#ccc');
+            $check.hide();
+        } else {
+            // Select
+            $card.addClass('selected');
+            $card.css('border-color', '#b27622');
+            $card.css('background', '#fff');
+            $icon.css('background', '#b27622');
+            $icon.css('border-color', '#b27622');
+            $check.show();
+        }
+
+        // Update hidden input
+        var selectedValues = [];
+        $('.exhibition-event-card.selected').each(function(){
+            selectedValues.push($(this).data('value'));
+        });
+        $('#exhibition_events_hidden').val(selectedValues.join(','));
+    });
 
 </script>
 

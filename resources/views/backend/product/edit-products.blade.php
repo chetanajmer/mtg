@@ -325,40 +325,85 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                           <div class="form-group m-b-20" >
                                             <label>Product Color</label>
-                                            <select  name="product_colors[]" class="selectpicker" multiple data-style="btn-white">
-                                              @php 
-                                                if(!empty($items->colors))
-                                                {
-                                                   $product_color=explode(',',$items->colors);
+                                            <div id="product_colors_container">
+                                              @php
+                                                $product_color = array();
+                                                if(!empty($items->colors)) {
+                                                  $decoded = json_decode($items->colors);
+                                                  if(is_array($decoded)) {
+                                                    $product_color = array_filter($decoded, function($val) { return !is_null($val) && $val !== ''; });
+                                                  } else {
+                                                    // Handle old comma-separated format
+                                                    $product_color = array_filter(explode(',', $items->colors), function($val) { return !is_null($val) && $val !== ''; });
+                                                  }
                                                 }
                                               @endphp
-
-                                              @if(!empty($items->colors))
-                                                @foreach($color as $val)
-                                                  <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                  </option>   
-                                                @endforeach  
-                                              @else
-                                                @foreach($color as $val)
-                                                  <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                  </option>   
-                                                @endforeach  
-                                              @endif
-                                                                  
-                                            </select>  
+                                              @foreach($product_color as $pc)
+                                              <input type="hidden" name="product_colors[]" value="{{ $pc }}" class="color-hidden-input">
+                                              @endforeach
+                                            </div>
+                                            <div class="color-swatch-container" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+                                              @foreach($color as $val)
+                                              @php
+                                                $isSelected = in_array($val->code, $product_color);
+                                                $borderStyle = $isSelected ? '3px solid #4a76fd' : '2px solid #ddd';
+                                                $boxShadow = $isSelected ? '0 0 8px rgba(74, 118, 253, 0.5)' : 'none';
+                                              @endphp
+                                              <div class="color-swatch @if($isSelected) selected @endif" data-color="{{ $val->code }}" data-name="{{ $val->name }}"
+                                                   style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+                                                          background-color: {{ $val->code }};
+                                                          border: {{ $borderStyle }};
+                                                          box-shadow: {{ $boxShadow }};
+                                                          transition: all 0.2s; position: relative; z-index: 1; pointer-events: auto;"
+                                                   title="{{ $val->name }}">
+                                                   @if($isSelected)
+                                                   <div class="check-icon" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px; font-weight: bold; text-shadow: 0 0 3px rgba(0,0,0,0.5); pointer-events: none;">✓</div>
+                                                   @endif
+                                              </div>
+                                              @endforeach
+                                            </div>
                                           </div>
 
                                           <div class="form-group m-b-20" >
                                             <label>Branding Options</label>
-                                            <select  name="branding_options[]" class="selectpicker" multiple data-style="btn-white">
+                                            <div id="branding-options-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
                                               @php
                                                 $selected_branding = !empty($items->branding_options) ? explode(',', $items->branding_options) : array();
                                               @endphp
                                               @foreach($branding_options as $bo)
-                                                <option value="{{ $bo->name }}" @if(in_array($bo->name, $selected_branding)) selected @endif>{{ $bo->name }}
-                                                </option>
+                                              @php
+                                                $isSelected = in_array($bo->name, $selected_branding);
+                                              @endphp
+                                              <div class="branding-option-card @if($isSelected) selected @endif" data-value="{{ $bo->name }}" style="border: @if($isSelected) 2px solid #b27622 @else 1px solid #d8dde3 @endif; border-radius: 5px; padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: #fff; transition: all 0.2s;">
+                                                <div class="branding-option-icon" style="width: 20px; height: 20px; border: 2px solid @if($isSelected) #b27622 @else #ccc @endif; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: @if($isSelected) #b27622 @else transparent @endif; transition: all 0.2s;">
+                                                  <i class="fa fa-check" style="display: @if($isSelected) block @else none @endif; color: #fff; font-size: 12px;"></i>
+                                                </div>
+                                                <span style="font-size: 13px; color: #333;">{{ $bo->name }}</span>
+                                              </div>
                                               @endforeach
-                                            </select>
+                                            </div>
+                                            <input type="hidden" name="branding_options" id="branding_options_hidden" value="{{ implode(',', $selected_branding) }}">
+                                          </div>
+
+                                          <div class="form-group m-b-20" >
+                                            <label>Exhibition Events</label>
+                                            <div id="exhibition-events-container" style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                              @php
+                                                $selected_exhibition = !empty($items->exhibition_events) ? explode(',', $items->exhibition_events) : array();
+                                              @endphp
+                                              @foreach($exhibition_events as $ee)
+                                              @php
+                                                $isSelected = in_array($ee->name, $selected_exhibition);
+                                              @endphp
+                                              <div class="exhibition-event-card @if($isSelected) selected @endif" data-value="{{ $ee->name }}" style="border: @if($isSelected) 2px solid #b27622 @else 1px solid #d8dde3 @endif; border-radius: 5px; padding: 12px 20px; cursor: pointer; display: flex; align-items: center; gap: 10px; background: #fff; transition: all 0.2s;">
+                                                <div class="exhibition-event-icon" style="width: 20px; height: 20px; border: 2px solid @if($isSelected) #b27622 @else #ccc @endif; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: @if($isSelected) #b27622 @else transparent @endif; transition: all 0.2s;">
+                                                  <i class="fa fa-check" style="display: @if($isSelected) block @else none @endif; color: #fff; font-size: 12px;"></i>
+                                                </div>
+                                                <span style="font-size: 13px; color: #333;">{{ $ee->name }}</span>
+                                              </div>
+                                              @endforeach
+                                            </div>
+                                            <input type="hidden" name="exhibition_events" id="exhibition_events_hidden" value="{{ implode(',', $selected_exhibition) }}">
                                           </div>
 
                                        <!--  <div class="form-group m-b-20">
@@ -532,18 +577,88 @@ window.location.href = "{{url('/admin')}}";</script>
                                               @endphp
 
                                               @foreach($bulkimg as $img)
+                                              @php
+                                                $thumbPath = public_path('upload/product/thumbnail/' . $img);
+                                                $prodPath = public_path('upload/product/' . $img);
+                                                $imgSrc = file_exists($thumbPath) ? URL::asset('upload/product/thumbnail/' . rawurlencode($img)) : (file_exists($prodPath) ? URL::asset('upload/product/' . rawurlencode($img)) : '');
+                                              @endphp
+                                              @if($imgSrc)
                                               <div class="col-lg-4">
-                                                <img id="imagepreview1" class="img-rounded" src="{{ URL::asset('upload/product/'.$img) }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">  
-                                                <center> 
-                                                  <a style="background-color:white; position: absolute; top:-5px; right:49px; border:1px solid #ddd; padding:2px; cursor:pointer;color:grey; border-radius:50%; width:25px;" onclick="deletebulkimage('{{$img}}')"  >X</a> 
+                                                <img id="imagepreview1" class="img-rounded" src="{{ $imgSrc }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                <center>
+                                                  <a style="background-color:white; position: absolute; top:-5px; right:49px; border:1px solid #ddd; padding:2px; cursor:pointer;color:grey; border-radius:50%; width:25px;" onclick="deletebulkimage('{{$img}}')"  >X</a>
                                                 </center>
                                               </div>
+                                              @endif
                                               @endforeach
                                             </div>
+                                            @else
+                                              @if(!empty($items->image1))
+                                              <div class="row" style="margin-bottom: 10px;">
+                                                @php
+                                                  $thumbPath1 = public_path('upload/product/thumbnail/' . $items->image1);
+                                                  $prodPath1 = public_path('upload/product/' . $items->image1);
+                                                  $imgSrc1 = file_exists($thumbPath1) ? URL::asset('upload/product/thumbnail/' . rawurlencode($items->image1)) : (file_exists($prodPath1) ? URL::asset('upload/product/' . rawurlencode($items->image1)) : '');
+                                                @endphp
+                                                @if($imgSrc1)
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{ $imgSrc1 }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                                @if(!empty($items->image2))
+                                                @php
+                                                  $thumbPath2 = public_path('upload/product/thumbnail/' . $items->image2);
+                                                  $prodPath2 = public_path('upload/product/' . $items->image2);
+                                                  $imgSrc2 = file_exists($thumbPath2) ? URL::asset('upload/product/thumbnail/' . rawurlencode($items->image2)) : (file_exists($prodPath2) ? URL::asset('upload/product/' . rawurlencode($items->image2)) : '');
+                                                @endphp
+                                                @if($imgSrc2)
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{ $imgSrc2 }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                                @endif
+                                                @if(!empty($items->image3))
+                                                @php
+                                                  $thumbPath3 = public_path('upload/product/thumbnail/' . $items->image3);
+                                                  $prodPath3 = public_path('upload/product/' . $items->image3);
+                                                  $imgSrc3 = file_exists($thumbPath3) ? URL::asset('upload/product/thumbnail/' . rawurlencode($items->image3)) : (file_exists($prodPath3) ? URL::asset('upload/product/' . rawurlencode($items->image3)) : '');
+                                                @endphp
+                                                @if($imgSrc3)
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{ $imgSrc3 }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                                @endif
+                                                @if(!empty($items->image4))
+                                                @php
+                                                  $thumbPath4 = public_path('upload/product/thumbnail/' . $items->image4);
+                                                  $prodPath4 = public_path('upload/product/' . $items->image4);
+                                                  $imgSrc4 = file_exists($thumbPath4) ? URL::asset('upload/product/thumbnail/' . rawurlencode($items->image4)) : (file_exists($prodPath4) ? URL::asset('upload/product/' . rawurlencode($items->image4)) : '');
+                                                @endphp
+                                                @if($imgSrc4)
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{ $imgSrc4 }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                                @endif
+                                                @if(!empty($items->image5))
+                                                @php
+                                                  $thumbPath5 = public_path('upload/product/thumbnail/' . $items->image5);
+                                                  $prodPath5 = public_path('upload/product/' . $items->image5);
+                                                  $imgSrc5 = file_exists($thumbPath5) ? URL::asset('upload/product/thumbnail/' . rawurlencode($items->image5)) : (file_exists($prodPath5) ? URL::asset('upload/product/' . rawurlencode($items->image5)) : '');
+                                                @endphp
+                                                @if($imgSrc5)
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{ $imgSrc5 }}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                                @endif
+                                              </div>
+                                              @endif
                                             @endif
                                             <input type="file" id="bulk_image" name="bulk_image[]" class=""  multiple="">
                                              <input type="hidden" id="bulk_image" name="old_bulk_image" class="" value="{{$items->bulk_image}}"  >
-                                            
+
                                           @else
 
                                               @if(!empty($items->bulk_image))
@@ -554,15 +669,43 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                               @foreach($bulkimg as $img)
                                               <div class="col-lg-4">
-                                                <img id="imagepreview1" class="img-rounded" src="{{$img}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">  
+                                                <img id="imagepreview1" class="img-rounded" src="{{$img}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
                                               </div>
                                               @endforeach
                                             </div>
+                                            @else
+                                              @if(!empty($items->image1))
+                                              <div class="row" style="margin-bottom: 10px;">
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{$items->image1}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @if(!empty($items->image2))
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{$items->image2}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                                @if(!empty($items->image3))
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{$items->image3}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                                @if(!empty($items->image4))
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{$items->image4}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                                @if(!empty($items->image5))
+                                                <div class="col-lg-4">
+                                                  <img class="img-rounded" src="{{$items->image5}}" alt="your image" style="max-width:100px; max-height:100px;margin-bottom: 20px;border: 1px solid #ddd">
+                                                </div>
+                                                @endif
+                                              </div>
+                                              @endif
                                             @endif
 
 
                                           @endif
-                                            
+
 
                                         </div>
 
@@ -738,9 +881,17 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                         <div class="form-group m-b-20">
 
-                                            <label>Base Price <span class="text-danger">*</span></label>
+                                            <label>Cost Price <span class="text-danger">*</span></label>
 
                                                 <input type="number" required name="price" class="form-control" value="{{$items->price}}">
+
+                                        </div>
+
+                                        <div class="form-group m-b-20">
+
+                                            <label>Base Price</label>
+
+                                                <input type="number" name="base_price" class="form-control" value="{{$items->base_price ?? ''}}" placeholder="Enter base price">
 
                                         </div>
 
@@ -3089,6 +3240,223 @@ function delete_variation_image($value)
             }
         }, true);
     }
+
+    // Color swatch selection - use event delegation
+    $(document).on('click', '.color-swatch', function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        var colorCode = $(this).data('color');
+        var $container = $('#product_colors_container');
+
+        if($(this).hasClass('selected')){
+            // Deselect color
+            $(this).removeClass('selected');
+            $(this).css('border', '2px solid #ddd');
+            $(this).css('box-shadow', 'none');
+            $(this).find('.check-icon').remove();
+
+            // Remove hidden input for this color
+            $container.find('input[value="' + colorCode + '"]').remove();
+        } else {
+            // Select color
+            $(this).addClass('selected');
+            $(this).css('border', '3px solid #4a76fd');
+            $(this).css('box-shadow', '0 0 8px rgba(74, 118, 253, 0.5)');
+            $(this).append('<div class="check-icon" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 20px; font-weight: bold; text-shadow: 0 0 3px rgba(0,0,0,0.5); pointer-events: none;">✓</div>');
+
+            // Add hidden input for this color
+            $container.append('<input type="hidden" name="product_colors[]" value="' + colorCode + '" class="color-hidden-input">');
+        }
+
+        // Log for debugging
+        var selectedColors = [];
+        $container.find('input.color-hidden-input').each(function(){
+            selectedColors.push($(this).val());
+        });
+        console.log('Selected colors:', selectedColors);
+    });
+
+    // SEO Auto-fill functionality
+    var seoFields = {
+        metatitle: false,
+        metakey: false,
+        metadesc: false,
+        slug: false
+    };
+
+    // Track if SEO fields have been manually edited
+    $('input[name="metatitle"]').on('input', function(){ seoFields.metatitle = true; });
+    $('input[name="metakey"]').on('input', function(){ seoFields.metakey = true; });
+    $('textarea[name="metadesc"]').on('input', function(){ seoFields.metadesc = true; });
+    $('input[name="slug"]').on('input', function(){ seoFields.slug = true; });
+
+    // Function to generate SEO-friendly slug
+    function generateSlug(text) {
+        return text.toString().toLowerCase()
+            .trim()
+            .replace(/\s+/g, '-')
+            .replace(/[^\w\-]+/g, '')
+            .replace(/\-\-+/g, '-');
+    }
+
+    // Function to truncate text
+    function truncateText(text, maxLength) {
+        if (text.length <= maxLength) return text;
+        return text.substr(0, maxLength - 3) + '...';
+    }
+
+    // Auto-fill SEO fields when SEO tab is clicked
+    $(document).on('click', '#productTabs a[href="#tab-seo"]', function(e){
+        e.preventDefault();
+
+        var productName = $('input[name="name"]').val();
+        var subheading = $('input[name="subheading"]').val();
+        var description = $('textarea[name="description"]').val();
+        var shortDesc = $('textarea[name="shortdescription"]').val();
+        var category = $('#category_select option:selected').text();
+        var brand = $('#brand option:selected').text();
+
+        // Auto-fill Meta Title if not manually edited
+        if (!seoFields.metatitle && productName) {
+            var metaTitle = productName;
+            if (subheading) {
+                metaTitle += ' - ' + subheading;
+            }
+            if (category && category !== 'Select Category') {
+                metaTitle += ' | ' + category;
+            }
+            $('input[name="metatitle"]').val(truncateText(metaTitle, 60));
+        }
+
+        // Auto-fill Meta Description if not manually edited
+        if (!seoFields.metadesc) {
+            var metaDesc = '';
+            if (shortDesc) {
+                metaDesc = shortDesc;
+            } else if (description) {
+                // Strip HTML tags from description
+                var tempDiv = $('<div>').html(description);
+                metaDesc = tempDiv.text().trim();
+            }
+
+            if (productName && !metaDesc.includes(productName)) {
+                metaDesc = productName + ' - ' + metaDesc;
+            }
+
+            if (metaDesc) {
+                $('textarea[name="metadesc"]').val(truncateText(metaDesc, 160));
+            }
+        }
+
+        // Auto-fill Meta Keywords if not manually edited
+        if (!seoFields.metakey && productName) {
+            var keywords = [productName];
+
+            if (brand && brand !== 'Select Supplier') {
+                keywords.push(brand);
+            }
+
+            if (category && category !== 'Select Category') {
+                keywords.push(category);
+            }
+
+            if (subheading) {
+                // Extract words from subheading
+                var subheadingWords = subheading.split(/\s+/).filter(function(word){
+                    return word.length > 3;
+                });
+                keywords = keywords.concat(subheadingWords.slice(0, 3));
+            }
+
+            // Remove duplicates and join with commas
+            keywords = [...new Set(keywords)];
+            $('input[name="metakey"]').val(keywords.join(', '));
+        }
+
+        // Auto-fill Slug if not manually edited and empty
+        if (!seoFields.slug && productName) {
+            var currentSlug = $('input[name="slug"]').val();
+            if (!currentSlug) {
+                $('input[name="slug"]').val(generateSlug(productName));
+            }
+        }
+
+        // Show the tab
+        $('#productTabs li').removeClass('active');
+        $(this).closest('li').addClass('active');
+        $('#productTabContent .tab-pane').removeClass('active');
+        $('#tab-seo').addClass('active');
+    });
+
+    // Branding Options Selection
+    $(document).on('click', '.branding-option-card', function(){
+        var $card = $(this);
+        var value = $card.data('value');
+        var $icon = $card.find('.branding-option-icon');
+        var $check = $icon.find('.fa-check');
+
+        if($card.hasClass('selected')){
+            // Deselect
+            $card.removeClass('selected');
+            $card.css('border-color', '#d8dde3');
+            $card.css('border-width', '1px');
+            $card.css('background', '#fff');
+            $icon.css('background', 'transparent');
+            $icon.css('border-color', '#ccc');
+            $check.hide();
+        } else {
+            // Select
+            $card.addClass('selected');
+            $card.css('border-color', '#b27622');
+            $card.css('border-width', '2px');
+            $card.css('background', '#fff');
+            $icon.css('background', '#b27622');
+            $icon.css('border-color', '#b27622');
+            $check.show();
+        }
+
+        // Update hidden input
+        var selectedValues = [];
+        $('.branding-option-card.selected').each(function(){
+            selectedValues.push($(this).data('value'));
+        });
+        $('#branding_options_hidden').val(selectedValues.join(','));
+    });
+
+    // Exhibition Events Selection
+    $(document).on('click', '.exhibition-event-card', function(){
+        var $card = $(this);
+        var value = $card.data('value');
+        var $icon = $card.find('.exhibition-event-icon');
+        var $check = $icon.find('.fa-check');
+
+        if($card.hasClass('selected')){
+            // Deselect
+            $card.removeClass('selected');
+            $card.css('border-color', '#d8dde3');
+            $card.css('border-width', '1px');
+            $card.css('background', '#fff');
+            $icon.css('background', 'transparent');
+            $icon.css('border-color', '#ccc');
+            $check.hide();
+        } else {
+            // Select
+            $card.addClass('selected');
+            $card.css('border-color', '#b27622');
+            $card.css('border-width', '2px');
+            $card.css('background', '#fff');
+            $icon.css('background', '#b27622');
+            $icon.css('border-color', '#b27622');
+            $check.show();
+        }
+
+        // Update hidden input
+        var selectedValues = [];
+        $('.exhibition-event-card.selected').each(function(){
+            selectedValues.push($(this).data('value'));
+        });
+        $('#exhibition_events_hidden').val(selectedValues.join(','));
+    });
 
 </script>
 

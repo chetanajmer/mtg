@@ -164,7 +164,7 @@ $email=session()->get('username');
                     @if($items->brand=='42')
                         <span class="label label-green" style="background-color: green">Midocean</span> 
                       @endif
-                     <br> <b>{{$items->name}}</b>
+                     <br> <b><a href="{{url('product/'.$items->slug)}}" target="_blank">{{$items->name}}</a></b>
                   </td>
                 
                   <!--   <td style="text-align:center;">@if($items->is_active=="online")  <span class="label label-success">Active</span> @else<span class="label label-danger">In-Active</span> @endif</td> -->

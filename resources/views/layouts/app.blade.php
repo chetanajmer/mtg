@@ -231,7 +231,7 @@ figure figcaption {
                                     <a href="{{url('cms-settings')}}" class="right-bar-toggle waves-effect waves-light"><i class="icon-settings"></i></a>
                                 </li>
                                 <li class="dropdown top-menu-item-xs">
-                                    <a href="" class="dropdown-toggle profile waves-effect waves-light" data-toggle="dropdown" aria-expanded="true"><img src="/assets/images/users/avatar-1.jpg" alt="user-img" class="img-circle"> </a>
+                                    <a href="" class="dropdown-toggle profile waves-effect waves-light" data-toggle="dropdown" aria-expanded="true"><img src="/assets/images/users/admin.png" alt="user-img" class="img-circle"> </a>
                                     <ul class="dropdown-menu">
                                         <!-- <li><a href="javascript:void(0)"><i class="ti-user m-r-10 text-custom"></i> Profile</a></li>
                                         <li><a href="javascript:void(0)"><i class="ti-settings m-r-10 text-custom"></i> Settings</a></li>
@@ -384,10 +384,18 @@ figure figcaption {
                                     <li><a href="{{url('branding-options')}}">Branding Options</a></li>
                                     <li><a href="{{url('occasions')}}">Occasion Tags</a></li>
                                     <li><a href="{{url('preferences')}}">Preferences</a></li>
+                                    <li><a href="{{url('exhibition-events')}}">Exhibition Events</a></li>
+                                    <li><a href="{{url('tier-pricing')}}">Tier Pricing</a></li>
+                                    
                                     <!-- <li><a href="{{url('variation')}}">Variations</a></li> -->
 
                                 </ul>
                             </li>
+
+                            <!-- <li>
+                                <a href="{{url('exhibition-events')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Exhibition Events</span></a>
+
+                            </li> -->
                            
                             <li>
                                 <a href="{{url('orders')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Store Enquiries</span></a>
