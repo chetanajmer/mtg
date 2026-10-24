@@ -10,3 +10,6 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/morethangiftz/beta.morethangiftz.com
     - /usr/bin/rsync -av --exclude='.git/' --exclude='.cpanel.yml' --exclude='.env' --exclude='.env.backup' --exclude='.gitignore' --exclude='node_modules/' --exclude='public/upload/' --exclude='storage/framework/cache/data/' --exclude='log_laravel/' $PWD/ $DEPLOYPATH/
+    - /usr/bin/find $DEPLOYPATH -type d -exec chmod 755 {} \;
+    - /usr/bin/find $DEPLOYPATH -type f -exec chmod 644 {} \;
+    - /bin/chmod -R 775 $DEPLOYPATH/storage $DEPLOYPATH/bootstrap/cache
