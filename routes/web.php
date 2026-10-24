@@ -25,6 +25,7 @@ use App\Http\Controllers\Backend\ColorController;
 use App\Http\Controllers\Backend\BrandingOptionController;
 use App\Http\Controllers\Backend\OccasionController;
 use App\Http\Controllers\Backend\PreferenceController;
+use App\Http\Controllers\Backend\ExhibitionEventController;
 use App\Http\Controllers\Backend\CouponController;
 use App\Http\Controllers\Backend\RewardController;
 use App\Http\Controllers\Backend\FilterController;
@@ -42,6 +43,9 @@ use App\Http\Controllers\Backend\OrderController;
 use App\Http\Controllers\Backend\FlipbookController;
 use App\Http\Controllers\Backend\ReviewController;
 use App\Http\Controllers\Backend\PortfolioController;
+use App\Http\Controllers\Backend\OrderTrackingController;
+use App\Http\Controllers\NewBrandController;
+use App\Http\Controllers\OrderProcessingController;
 
 /*Store*/
 use App\Http\Controllers\Frontend\HomepageController;
@@ -111,6 +115,26 @@ Route::any('brandfeatured', [BrandController::class, 'brandfeatured'])->name('br
 Route::any('brandactive', [BrandController::class, 'brandactive'])->name('brandactive');
 Route::any('delete_brand_thumbnail', [BrandController::class, 'delete_brand_thumbnail'])->name('delete_brand_thumbnail');
 Route::any('delete_brand_banner', [BrandController::class, 'delete_brand_banner'])->name('delete_brand_banner');
+
+// New Brand Management
+Route::prefix('newbrand')->name('newbrand.')->group(function () {
+    Route::get('/', [NewBrandController::class, 'index'])->name('index');
+    Route::get('/create', [NewBrandController::class, 'create'])->name('create');
+    Route::post('/', [NewBrandController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [NewBrandController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [NewBrandController::class, 'update'])->name('update');
+    Route::delete('/{id}', [NewBrandController::class, 'destroy'])->name('destroy');
+});
+
+// Order Processing Workflow
+Route::prefix('orderprocessing')->name('orderprocessing.')->group(function () {
+    Route::get('/', [OrderProcessingController::class, 'index'])->name('index');
+    Route::get('/available', [OrderProcessingController::class, 'availableOrders'])->name('available');
+    Route::get('/create/{cartorderId}', [OrderProcessingController::class, 'createWorkflow'])->name('create');
+    Route::get('/{id}', [OrderProcessingController::class, 'show'])->name('show');
+    Route::post('/{id}/complete/{step}', [OrderProcessingController::class, 'completeStep'])->name('completeStep');
+    Route::post('/{id}/reset/{step}', [OrderProcessingController::class, 'resetStep'])->name('resetStep');
+});
 
 // Parent Category
 Route::any('add-parentcategories', [ParentcategoryController::class, 'index']);
@@ -360,13 +384,27 @@ Route::any('find-preference', [PreferenceController::class, 'find'])->name('find
 Route::any('update-preference', [PreferenceController::class, 'update'])->name('updatepreference');
 Route::any('delete-preference', [PreferenceController::class, 'delete'])->name('deletepreference');
 
+/*Exhibition Events*/
+Route::any('exhibition-events', [ExhibitionEventController::class, 'index']);
+Route::any('add-exhibition-event', [ExhibitionEventController::class, 'add'])->name('addexhibitionevent');
+Route::any('find-exhibition-event', [ExhibitionEventController::class, 'find'])->name('findexhibitionevent');
+Route::any('update-exhibition-event', [ExhibitionEventController::class, 'update'])->name('updateexhibitionevent');
+Route::any('delete-exhibition-event', [ExhibitionEventController::class, 'delete'])->name('deleteexhibitionevent');
+
+/*Tier Pricing*/
+Route::any('tier-pricing', [ProductController::class, 'tierPricing'])->name('tier_pricing');
+Route::any('add-tier-pricing', [ProductController::class, 'addTierPricing'])->name('add_tier_pricing');
+Route::any('find-tier-pricing', [ProductController::class, 'findTierPricing'])->name('find_tier_pricing');
+Route::any('update-tier-pricing', [ProductController::class, 'updateTierPricing'])->name('update_tier_pricing');
+Route::any('delete-tier-pricing', [ProductController::class, 'deleteTierPricing'])->name('delete_tier_pricing');
+
 
 /*Variation */
-Route::any('variation', [VariationController::class, 'variation']);
-Route::any('add-variation', [VariationController::class, 'add'])->name('addvariation');
-Route::any('find-variation', [VariationController::class, 'find'])->name('findvariation');
-Route::any('update-variation', [VariationController::class, 'update'])->name('updatevariation');
-Route::any('delete-variation', [VariationController::class, 'delete'])->name('deletevariation');
+// Route::any('variation', [VariationController::class, 'variation']);
+// Route::any('add-variation', [VariationController::class, 'add'])->name('addvariation');
+// Route::any('find-variation', [VariationController::class, 'find'])->name('findvariation');
+// Route::any('update-variation', [VariationController::class, 'update'])->name('updatevariation');
+// Route::any('delete-variation', [VariationController::class, 'delete'])->name('deletevariation');
 
 
 
@@ -417,7 +455,9 @@ Route::any('date_report', [ReportController::class, 'date_report'])->name('date_
 Route::any('user_report', [ReportController::class, 'user_report'])->name('user_report');
 Route::any('product_report', [ReportController::class, 'product_report'])->name('product_report');
 
-/*Orders */
+/*Orders - Backend Store Enquiries */
+Route::any('orders', [OrderController::class, 'index'])->name('orders.index');
+Route::any('order-workflow/{id}', [OrderController::class, 'orderWorkflow'])->name('orders.workflow');
 Route::any('abandoned_order', [OrderController::class, 'abandoned_order'])->name('abandoned_order');
 Route::any('abandoned_orderdetails/{id}', [OrderController::class, 'abandoned_orderdetails'])->name('abandoned_orderdetails');
 Route::any('send_abandoned_mail', [OrderController::class, 'send_abandoned_mail'])->name('send_abandoned_mail');
@@ -435,12 +475,23 @@ Route::any('delete_flipbook/{id}', [FlipbookController::class, 'delete_flipbook'
 // Reviews
 Route::any('reviews', [ReviewController::class, 'index']);
 
+// Order Tracking
+Route::any('order-tracking', [OrderTrackingController::class, 'index'])->name('ordertracking.index');
+
 
 
 /*Frontend Homepage*/
 
+Route::get('web-frontend', function () {
+    return view('web-frontend.index');
+});
+
+Route::get('web-frontend/product', function () {
+    return view('web_frontend.product');
+});
+
 Route::any('/', [HomepageController::class, 'index']);
-Route::any('product/{slug}', [HomepageController::class, 'product']);
+Route::get('product/{slug}', [HomepageController::class, 'webProduct'])->name('web.product');
 Route::any('product/{product_slug}/{slug}', [HomepageController::class, 'variationproduct'])->name('variationproduct');
 /*Route::any('addtocart', [HomepageController::class, 'addtocart'])->name('addtocart'); */
 Route::any('variant_price', [HomepageController::class, 'variant_price'])->name('variant_price'); 
@@ -491,6 +542,24 @@ Route::any('/store/dologout', [UsersController::class, 'dostorelogout'])->name('
 Route::any('/store/register', [UsersController::class, 'storeregister']);
 Route::any('/store/doregister', [UsersController::class, 'dostoreregister'])->name('dostoreregister'); 
 Route::any('/store/myaccount', [UsersController::class, 'myaccount']);
+Route::any('/corporate-portal', [UsersController::class, 'corporatePortal']);
+Route::any('/corporate-portal/wishlist', function () {
+    return view('web_frontend.corporate-wishlist');
+});
+Route::post('/collections', [UsersController::class, 'createCollection']);
+Route::any('/cart', function () {
+    return view('web_frontend.cart');
+});
+Route::any('/order-tracking', function () {
+    return view('web_frontend.order-tracking');
+});
+Route::any('/annual-corporate-membership', function () {
+    return view('web_frontend.annual-corporate-membership');
+});
+Route::any('/corporate-gifting-budget-planner', function () {
+    return view('web_frontend.corporate-gifting-budget-planner');
+});
+Route::post('/send-enquiry', [App\Http\Controllers\Frontend\EnquiryController::class, 'sendEnquiry']);
 Route::any('/store/resetpassword', [UsersController::class, 'resetpassword']);
 Route::any('/store/doresetpassword', [UsersController::class, 'doresetpassword'])->name('doresetpassword'); 
 Route::any('updateuserdetails', [UsersController::class, 'updateuserdetails'])->name('updateuserdetails');

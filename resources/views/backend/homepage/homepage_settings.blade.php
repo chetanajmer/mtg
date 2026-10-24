@@ -122,26 +122,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors1[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category1->colors))
-                                                          {
-                                                             $product_color=explode(',',$category1->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category1->colors)) {
+                                                            $decoded = json_decode($category1->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category1->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category1->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
 
                                                     <div class="form-group m-b-20">
@@ -215,26 +214,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors2[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category2->colors))
-                                                          {
-                                                             $product_color=explode(',',$category2->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category2->colors)) {
+                                                            $decoded = json_decode($category2->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category2->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category2->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
 
                                                    <div class="form-group m-b-20">
@@ -309,26 +307,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors3[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category3->colors))
-                                                          {
-                                                             $product_color=explode(',',$category3->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category3->colors)) {
+                                                            $decoded = json_decode($category3->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category3->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category3->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
 
                                                    <div class="form-group m-b-20">
@@ -409,26 +406,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors4[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category4->colors))
-                                                          {
-                                                             $product_color=explode(',',$category4->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category4->colors)) {
+                                                            $decoded = json_decode($category4->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category4->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category4->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
                                                     <div class="form-group m-b-20">
 
@@ -503,26 +499,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors5[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category5->colors))
-                                                          {
-                                                             $product_color=explode(',',$category5->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category5->colors)) {
+                                                            $decoded = json_decode($category5->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category5->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category5->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
                                                    <div class="form-group m-b-20">
 
@@ -598,26 +593,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors6[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category6->colors))
-                                                          {
-                                                             $product_color=explode(',',$category6->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category6->colors)) {
+                                                            $decoded = json_decode($category6->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category6->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category6->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
                                                    <div class="form-group m-b-20">
 
@@ -694,26 +688,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors7[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category7->colors))
-                                                          {
-                                                             $product_color=explode(',',$category7->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category7->colors)) {
+                                                            $decoded = json_decode($category7->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category7->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category7->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
                                                     <div class="form-group m-b-20">
 
@@ -789,26 +782,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors8[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category8->colors))
-                                                          {
-                                                             $product_color=explode(',',$category8->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category8->colors)) {
+                                                            $decoded = json_decode($category8->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category8->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category8->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
                                                    <div class="form-group m-b-20">
 
@@ -884,26 +876,25 @@ window.location.href = "{{url('/admin')}}";</script>
                                                     <div class="form-group m-b-20">
                                                         <label>Color </label>
                                                         <select  name="colors9[]" class="selectpicker" multiple data-style="btn-white">
-                                                        @php 
-                                                          if(!empty($category9->colors))
-                                                          {
-                                                             $product_color=explode(',',$category9->colors);
+                                                        @php
+                                                          $product_color = array();
+                                                          if(!empty($category9->colors)) {
+                                                            $decoded = json_decode($category9->colors);
+                                                            if(is_array($decoded)) {
+                                                              $product_color = $decoded;
+                                                            } else {
+                                                              // Handle old comma-separated format
+                                                              $product_color = explode(',', $category9->colors);
+                                                            }
                                                           }
                                                         @endphp
 
-                                                        @if(!empty($category9->colors))
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @else
-                                                          @foreach($color as $val)
-                                                            <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" >{{ $val->name }}
-                                                            </option>   
-                                                          @endforeach  
-                                                        @endif
-                                                                            
-                                                      </select> 
+                                                        @foreach($color as $val)
+                                                          <option style="background-color:{{ $val->code }} " value="{{ $val->code }}" <?php if(in_array($val->code, $product_color)) echo 'selected'?>>{{ $val->name }}
+                                                          </option>
+                                                        @endforeach
+
+                                                      </select>
                                                     </div>
 
                                                    <div class="form-group m-b-20">

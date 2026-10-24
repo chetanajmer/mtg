@@ -102,12 +102,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors1;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','1')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','1')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','1')->update(['colors' => json_encode([])]);
        }
 		}
 		
@@ -148,12 +148,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors2;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','2')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','2')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','2')->update(['colors' => json_encode([])]);
        }
 		}
 
@@ -195,12 +195,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors3;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','3')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','3')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','3')->update(['colors' => json_encode([])]);
        }
 		}
 
@@ -241,12 +241,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors4;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','4')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','4')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','4')->update(['colors' => json_encode([])]);
        }
 		}
 
@@ -287,12 +287,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors5;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','5')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','5')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','5')->update(['colors' => json_encode([])]);
        }
 		}
 
@@ -333,12 +333,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors6;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','6')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','6')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','6')->update(['colors' => json_encode([])]);
        }
 		}
 
@@ -379,12 +379,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors7;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','7')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','7')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','7')->update(['colors' => json_encode([])]);
        }
 		}
 
@@ -425,12 +425,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors8;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','8')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','8')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','8')->update(['colors' => json_encode([])]);
        }
 		}
 
@@ -471,12 +471,12 @@ class HomepagesettingController extends Controller
 	    $color=$request->colors9;
        if(!empty($color))
        {
-          $colors=implode(",", $color);
+          $colors=json_encode($color);
           DB::table('category_settings')->where('id','9')->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('category_settings')->where('id','9')->update(['colors' => '']);
+         DB::table('category_settings')->where('id','9')->update(['colors' => json_encode([])]);
        }
 		}
 		 

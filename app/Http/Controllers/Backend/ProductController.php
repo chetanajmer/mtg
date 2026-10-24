@@ -66,6 +66,7 @@ class ProductController extends Controller
     $midocean=DB::table('products')->select('id','slug','name','newarrival','featured','sale','most_selling','thumbnail','category','subcategory','brand','is_active')->where('brand','42')->where('is_active','online')->get();
 
     $sub_products=$newarrival->merge($hotproduct)->merge($midocean);
+    $sub_products_id = array();
     foreach($sub_products as $item)
     {
       $sub_products_id[]=$item->id;
@@ -662,9 +663,11 @@ class ProductController extends Controller
 
         $installation=DB::Table('installations')->select('*')->where('product_id',$product_id)->get();
 
+        $exhibition_events=\App\Models\ExhibitionEvent::all();
+
         return view('backend.product.edit-products',compact('items','parentcategory','category','subcategory','brands',
 
-          'installation','paginationid'));
+          'installation','paginationid','exhibition_events'));
 
     }
 
@@ -731,6 +734,8 @@ class ProductController extends Controller
 
           'price' => $request->price,
 
+          'base_price' => $request->base_price,
+
           'sprice' => $request->sprice,
 
           'date_sale_price_start' => $request->date_sale_price_start,
@@ -773,7 +778,9 @@ class ProductController extends Controller
 
           'moq_unit' => $request->moq_unit,
 
-          'branding_options' => !empty($request->branding_options)?implode(',',$request->branding_options):null,
+          'branding_options' => !empty($request->branding_options) ? (is_array($request->branding_options) ? implode(',', $request->branding_options) : $request->branding_options) : null,
+
+          'exhibition_events' => !empty($request->exhibition_events) ? (is_array($request->exhibition_events) ? implode(',', $request->exhibition_events) : $request->exhibition_events) : null,
 
           'occasion_tags' => !empty($occasion_names)?implode(',',$occasion_names):null,
 
@@ -970,13 +977,13 @@ class ProductController extends Controller
 
             } 
 
-            $imageName1 = $productname."-silvergiftz-".$randomstr."-image1".'.'.$request->image1->extension();  
+            $imageName1 = $productname."-silvergiftz-".$randomstr."-image1".'.'.$request->image1->extension();
 
-            $image_resize = Image::make($image1->getRealPath());              
+            $image_resize = Image::make($image1->getRealPath());
 
             // $image_resize->resize(800,800);
 
-            $image_resize->save(public_path('upload/product/' .$imageName1));
+            $image_resize->save(public_path('upload/product/thumbnail/' .$imageName1));
 
 
 
@@ -1011,13 +1018,13 @@ class ProductController extends Controller
 
             }
 
-            $imageName2 = $productname."-silvergiftz-".$randomstr."-image2".'.'.$request->image2->extension(); 
+            $imageName2 = $productname."-silvergiftz-".$randomstr."-image2".'.'.$request->image2->extension();
 
-            $image_resize = Image::make($image2->getRealPath());              
+            $image_resize = Image::make($image2->getRealPath());
 
             // $image_resize->resize(800,800);
 
-            $image_resize->save(public_path('upload/product/' .$imageName2));
+            $image_resize->save(public_path('upload/product/thumbnail/' .$imageName2));
 
 
 
@@ -1050,13 +1057,13 @@ class ProductController extends Controller
 
             }
 
-            $imageName3 = $productname."-silvergiftz-".$randomstr."-image3".'.'.$request->image3->extension();   
+            $imageName3 = $productname."-silvergiftz-".$randomstr."-image3".'.'.$request->image3->extension();
 
-            $image_resize = Image::make($image3->getRealPath());              
+            $image_resize = Image::make($image3->getRealPath());
 
             // $image_resize->resize(800,800);
 
-            $image_resize->save(public_path('upload/product/' .$imageName3));
+            $image_resize->save(public_path('upload/product/thumbnail/' .$imageName3));
 
 
 
@@ -1089,13 +1096,13 @@ class ProductController extends Controller
 
             }
 
-            $imageName4 = $productname."-silvergiftz-".$randomstr."-image4".'.'.$request->image4->extension();   
+            $imageName4 = $productname."-silvergiftz-".$randomstr."-image4".'.'.$request->image4->extension();
 
-            $image_resize = Image::make($image4->getRealPath());              
+            $image_resize = Image::make($image4->getRealPath());
 
             // $image_resize->resize(800,800);
 
-            $image_resize->save(public_path('upload/product/' .$imageName4));
+            $image_resize->save(public_path('upload/product/thumbnail/' .$imageName4));
 
 
 
@@ -1128,13 +1135,13 @@ class ProductController extends Controller
 
             }
 
-            $imageName5 = $productname."-silvergiftz-".$randomstr."-image5".'.'.$request->image5->extension();   
+            $imageName5 = $productname."-silvergiftz-".$randomstr."-image5".'.'.$request->image5->extension();
 
-            $image_resize = Image::make($image5->getRealPath());              
+            $image_resize = Image::make($image5->getRealPath());
 
             // $image_resize->resize(800,800);
 
-            $image_resize->save(public_path('upload/product/' .$imageName5));
+            $image_resize->save(public_path('upload/product/thumbnail/' .$imageName5));
 
 
 
@@ -1167,15 +1174,15 @@ class ProductController extends Controller
 
             }
 
-            $imageName6 = $productname."-silvergiftz-".$randomstr."-image6".'.'.$request->image6->extension();   
+            $imageName6 = $productname."-silvergiftz-".$randomstr."-image6".'.'.$request->image6->extension();
 
-         
 
-            $image_resize = Image::make($image6->getRealPath());              
+
+            $image_resize = Image::make($image6->getRealPath());
 
             // $image_resize->resize(800,800);
 
-            $image_resize->save(public_path('upload/product/' .$imageName6));
+            $image_resize->save(public_path('upload/product/thumbnail/' .$imageName6));
 
 
 
@@ -1213,7 +1220,7 @@ class ProductController extends Controller
 
         // Bulk Images
         $current_date=date("Y-m-d");
-        $current_time=date("H:i:s");
+        $current_time=str_replace(':', '-', date("H:i:s"));
         $bulk_image=$request->bulk_image;
         $old_bulk_image=$request->old_bulk_image;
 
@@ -1225,12 +1232,13 @@ class ProductController extends Controller
 
         if(!empty($bulk_image))
         {
+          $imageName = array();
           foreach($bulk_image as $img)
           {
-            $bulkimageName= $productname."-silvergiftz-silverpixelz-".$current_date."+".$current_time.rand().'.'.$img->getClientOriginalExtension();
-            $image_resize = Image::make($img->getRealPath());              
+            $bulkimageName= $productname."-silvergiftz-silverpixelz-".$current_date."-".$current_time.rand().'.'.$img->getClientOriginalExtension();
+            $image_resize = Image::make($img->getRealPath());
             // $image_resize->resize(800,800);
-            $image_resize->save(public_path('upload/product/' .$bulkimageName));
+            $image_resize->save(public_path('upload/product/thumbnail/' .$bulkimageName));
             $imageName[]=$bulkimageName;
           }  
             $bulkimage=implode(',', $imageName);
@@ -1338,12 +1346,12 @@ class ProductController extends Controller
        $product_color=$request->product_colors;
        if(!empty($product_color))
        {
-          $colors=implode(",", $product_color);
+          $colors=json_encode($product_color);
           DB::table('products')->where('slug',$slug)->update(['colors' => $colors]);
        }
        else
        {
-         DB::table('products')->where('slug',$slug)->update(['colors' => '']);
+         DB::table('products')->where('slug',$slug)->update(['colors' => json_encode([])]);
        }
        
 
@@ -2191,10 +2199,16 @@ class ProductController extends Controller
    {
       $id=$request->id;
       $img=$request->img;
-      $image_path="upload/product/".$img;
-      if(is_file($image_path))
+      // Check in thumbnail folder first, then in product folder
+      $thumb_path="upload/product/thumbnail/".$img;
+      $prod_path="upload/product/".$img;
+      if(is_file($thumb_path))
       {
-        unlink($image_path);
+        unlink($thumb_path);
+      }
+      elseif(is_file($prod_path))
+      {
+        unlink($prod_path);
       }
       $product=Product::where('id',$id)->first();
       $image=str_replace($img, '', $product->bulk_image);
@@ -2202,11 +2216,11 @@ class ProductController extends Controller
       $result=array_filter($arr_img);
       $update_img=implode(',',$result);
       DB::table('products')->where('id',$id)->update(['bulk_image' => $update_img]);
-    
+
       // $res=explode(",", $item);
       // DB::update('update products set image6=? where id=?',[$image,$id]);
       // $msg="updated";
-      // return $msg;     
+      // return $msg;
     }
 
 
@@ -2553,13 +2567,13 @@ class ProductController extends Controller
 
 
 
-        date_default_timezone_set('Asia/Kolkata');  
+        date_default_timezone_set('Asia/Kolkata');
 
         $current_date=date("Y-m-d");
 
-        $current_time=date("H:i:s");
+        $current_time=str_replace(':', '-', date("H:i:s"));
 
-            //image sections  
+            //image sections
 
         $product_name=$request->get('product_model');
 
@@ -2569,9 +2583,9 @@ class ProductController extends Controller
 
         if(!empty($image1))
 
-        {  
+        {
 
-            $imageName1 = $productname."-silvergiftz-".$current_date."+".$current_time."-image1".'.'.$request->image1->extension();  
+            $imageName1 = $productname."-silvergiftz-".$current_date."-".$current_time."-image1".'.'.$request->image1->extension();  
 
             $image_resize = Image::make($image1->getRealPath());              
 
@@ -2601,7 +2615,7 @@ class ProductController extends Controller
 
             
 
-            $imageName2 = $productname."-silvergiftz-".$current_date."+".$current_time."-image2".'.'.$request->image2->extension(); 
+            $imageName2 = $productname."-silvergiftz-".$current_date."-".$current_time."-image2".'.'.$request->image2->extension(); 
 
            
 
@@ -2629,7 +2643,7 @@ class ProductController extends Controller
 
         {
 
-            $imageName3 = $productname."-silvergiftz-".$current_date."+".$current_time."-image3".'.'.$request->image3->extension();   
+            $imageName3 = $productname."-silvergiftz-".$current_date."-".$current_time."-image3".'.'.$request->image3->extension();   
 
          
 
@@ -2655,7 +2669,7 @@ class ProductController extends Controller
 
         {
 
-            $imageName4 = $productname."-silvergiftz-".$current_date."+".$current_time."-image4".'.'.$request->image4->extension();   
+            $imageName4 = $productname."-silvergiftz-".$current_date."-".$current_time."-image4".'.'.$request->image4->extension();   
 
          
 
@@ -2683,7 +2697,7 @@ class ProductController extends Controller
 
         {
 
-            $imageName5 = $productname."-silvergiftz-".$current_date."+".$current_time."-image5".'.'.$request->image5->extension();   
+            $imageName5 = $productname."-silvergiftz-".$current_date."-".$current_time."-image5".'.'.$request->image5->extension();   
 
          
 
@@ -2711,7 +2725,7 @@ class ProductController extends Controller
 
         {
 
-            $imageName6 = $productname."-silvergiftz-".$current_date."+".$current_time."-image6".'.'.$request->image6->extension();   
+            $imageName6 = $productname."-silvergiftz-".$current_date."-".$current_time."-image6".'.'.$request->image6->extension();   
 
          
 
@@ -2839,8 +2853,63 @@ class ProductController extends Controller
 
         $categories=Category::where('is_active','online')->get();
 
-        return view('backend.singleproducts.add-products',compact('categories','modelno','brands'));
+        $exhibition_events=\App\Models\ExhibitionEvent::all();
 
+        $tier_pricing = DB::table('tier_pricing')->orderBy('min_qty')->get();
+
+        return view('backend.singleproducts.add-products',compact('categories','modelno','brands','exhibition_events','tier_pricing'));
+
+    }
+
+    public function tierPricing()
+    {
+        $tierPricing = DB::table('tier_pricing')->orderBy('min_qty')->get();
+        return view('backend.product.tier_pricing', compact('tierPricing'));
+    }
+
+    public function addTierPricing(Request $request)
+    {
+        DB::table('tier_pricing')->insert([
+            'min_qty' => $request->min_qty,
+            'max_qty' => $request->max_qty ? $request->max_qty : null,
+            'percentage' => $request->percentage,
+            'created_at' => date('Y-m-d H:i:s'),
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        $msg="Successfully Added !";
+        return $msg;
+    }
+
+    public function findTierPricing(Request $request)
+    {
+        $items = DB::table('tier_pricing')->where('id', $request->id)->first();
+        return response()->json($items);
+    }
+
+    public function updateTierPricing(Request $request)
+    {
+        $id = (int)$request->id;
+        DB::table('tier_pricing')
+        ->where('id', $id)
+        ->update([
+            'min_qty' => $request->min_qty,
+            'max_qty' => $request->max_qty ? $request->max_qty : null,
+            'percentage' => $request->percentage,
+            'updated_at' => date('Y-m-d H:i:s')
+        ]);
+
+        $msg="Updated !";
+        return $msg;
+    }
+
+    public function deleteTierPricing(Request $request)
+    {
+        $id = (int)$request->id;
+        DB::table('tier_pricing')->where('id', $id)->delete();
+
+        $msg="Deleted !";
+        return $msg;
     }
 
 
@@ -2879,16 +2948,26 @@ class ProductController extends Controller
         {
             return;
         }
+
         $sort=0;
         foreach($request->tier_min as $i=>$min)
         {
             $min=(int)$min;
             $max=isset($request->tier_max[$i])?(int)$request->tier_max[$i]:0;
             $price=isset($request->tier_price[$i])?(float)$request->tier_price[$i]:0;
-            if($min<=0 || $price<=0)
+
+            // Validate minimum quantity
+            if($min<=0)
             {
                 continue;
             }
+
+            // Validate price - must be non-negative
+            if($price < 0)
+            {
+                $price = 0;
+            }
+
             DB::table('product_tier_prices')->insert(array(
                 'product_id'=>$product_id,
                 'min_qty'=>$min,
@@ -2999,6 +3078,8 @@ class ProductController extends Controller
 
        $product->price=$request->price;
 
+       $product->base_price=$request->base_price;
+
        $product->sprice=$request->sprice;
 
        $product->date_sale_price_start=$request->date_sale_price_start;
@@ -3063,6 +3144,32 @@ class ProductController extends Controller
        $product->preferences=!empty($preference_names)?implode(',',$preference_names):null;
 
        $product->ai_tags=$request->ai_tags;
+
+       // branding options
+       if(!empty($request->branding_options))
+       {
+          $branding_options = is_array($request->branding_options) ? implode(',', $request->branding_options) : $request->branding_options;
+          $product->branding_options=$branding_options;
+       }
+
+       // exhibition events
+       if(!empty($request->exhibition_events))
+       {
+          $exhibition_events = is_array($request->exhibition_events) ? implode(',', $request->exhibition_events) : $request->exhibition_events;
+          $product->exhibition_events=$exhibition_events;
+       }
+
+       // product color
+       $product_color=$request->product_colors;
+       if(!empty($product_color))
+       {
+          $color=json_encode($product_color);
+          $product->colors=$color;
+       }
+       else
+       {
+          $product->colors=json_encode([]);
+       }
 
        $product->description=$request->description;
 
@@ -3293,16 +3400,17 @@ class ProductController extends Controller
 
         // Bulk Images
         $current_date=date("Y-m-d");
-        $current_time=date("H:i:s");
+        $current_time=str_replace(':', '-', date("H:i:s"));
         $bulk_image=$request->bulk_image;
         if(!empty($bulk_image))
         {
+          $bulk_imageName = array();
           foreach($bulk_image as $img)
           {
-            $bulkimageName= $productname."-silvergiftz-silverpixelz-".$current_date."+".$current_time.rand().'.'.$img->getClientOriginalExtension();
-            $image_resize = Image::make($img->getRealPath());              
+            $bulkimageName= $productname."-silvergiftz-silverpixelz-".$current_date."-".$current_time.rand().'.'.$img->getClientOriginalExtension();
+            $image_resize = Image::make($img->getRealPath());
             // $image_resize->resize(800,800);
-            $image_resize->save(public_path('upload/product/' .$bulkimageName));
+            $image_resize->save(public_path('upload/product/thumbnail/' .$bulkimageName));
             $bulk_imageName[]=$bulkimageName;
           }  
           $bulkimage=implode(',', $bulk_imageName);
@@ -3313,14 +3421,18 @@ class ProductController extends Controller
 
         if(!empty($request->branding_options))
         {
-           $product->branding_options=implode(',', $request->branding_options);
+           $product->branding_options=$request->branding_options;
         }
 
-        $product_color=$request->product_color;
+        $product_color=$request->product_colors;
         if(!empty($product_color))
         {
-           $color=implode(',', $product_color);
+           $color=json_encode($product_color);
            $product->colors=$color;
+        }
+        else
+        {
+           $product->colors=json_encode([]);
         }
 
 

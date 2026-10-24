@@ -85,6 +85,8 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                     <th>Preference Name</th>
 
+                                                    <th>Image</th>
+
                                                     <th style="min-width: 80px;">Action</th>
 
                                                 </tr>
@@ -104,6 +106,14 @@ window.location.href = "{{url('/admin')}}";</script>
                                                    
 
                                                     <td>{{$items->name}}</td>
+
+                                                    <td>
+                                                        @if($items->image)
+                                                            <img src="{{asset('uploads/preferences/'.$items->image)}}" width="50" height="50" alt="">
+                                                        @else
+                                                            -
+                                                        @endif
+                                                    </td>
 
                                                      <td>
 
@@ -128,7 +138,6 @@ window.location.href = "{{url('/admin')}}";</script>
                                             </tbody>
 
                                         </table>
-                                           {!! $items_array->appends(Request::except('page'))->render() !!}
                                     </div>
 
                         		</div>
@@ -160,25 +169,35 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                 </div> 
 
-                                                <div class="modal-body"> 
+                                                <div class="modal-body">
 
-                                                    <div class="row"> 
+                                                    <div class="row">
 
-                                                        <div class="col-md-12"> 
+                                                        <div class="col-md-12">
 
-                                                            <div class="form-group"> 
+                                                            <div class="form-group">
 
-                                                                <label for="field-1"  class="control-label">Preference Name</label> 
+                                                                <label for="field-1"  class="control-label">Preference Name</label>
 
-                                                                <input type="text" id="name" class="form-control" id="field-1" placeholder="e.g : Eco Friendly"> 
+                                                                <input type="text" id="name" class="form-control" id="field-1" placeholder="e.g : Eco Friendly">
 
-                                                            </div> 
+                                                            </div>
 
-                                                        </div> 
+                                                        </div>
 
-                                                    </div> 
+                                                    </div>
 
-                                                 
+
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label for="field-2"  class="control-label">Image</label>
+                                                                <input type="file" id="image" class="form-control" accept="image/*">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
                                                 </div> 
 
                                                 <div class="modal-footer"> 
@@ -211,27 +230,39 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                 </div> 
 
-                                                <div class="modal-body"> 
+                                                <div class="modal-body">
 
-                                                    <div class="row"> 
+                                                    <div class="row">
 
                                                         <input type="hidden" name="editid" id="editid">
 
-                                                        <div class="col-md-12"> 
+                                                        <div class="col-md-12">
 
-                                                            <div class="form-group"> 
+                                                            <div class="form-group">
 
-                                                                <label for="field-1"  class="control-label">Preference Name</label> 
+                                                                <label for="field-1"  class="control-label">Preference Name</label>
 
-                                                                <input type="text" id="updatename" class="form-control" id="field-1" placeholder=""> 
+                                                                <input type="text" id="updatename" class="form-control" id="field-1" placeholder="">
 
-                                                            </div> 
+                                                            </div>
 
-                                                        </div> 
+                                                        </div>
 
-                                                    </div> 
+                                                    </div>
 
-                                                 
+
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="form-group">
+                                                                <label for="field-2"  class="control-label">Image</label>
+                                                                <input type="file" id="updateimage" class="form-control" accept="image/*">
+                                                                <input type="hidden" id="existingimage">
+                                                                <div id="imagepreview" style="margin-top: 10px;"></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
                                                 </div> 
 
                                                 <div class="modal-footer"> 
@@ -264,15 +295,24 @@ window.location.href = "{{url('/admin')}}";</script>
 $('#saveshipping').on('click',function(e) {
 
         var name=$("#name").val();
+        var image=$("#image")[0].files[0];
+
+        var formData = new FormData();
+        formData.append("_token", "{{ csrf_token() }}");
+        formData.append("name", name);
+        if(image){
+            formData.append("image", image);
+        }
 
         $.ajax({
 
             url:"{{ route('addpreference') }}",
                 method:"POST",
+                data: formData,
+                processData: false,
+                contentType: false,
 
-                data: {"_token": "{{ csrf_token() }}","name":name},
-
-                success:function (data) 
+                success:function (data)
 
                 {
 
@@ -303,7 +343,7 @@ $(document).on('click', '.editbutton', function() {
 
                 data: {"_token": "{{ csrf_token() }}","id": id},
 
-                success:function (data) 
+                success:function (data)
 
                 {
 
@@ -312,7 +352,14 @@ $(document).on('click', '.editbutton', function() {
                 $("#updatename").val(data['name']);
 
                 $('#editid').val(data['id']);
-               
+                $('#existingimage').val(data['image']);
+
+                if(data['image']){
+                    $('#imagepreview').html('<img src="{{asset('uploads/preferences/')}}/' + data['image'] + '" width="100" height="100" alt="">');
+                } else {
+                    $('#imagepreview').html('');
+                }
+
                 }
 
             })
@@ -326,22 +373,32 @@ $(document).on('click', '.updateshipping', function() {
     var name =$("#updatename").val();
 
     var id=$('#editid').val();
+    var image=$("#updateimage")[0].files[0];
+
+    var formData = new FormData();
+    formData.append("_token", "{{ csrf_token() }}");
+    formData.append("id", id);
+    formData.append("name", name);
+    if(image){
+        formData.append("image", image);
+    }
 
         $.ajax({
 
             url:"{{ route('updatepreference') }}",
                 method:"POST",
+                data: formData,
+                processData: false,
+                contentType: false,
 
-                data: {"_token": "{{ csrf_token() }}","id": id,"name": name},
-
-                success:function (data) 
+                success:function (data)
 
                 {
 
                 console.log(data);
 
                 swal("success",'Updated Successfully !');
-               
+
                 $('#edit-close-modal').modal('hide');
 
                 location.reload();

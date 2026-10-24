@@ -1,0 +1,609 @@
+/* Annual Corporate Membership Page Styles */
+.membership-hero {
+  background: #faf8f5;
+  padding: 60px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.hero-left {
+  position: relative;
+  z-index: 2;
+}
+
+.hero-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #c78113;
+  margin-bottom: 16px;
+  display: block;
+}
+
+.hero-left h1 {
+  font-size: 48px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 16px;
+  line-height: 1.1;
+}
+
+.hero-subheading {
+  font-size: 24px;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 20px;
+}
+
+.hero-description {
+  font-size: 16px;
+  color: #687180;
+  margin: 0 0 32px;
+  line-height: 1.6;
+  max-width: 500px;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+.btn-primary {
+  background: #111;
+  border: none;
+  color: white;
+  padding: 14px 28px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background: #333;
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: white;
+  border: 2px solid #111;
+  color: #111;
+  padding: 14px 28px;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #f5f5f5;
+}
+
+.hero-stats {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stat-number {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #687180;
+}
+
+.stat-divider {
+  width: 1px;
+  height: 40px;
+  background: #e2e5e8;
+}
+
+.hero-right {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-image {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.hero-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.hero-vertical-text {
+  position: absolute;
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-90deg);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111;
+  letter-spacing: 4px;
+  opacity: 0.3;
+}
+
+/* Membership Plans */
+.membership-plans {
+  padding: 80px 0;
+  background: white;
+}
+
+.plans-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.plans-eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #c78113;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.plans-header h2 {
+  font-size: 36px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 12px;
+}
+
+.plans-subtitle {
+  font-size: 16px;
+  color: #687180;
+  margin: 0;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.plan-card {
+  background: white;
+  border: 1px solid #e2e5e8;
+  border-radius: 12px;
+  padding: 32px 24px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s;
+}
+
+.plan-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.plan-card.featured {
+  border: 2px solid #c78113;
+  background: linear-gradient(180deg, #fff7e9 0%, white 100%);
+}
+
+.featured-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #c78113;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.plan-icon {
+  width: 48px;
+  height: 48px;
+  background: #f8f9fa;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: #111;
+  margin-bottom: 20px;
+}
+
+.plan-card.gold .plan-icon {
+  background: #fff7e9;
+  color: #c78113;
+}
+
+.plan-card h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 4px;
+}
+
+.plan-audience {
+  font-size: 13px;
+  color: #687180;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.plan-description {
+  font-size: 14px;
+  color: #4e5661;
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.plan-details {
+  flex: 1;
+  margin-bottom: 24px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f1f3;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: #687180;
+}
+
+.detail-value {
+  font-size: 13px;
+  color: #111;
+  font-weight: 600;
+}
+
+.detail-value.savings {
+  color: #22c55e;
+}
+
+.detail-value i {
+  color: #22c55e;
+  font-size: 16px;
+}
+
+.plan-price {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #f0f1f3;
+}
+
+.plan-price .price {
+  font-size: 32px;
+  font-weight: 700;
+  color: #111;
+}
+
+.plan-price .period {
+  font-size: 14px;
+  color: #687180;
+}
+
+.btn-select-plan {
+  width: 100%;
+  background: #111;
+  border: none;
+  color: white;
+  padding: 14px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-select-plan:hover {
+  background: #333;
+}
+
+.btn-select-plan.btn-gold {
+  background: #c78113;
+}
+
+.btn-select-plan.btn-gold:hover {
+  background: #a86b0e;
+}
+
+/* Benefits Strip */
+.benefits-strip {
+  background: #f8f9fa;
+  padding: 40px 0;
+}
+
+.benefits-grid {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #4e5661;
+  font-weight: 500;
+}
+
+.benefit-item i {
+  font-size: 20px;
+  color: #111;
+}
+
+.benefit-divider {
+  width: 1px;
+  height: 30px;
+  background: #e2e5e8;
+}
+
+/* Info Cards */
+.info-cards {
+  padding: 60px 0;
+  background: white;
+}
+
+.info-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.info-card {
+  background: #f8f9fa;
+  border: 1px solid #e2e5e8;
+  border-radius: 12px;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.card-icon-wrapper {
+  flex-shrink: 0;
+}
+
+.card-icon {
+  width: 64px;
+  height: 64px;
+  background: white;
+  border: 1px solid #e2e5e8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  color: #111;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-content h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 8px;
+}
+
+.card-content p {
+  font-size: 14px;
+  color: #687180;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.card-toggle {
+  flex-shrink: 0;
+}
+
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 28px;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.3s;
+  border-radius: 28px;
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.3s;
+  border-radius: 50%;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background-color: #22c55e;
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+  transform: translateX(24px);
+}
+
+.card-calendar-icon {
+  flex-shrink: 0;
+  font-size: 32px;
+  color: #111;
+}
+
+/* Bottom CTA */
+.bottom-cta {
+  padding: 60px 0;
+  background: white;
+  text-align: center;
+}
+
+.btn-get-started {
+  background: #111;
+  border: none;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s;
+  margin-bottom: 16px;
+}
+
+.btn-get-started:hover {
+  background: #333;
+  transform: translateY(-2px);
+}
+
+.cta-subtext {
+  font-size: 14px;
+  color: #687180;
+  margin: 0;
+}
+
+/* Responsive Styles */
+@media (max-width: 1199px) {
+  .hero-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  .hero-right {
+    order: -1;
+  }
+
+  .plans-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .info-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .benefits-grid {
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+
+  .benefit-divider {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .membership-hero {
+    padding: 40px 0;
+  }
+
+  .hero-left h1 {
+    font-size: 32px;
+  }
+
+  .hero-subheading {
+    font-size: 20px;
+  }
+
+  .hero-ctas {
+    flex-direction: column;
+  }
+
+  .hero-stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .stat-divider {
+    width: 40px;
+    height: 1px;
+  }
+
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-card {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .card-toggle {
+    margin-top: 16px;
+  }
+
+  .card-calendar-icon {
+    margin-top: 16px;
+  }
+}

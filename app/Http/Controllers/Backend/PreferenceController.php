@@ -23,6 +23,14 @@ class PreferenceController extends Controller
 
        $item=new Preference;
        $item->name=$request->name;
+
+       if($request->hasFile('image')){
+           $image = $request->file('image');
+           $filename = time() . '.' . $image->getClientOriginalExtension();
+           $image->move(public_path('uploads/preferences'), $filename);
+           $item->image = $filename;
+       }
+
        $item->save();
 
        $msg="Successfully Added !";
@@ -35,7 +43,7 @@ class PreferenceController extends Controller
 
     	$items=Preference::where('id',$request->id)->first();
 
-       return $items;
+       return response()->json($items);
 
     }
 
@@ -44,9 +52,19 @@ class PreferenceController extends Controller
     {
 
         $id=(int)$request->id;
+
+        $data = ['name' => $request->name];
+
+        if($request->hasFile('image')){
+           $image = $request->file('image');
+           $filename = time() . '.' . $image->getClientOriginalExtension();
+           $image->move(public_path('uploads/preferences'), $filename);
+           $data['image'] = $filename;
+        }
+
         DB::table('preferences')
         ->where('id',$id)
-        ->update(['name' => $request->name]);
+        ->update($data);
 
         $msg="Updated !";
        return $msg;

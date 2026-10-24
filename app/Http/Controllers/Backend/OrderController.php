@@ -28,6 +28,19 @@ use Carbon\carbon;
 class OrderController extends Controller
 {
 
+    public function index(Request $request)
+    {
+        $items_array=Cartorder::orderBy('created_at','desc')->get()->unique('orderid');
+        return view('backend.orders.list',compact('items_array'));
+    }
+
+    public function orderWorkflow($id)
+    {
+        // Order Workflow page
+        $order = Cartorder::where('id', $id)->first();
+        return view('backend.orders.order-workflow', compact('order'));
+    }
+
     public function abandoned_order(Request $request)
     {
       $items_array=Tmporder::whereNull('ordercomplete')->orderbyDesc('id')->get();
