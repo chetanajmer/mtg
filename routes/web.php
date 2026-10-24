@@ -475,7 +475,7 @@ Route::any('delete_flipbook/{id}', [FlipbookController::class, 'delete_flipbook'
 // Reviews
 Route::any('reviews', [ReviewController::class, 'index']);
 
-// Order Tracking
+// Order Tracking (Backend)
 Route::any('order-tracking', [OrderTrackingController::class, 'index'])->name('ordertracking.index');
 
 
@@ -550,7 +550,7 @@ Route::post('/collections', [UsersController::class, 'createCollection']);
 Route::any('/cart', function () {
     return view('web_frontend.cart');
 });
-Route::any('/order-tracking', function () {
+Route::any('/track-order', function () {
     return view('web_frontend.order-tracking');
 });
 Route::any('/annual-corporate-membership', function () {

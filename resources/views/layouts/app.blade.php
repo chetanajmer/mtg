@@ -342,10 +342,10 @@ figure figcaption {
                             </li>
 
                             <li>
-                                <a href="{{url('order-tracking')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Order Tracking</span></a>
+                                <a href="{{route('ordertracking.index')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Order Tracking</span></a>
                             </li>
 
-
+                            
                          
                              <!-- <li>
                                 <a href="{{url('listparentcategory')}}" class="waves-effect"><i class="ti-menu-alt"></i><span>Parent Categories</span></a>  

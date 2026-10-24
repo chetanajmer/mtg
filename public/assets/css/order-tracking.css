@@ -1,4 +1,4 @@
-/* ========== Order Tracking Page Styles - Scoped to content area ========== */
+/* ========== Order Tracking Page Styles - Scoped for Backend Layout ========== */
 
 /* Order summary */
 .order-card { padding: 20px; margin-bottom: 20px; }
@@ -7,7 +7,7 @@
 .bottle { display: block; width: 24px; height: 52px; border-radius: 6px 6px 4px 4px; background: linear-gradient(90deg, #111, #3a3a3a 50%, #111); position: relative; }
 .bottle::before { content: ""; position: absolute; top: -7px; left: 7px; width: 10px; height: 8px; background: #111; border-radius: 2px; }
 .order-info h2 { font-size: 16px; margin-bottom: 8px; }
-.meta { color: #6b7280; display: flex; gap: 14px; }
+.meta { color: #6b7280; display: flex; gap: 14px; flex-wrap: wrap; }
 .meta span + span::before { content: "|"; margin-right: 14px; color: #c3c8d0; }
 .meta b { font-weight: 500; color: #1f2937; }
 .meta span:first-child b { color: #6b7280; }
@@ -26,29 +26,29 @@
 .steps-card { margin-bottom: 20px; }
 .steps-card h3 { padding: 14px 16px 10px; font-size: 16px; margin-top: 0; border-bottom: 1px solid #e5e7eb; }
 .steps { padding: 0; list-style: none; }
-.steps li { display: flex; align-items: center; gap: 12px; padding: 12px 14px 12px 12px; border-top: 1px solid #e5e7eb; }
+.steps li { display: flex; align-items: flex-start; gap: 12px; padding: 12px 14px 12px 12px; border-top: 1px solid #e5e7eb; }
 .steps li.current { background: #e8f0fe; border-left: 3px solid #2563eb; }
 .steps li > div { flex: 1; min-width: 0; }
-.steps strong { display: block; font-size: 12.5px; font-weight: 600; }
+.steps strong { display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 2px; }
 .steps small { display: block; color: #6b7280; font-size: 11px; margin-top: 2px; line-height: 1.35; }
 .num { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; background: #7b8794; color: #fff; display: grid; place-items: center; font-size: 13px; }
 .num.green { background: #16a34a; }
 .num.blue { background: #2563eb; }
-.tag { font-style: normal; font-size: 11px; padding: 4px 10px; border-radius: 4px; white-space: nowrap; }
+.tag { font-style: normal; font-size: 11px; padding: 4px 10px; border-radius: 4px; white-space: nowrap; margin-left: auto; }
 .tag-green { background: #e3f6e8; color: #16a34a; }
 .tag-orange { background: #fdf0e1; color: #f08a24; }
 .tag-grey { background: #f1f3f5; color: #6b7280; }
-.chev { font-size: 18px; color: #4b5563; }
+.chev { font-size: 18px; color: #4b5563; margin-left: 8px; }
 
 /* Detail panel */
 .detail { padding: 20px; }
-.detail-head { display: flex; justify-content: space-between; align-items: flex-start; }
-.detail h3 { font-size: 16px; }
+.detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+.detail h3 { font-size: 16px; margin-bottom: 5px; }
 .detail-head p { color: #6b7280; margin-top: 6px; }
 .status { display: flex; align-items: center; gap: 12px; font-size: 12px; }
 .status select { width: 150px; padding: 8px 10px; border: 1px solid #e5e7eb; border-radius: 6px; color: #f08a24; background: #fff; }
 .detail h4 { font-size: 12.5px; margin-bottom: 8px; }
-.mockups { display: flex; gap: 10px; }
+.mockups { display: flex; gap: 10px; flex-wrap: wrap; }
 .mock { position: relative; width: 122px; height: 108px; border-radius: 6px; display: grid; place-items: center; background: linear-gradient(#2b2b2b, #0e0e0e); color: #d9b46a; }
 .mock-2 { width: 130px; background: linear-gradient(#3a3a3a, #111); }
 .mock small { position: absolute; bottom: 20px; font-size: 7px; }
@@ -61,17 +61,20 @@
 /* Revisions */
 .section-title { margin-top: 20px; font-size: 14px !important; }
 .revisions { border: 1px solid #e5e7eb; border-radius: 6px; padding: 4px 18px 4px 30px; position: relative; list-style: none; }
-.revisions li { display: flex; align-items: center; gap: 10px; padding: 10px 0; position: relative; }
+.revisions li { display: flex; align-items: center; gap: 10px; padding: 10px 0; position: relative; flex-wrap: wrap; }
 .revisions li::before { content: ""; position: absolute; left: -17px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: #9aa3b0; }
 .revisions li.rev-current::before { background: #2563eb; box-shadow: 0 0 0 3px #e8f0fe; }
-.rev-info { flex: 1; }
-.rev-info strong { display: block; font-size: 12.5px; }
+.rev-info { flex: 1; min-width: 200px; }
+.rev-info strong { display: block; font-size: 12.5px; margin-bottom: 2px; }
 .rev-info small { color: #6b7280; font-size: 11px; }
+
+/* Revisions buttons */
+.revisions .btn { margin-right: 5px; }
 
 /* Approval + send */
 .bottom { margin-top: 18px; padding-top: 14px; border-top: 1px solid #e5e7eb; }
 .bottom h4:not(:first-child) { margin-top: 18px; }
-.radios { display: flex; gap: 8px; }
+.radios { display: flex; gap: 8px; flex-wrap: wrap; }
 .radio { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid #e5e7eb; border-radius: 6px; color: #6b7280; }
 .radio.checked { border-color: #2563eb; color: #1f2937; }
 .radio input { accent-color: #2563eb; }
@@ -84,7 +87,7 @@
 .footer-actions { display: flex; justify-content: flex-end; margin-top: 18px; }
 
 /* Pills */
-.pill { min-width: 128px; text-align: center; padding: 8px 10px; border-radius: 6px; font-size: 12px; }
+.pill { min-width: 128px; text-align: center; padding: 8px 10px; border-radius: 6px; font-size: 12px; margin-left: 5px; }
 .pill-orange { background: #fdf0e1; color: #f08a24; }
 .pill-red { background: #fde9e4; color: #e5533d; }
 .pill-grey { background: #f1f3f5; color: #6b7280; }
@@ -97,4 +100,6 @@
 @media (max-width: 760px) {
   .meta, .detail-head { flex-direction: column; align-items: flex-start; gap: 8px; }
   .revisions li { flex-wrap: wrap; }
+  .steps li { flex-direction: column; align-items: flex-start; }
+  .tag { margin-left: 0; margin-top: 5px; }
 }
