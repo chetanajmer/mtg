@@ -2595,8 +2595,3 @@ $('#radio2').on('change',function(e)
 
 
 @endsection
-
-
-
-
-

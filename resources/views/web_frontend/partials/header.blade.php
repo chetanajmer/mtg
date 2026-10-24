@@ -43,8 +43,8 @@
           <div class="secondary-left">
             <a href="#">About us</a>
             <a href="#">Branding</a>
-            <a href="#">Annual Contract</a>
-            <a href="#">Track your Order</a>
+            <a href="/annual-corporate-membership" class="{{ request()->is('annual-corporate-membership') ? 'active' : '' }}">Annual Contract</a>
+            <a href="/order-tracking" class="{{ request()->is('order-tracking') ? 'active' : '' }}">Track your Order</a>
           </div>
           <div class="secondary-right">
             <a href="#">For Businesses</a>

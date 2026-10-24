@@ -31,7 +31,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                         <!-- Page-Title -->
 
-                        <div class="row">
+                        <div class="row">   
 
                             <div class="col-sm-12">
 

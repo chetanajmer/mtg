@@ -334,8 +334,18 @@ figure figcaption {
  -->
                         
                             <li>
-                                <a href="{{url('listbrand')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Brands</span></a>  
+                                <a href="{{url('listbrand')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Supplier</span></a>  
                             </li>
+
+                            <li>
+                                <a href="{{route('newbrand.index')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Brand</span></a>
+                            </li>
+
+                            <li>
+                                <a href="{{url('order-tracking')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Order Tracking</span></a>
+                            </li>
+
+
                          
                              <!-- <li>
                                 <a href="{{url('listparentcategory')}}" class="waves-effect"><i class="ti-menu-alt"></i><span>Parent Categories</span></a>  
@@ -396,13 +406,12 @@ figure figcaption {
                                 <a href="{{url('exhibition-events')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Exhibition Events</span></a>
 
                             </li> -->
-                           
                             <li>
                                 <a href="{{url('orders')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Store Enquiries</span></a>
                               
                             </li>
-                          
 
+                          
                             <li>
                                 <a href="{{url('store-user')}}" class="waves-effect">
                                   <i class="ti-user"></i><span>Store Users</span>
@@ -483,7 +492,7 @@ figure figcaption {
                                 <a href="{{url('flipbook')}}" class="waves-effect"><i class="ti-book"></i><span>Flipbook</span></a>
                             </li>
 
-                           
+
                             <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect"><i class="ti-settings"></i><span> Setup & Config </span> <span class="menu-arrow"></span></a>
                                 <ul class="list-unstyled">

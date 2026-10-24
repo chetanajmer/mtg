@@ -2948,29 +2948,31 @@ class ProductController extends Controller
         {
             return;
         }
-        
-        // Get Cost Price to subtract from displayed percentage
-        $costPrice = isset($request->price) ? (float)$request->price : 0;
-        
+
         $sort=0;
         foreach($request->tier_min as $i=>$min)
         {
             $min=(int)$min;
             $max=isset($request->tier_max[$i])?(int)$request->tier_max[$i]:0;
-            $displayedPercentage=isset($request->tier_percentage[$i])?(float)$request->tier_percentage[$i]:0;
-            
-            // Calculate original percentage (subtract Cost Price from displayed value)
-            $originalPercentage = $displayedPercentage - $costPrice;
-            
+            $price=isset($request->tier_price[$i])?(float)$request->tier_price[$i]:0;
+
+            // Validate minimum quantity
             if($min<=0)
             {
                 continue;
             }
+
+            // Validate price - must be non-negative
+            if($price < 0)
+            {
+                $price = 0;
+            }
+
             DB::table('product_tier_prices')->insert(array(
                 'product_id'=>$product_id,
                 'min_qty'=>$min,
                 'max_qty'=>$max>0?$max:null,
-                'price'=>$originalPercentage,
+                'price'=>$price,
                 'sort_order'=>$sort++,
                 'created_at'=>date('Y-m-d H:i:s'),
                 'updated_at'=>date('Y-m-d H:i:s')

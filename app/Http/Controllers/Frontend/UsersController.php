@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\Storeuser;
 use App\Models\Cartorder;
 use App\Models\General_setting;
+use App\Models\Collection;
+use App\Models\Product;
 use DB;
 use Illuminate\Support\Facades\Redirect;
 use Session;
@@ -123,26 +125,55 @@ class UsersController extends Controller
 
     	$userid=session()->get('userid');
     	$roles=session()->get('role');
-        $footerlevel1=Footerlevel1::findorFail(1);	
+        $footerlevel1=Footerlevel1::findorFail(1);
         $contact=Contact::where('id','1')->first();
       if(!empty($roles))
       {
         echo "You are Logged in as Administrator, please logout and login as store User";
       }
-      else 
-      {  
+      else
+      {
 
             if(!empty($userid))
-    	      {	
+    	      {
               $items_array=Cartorder::orderbyDesc('id')->where('userid',$userid)->get()->unique('orderid');
             	$userdetails=DB::table('storeusers')->select('*')->where('id', $userid)->first();
         	    return view('web_frontend.myaccount',compact('userdetails','items_array','footerlevel1','contact'));
             }
             else
             {
-        	    return view('frontend.login',compact('footerlevel1','contact'));	
+        	    return view('frontend.login',compact('footerlevel1','contact'));
             }
-      }      	
+      }
+    }
+
+    public function corporatePortal(Request $request)
+    {
+        $userid = session()->get('userid');
+
+        // Get total orders count
+        $totalOrders = Cartorder::count();
+
+        // Get total spend (YTD) - from cart orders (using ordertotal column)
+        $totalSpend = Cartorder::sum('ordertotal') ?? 0;
+
+        // Get recent orders
+        $recentOrders = Cartorder::orderbyDesc('id')->limit(5)->get();
+
+        // Get collections
+        $collections = Collection::withCount('products')->limit(5)->get();
+
+        return view('web_frontend.myaccount', compact('totalOrders', 'totalSpend', 'recentOrders', 'collections'));
+    }
+
+    public function createCollection(Request $request)
+    {
+        $collection = new Collection();
+        $collection->name = $request->name;
+        $collection->user_id = session()->get('userid');
+        $collection->save();
+
+        return response()->json(['success' => true, 'collection' => $collection]);
     }
 
 

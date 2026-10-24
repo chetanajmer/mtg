@@ -1077,11 +1077,11 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                     <div class="row tier-row" style="margin-bottom:10px;">
 
-                                                        <div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control" value="{{$tier->min_qty}}" placeholder="e.g : 50"></div>
+                                                        <div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control tier-input" value="{{$tier->min_qty}}" placeholder="e.g : 50"></div>
 
-                                                        <div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control" value="{{$tier->max_qty}}" placeholder="Unlimited"></div>
+                                                        <div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control tier-input" value="{{$tier->max_qty}}" placeholder="Unlimited"></div>
 
-                                                        <div class="col-md-3"><input type="number" step="0.01" min="0" name="tier_price[]" class="form-control" value="{{$tier->price}}" placeholder="e.g : 45"></div>
+                                                        <div class="col-md-3"><input type="number" step="0.01" min="0" name="tier_price[]" class="form-control tier-input" value="{{max(0, $tier->price)}}" placeholder="e.g : 45"></div>
 
                                                         <div class="col-md-3 tier-savings" style="padding-top:8px;">-</div>
 
@@ -3160,7 +3160,7 @@ function delete_variation_image($value)
         row.next('.spec-row').after(row);
     });
 
-    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50"></div><div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited"></div><div class="col-md-3"><input type="number" step="0.01" min="0" name="tier_price[]" class="form-control" placeholder="e.g : 45"></div><div class="col-md-3 tier-savings" style="padding-top:8px;">-</div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
+    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control tier-input" placeholder="e.g : 50"></div><div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control tier-input" placeholder="Unlimited"></div><div class="col-md-3"><input type="number" step="0.01" min="0" name="tier_price[]" class="form-control tier-input" placeholder="e.g : 45"></div><div class="col-md-3 tier-savings" style="padding-top:8px;">-</div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
 
     function tierBasePrice(){
         var p = parseFloat($('input[name="price"]').val());
@@ -3183,14 +3183,24 @@ function delete_variation_image($value)
     function toggleTierBody(){
         if($('input[name="tier_pricing_enabled"]').is(':checked')){
             $('#tier_pricing_body').show();
+            // Enable all tier inputs and add required
+            $('.tier-input').prop('disabled', false).prop('required', true);
             if($('#tier_rows .tier-row').length === 0){ $('#tier_rows').append(tierRowHtml); }
         } else {
             $('#tier_pricing_body').hide();
+            // Disable all tier inputs and remove required attribute
+            $('.tier-input').prop('disabled', true).prop('required', false);
         }
     }
 
     $('#add_tier_row').on('click', function(){
         $('#tier_rows').append(tierRowHtml);
+        // Ensure new inputs follow the current tier pricing state
+        if($('input[name="tier_pricing_enabled"]').is(':checked')){
+            $('#tier_rows .tier-row:last .tier-input').prop('required', true);
+        } else {
+            $('#tier_rows .tier-row:last .tier-input').prop('disabled', true).prop('required', false);
+        }
         recalcTierSavings();
     });
 
@@ -3199,12 +3209,26 @@ function delete_variation_image($value)
     });
 
     $(document).on('input change', '.tier-row input, input[name="price"]', function(){
+        // Prevent negative values in tier_price inputs
+        if($(this).attr('name') === 'tier_price[]'){
+            var val = parseFloat($(this).val());
+            if(val < 0){
+                $(this).val(0);
+            }
+        }
         recalcTierSavings();
     });
 
     $(document).on('change', 'input[name="tier_pricing_enabled"]', function(){
         toggleTierBody();
     });
+
+    // Initialize tier inputs based on initial state
+    if($('input[name="tier_pricing_enabled"]').is(':checked')){
+        $('.tier-input').prop('required', true);
+    } else {
+        $('.tier-input').prop('disabled', true).prop('required', false);
+    }
 
     toggleTierBody();
     recalcTierSavings();

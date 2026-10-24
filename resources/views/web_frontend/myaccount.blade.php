@@ -11,6 +11,10 @@
   $items_array = $items_array ?? [];
   $footerlevel1 = $footerlevel1 ?? null;
   $contact = $contact ?? null;
+  $totalOrders = $totalOrders ?? 0;
+  $totalSpend = $totalSpend ?? 0;
+  $recentOrders = $recentOrders ?? collect();
+  $collections = $collections ?? collect();
 @endphp
 
 <div class="dashboard-wrapper">
@@ -33,11 +37,11 @@
 <main class="content">
   <section class="hero"><img src="{{ asset('web_frontend/assets/images/Thoughtful-Gifts.png') }}" alt=""><div><h1>Welcome back, Rohan!</h1><p>Manage your corporate gifting, all in one place.</p></div></section>
   <section class="stats">
-    <article class="stat"><div class="stat-icon"><i class="bi bi-box-seam"></i></div><div><small>Total Orders</small><strong>12</strong><b class="up">↑ 20%</b><small>vs last 3 months</small></div></article>
+    <article class="stat"><div class="stat-icon"><i class="bi bi-box-seam"></i></div><div><small>Total Orders</small><strong>{{ $totalOrders }}</strong><b class="up">↑ 20%</b><small>vs last 3 months</small></div></article>
     <article class="stat"><div class="stat-icon"><i class="bi bi-gift"></i></div><div><small>Items Delivered</small><strong>2,850</strong><b class="up">↑ 35%</b><small>vs last 3 months</small></div></article>
     <article class="stat"><div class="stat-icon"><i class="bi bi-clock"></i></div><div><small>Pending Approvals</small><strong>3</strong><b class="down">↓ 2</b><small>requires your action</small></div></article>
     <article class="stat"><div class="stat-icon"><i class="bi bi-people"></i></div><div><small>Total Recipients</small><strong>1,240</strong><b class="up">↑ 18%</b><small>active employees</small></div></article>
-    <article class="stat"><div class="stat-icon"><i class="bi bi-file-earmark-text"></i></div><div><small>Total Spend (YTD)</small><strong>AED 48,750</strong><b class="up">↑ 12%</b><small>vs last year</small></div></article>
+    <article class="stat"><div class="stat-icon"><i class="bi bi-file-earmark-text"></i></div><div><small>Total Spend (YTD)</small><strong>AED {{ number_format($totalSpend, 2) }}</strong><b class="up">↑ 12%</b><small>vs last year</small></div></article>
   </section>
   <section class="quick"><h2>Quick Actions</h2><div class="quick-grid">
     <button data-toast="Place a New Order selected."><i class="bi bi-gift"></i><span>Place a New Order</span><i class="bi bi-arrow-right"></i></button>
@@ -49,9 +53,24 @@
   </div></section>
   <section class="middle">
     <article class="panel orders" id="orders"><div class="panel-head"><div><i class="bi bi-pencil-square"></i><span><strong>Recent Orders</strong></span></div><button class="outline" data-toast="Showing all orders.">View All <i class="bi bi-arrow-right"></i></button></div>
-      <div class="order-row"><div class="product-thumb thumb-one"></div><div class="order-info"><strong>#MTG-2025-00125</strong><small>Employee Welcome Kit</small><small>500 items • 25 Sep 2025</small></div><span class="pill green-bg">In Production</span><button class="outline track" data-toast="Tracking #MTG-2025-00125">Track →</button></div>
-      <div class="order-row"><div class="product-thumb thumb-two"></div><div class="order-info"><strong>#MTG-2025-00110</strong><small>Diwali Hampers</small><small>300 items • 12 Sep 2025</small></div><span class="pill green-bg">Delivered</span><button class="outline track" data-toast="Tracking #MTG-2025-00110">Track →</button></div>
-      <div class="order-row"><div class="product-thumb thumb-three"></div><div class="order-info"><strong>#MTG-2025-00098</strong><small>New Joiner Kit</small><small>150 items • 05 Sep 2025</small></div><span class="pill green-bg">Delivered</span><button class="outline track" data-toast="Tracking #MTG-2025-00098">Track →</button></div>
+      @if($recentOrders->count() > 0)
+        @foreach($recentOrders as $order)
+          <div class="order-row">
+            <div class="product-thumb thumb-one"></div>
+            <div class="order-info">
+              <strong>#MTG-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}</strong>
+              <small>{{ $order->name ?? 'Order Item' }}</small>
+              <small>{{ $order->quantity ?? 0 }} items • {{ $order->created_at ? $order->created_at->format('d M Y') : 'N/A' }}</small>
+            </div>
+            <span class="pill green-bg">{{ $order->orderstatus ?? 'Pending' }}</span>
+            <button class="outline track" data-toast="Tracking #MTG-{{ str_pad($order->id, 5, '0', STR_PAD_LEFT) }}">Track →</button>
+          </div>
+        @endforeach
+      @else
+        <div class="order-row" style="justify-content: center; color: #687181;">
+          <small>No recent orders found</small>
+        </div>
+      @endif
     </article>
     <div class="right-stack">
       <article class="quote-card"><h3>Need a Custom Solution?</h3><p>Talk to your dedicated account manager for bulk pricing, custom branding and special requirements.</p><button class="dark" data-toast="Quote request started.">Request a Quote <i class="bi bi-arrow-right"></i></button><div class="quote-product">Your<br>Logo</div></article>
@@ -60,10 +79,15 @@
   </section>
   <section class="bottom">
     <article class="panel" id="collections"><div class="panel-head"><div><span><strong>Your Saved Collections</strong></span></div><button class="outline" data-toast="Showing saved collections.">View All <i class="bi bi-arrow-right"></i></button></div><div class="collections">
-      <button class="collection" data-toast="Diwali 2025 collection opened."><div class="collection-image image-a"></div><strong>Diwali 2025</strong><small>12 products</small></button>
-      <button class="collection" data-toast="Welcome Kit collection opened."><div class="collection-image image-b"></div><strong>Welcome Kit</strong><small>8 products</small></button>
-      <button class="collection" data-toast="Work Anniversary collection opened."><div class="collection-image image-c"></div><strong>Work Anniversary</strong><small>10 products</small></button>
-      <button class="collection" data-toast="Office Essentials collection opened."><div class="collection-image image-d"></div><strong>Office Essentials</strong><small>15 products</small></button>
+      @if($collections->count() > 0)
+        @foreach($collections as $collection)
+          <button class="collection" onclick="viewCollection({{ $collection->id }})">
+            <div class="collection-image {{ $loop->index % 4 == 0 ? 'image-a' : ($loop->index % 4 == 1 ? 'image-b' : ($loop->index % 4 == 2 ? 'image-c' : 'image-d')) }}"></div>
+            <strong>{{ $collection->name }}</strong>
+            <small>{{ $collection->products_count ?? 0 }} products</small>
+          </button>
+        @endforeach
+      @endif
       <button class="create" id="createCollection"><i class="bi bi-plus-lg"></i><span>Create New<br>Collection</span></button>
     </div></article>
     <article class="panel" id="branding"><div class="panel-head"><div><span><strong>Branding Assets</strong></span></div><button class="outline" data-toast="Manage branding assets selected.">Manage <i class="bi bi-arrow-right"></i></button></div><div class="assets">
@@ -80,4 +104,40 @@
 
 @section('scripts')
 <script src="{{ asset('web_frontend/assets/js/script.js') }}"></script>
+<script>
+document.getElementById('createCollection').addEventListener('click', function() {
+  const name = prompt('Enter a name for your new collection:');
+  if (name && name.trim()) {
+    fetch('/collections', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+      },
+      body: JSON.stringify({
+        name: name.trim()
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        alert('Collection "' + name.trim() + '" created successfully!');
+        location.reload();
+      } else {
+        alert('Error creating collection: ' + (data.message || 'Unknown error'));
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('Error creating collection');
+    });
+  }
+});
+
+function viewCollection(collectionId) {
+  alert('Viewing collection ID: ' + collectionId);
+  // You can redirect to a collection detail page here
+  // window.location.href = '/collections/' + collectionId;
+}
+</script>
 @endsection
