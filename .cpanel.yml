@@ -3,11 +3,10 @@
 # Runs inside the cloned repository directory on every
 # "Deploy HEAD Commit" action.
 #
-# IMPORTANT: replace CPANELUSER with your actual cPanel username.
 # DEPLOYPATH = the folder where the app should live on the server.
 # The subdomain's document root should point to DEPLOYPATH/public
-# e.g. /home/CPANELUSER/mtg/public
+# i.e. /home/morethangiftz/beta.morethangiftz.com/public
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/CPANELUSER/mtg
+    - export DEPLOYPATH=/home/morethangiftz/beta.morethangiftz.com
     - /usr/bin/rsync -av --exclude='.git/' --exclude='.cpanel.yml' --exclude='.env' --exclude='.env.backup' --exclude='.gitignore' --exclude='node_modules/' --exclude='public/upload/' --exclude='storage/' --exclude='log_laravel/' $PWD/ $DEPLOYPATH/
