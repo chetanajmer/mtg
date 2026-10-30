@@ -9,7 +9,7 @@ class CollectionItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['collection_id', 'product_id'];
+    protected $fillable = ['collection_id', 'product_id', 'quantity'];
 
     public function collection()
     {

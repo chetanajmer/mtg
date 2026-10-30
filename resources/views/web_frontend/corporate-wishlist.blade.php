@@ -14,14 +14,13 @@
     <a href="/corporate-portal"><i class="bi bi-gift"></i>Dashboard</a>
     <a href="#orders"><i class="bi bi-cart3"></i>Orders</a>
     <a href="#approvals"><i class="bi bi-check-circle"></i>Approvals<span class="count">3</span></a>
-    <a href="#recipients"><i class="bi bi-people"></i>Recipients</a>
     <a href="#addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
     <a href="#branding"><i class="bi bi-image"></i>Branding Assets</a>
     <a href="#collections"><i class="bi bi-bookmark"></i>Saved Collections</a>
     <a class="active" href="/corporate-portal/wishlist"><i class="bi bi-heart"></i>Wishlists</a>
     <a href="#employees"><i class="bi bi-people-fill"></i>Employees</a>
     <a href="#reports"><i class="bi bi-bar-chart-line"></i>Reports</a>
-    <a href="#settings"><i class="bi bi-gear"></i>Account Settings</a>
+    <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
   </nav>
   <div class="help"><i class="bi bi-headset"></i><div><strong>Need Help?</strong><p>Your dedicated account manager is here.</p></div><button class="outline full" data-toast="Contact request started.">Contact Us <i class="bi bi-arrow-right"></i></button></div>
 </aside>

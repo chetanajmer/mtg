@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -40,5 +41,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot()
     {
          Schema::defaultStringLength(191);
+
+         View::composer('web_frontend.partials.header', function ($view) {
+             $count = session()->has('userid')
+                 ? \App\Models\CartItem::where('user_id', session()->get('userid'))->count()
+                 : \App\Models\CartItem::where('session_id', session()->getId())->count();
+
+             $view->with('cartItemCount', $count ?: 0);
+         });
     }
 }

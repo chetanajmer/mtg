@@ -117,26 +117,40 @@ document.getElementById('download').addEventListener('click',()=>{const type=doc
 
 // Cart Functionality
 function addToCart(productId, productName, price, image, quantity = 1) {
-  let cart = JSON.parse(localStorage.getItem('cart')) || [];
-  const existingItem = cart.find(item => item.id === productId);
   const qty = parseInt(quantity) || 1;
+  const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
 
-  if (existingItem) {
-    existingItem.quantity += qty;
-  } else {
-    cart.push({
-      id: productId,
-      name: productName,
-      price: price,
-      image: image,
-      quantity: qty,
-      sku: 'SKU-' + productId
-    });
-  }
-
-  localStorage.setItem('cart', JSON.stringify(cart));
-  updateCartCount();
-  showNotification('Added to Cart!');
+  fetch('/cart/add', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRF-TOKEN': token || ''
+    },
+    body: JSON.stringify({ product_id: productId, quantity: qty })
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.success) {
+      const cartCount = document.getElementById('cartCount');
+      if (cartCount) cartCount.textContent = data.count;
+      showNotification('Added to Cart!');
+    } else {
+      showNotification(data.message || 'Could not add to cart');
+    }
+  })
+  .catch(() => {
+    // Fallback to localStorage cart if the request fails
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const existingItem = cart.find(item => item.id === productId);
+    if (existingItem) {
+      existingItem.quantity += qty;
+    } else {
+      cart.push({ id: productId, name: productName, price: price, image: image, quantity: qty, sku: 'SKU-' + productId });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    showNotification('Added to Cart!');
+  });
 }
 
 function updateCartCount() {
@@ -160,10 +174,7 @@ function showNotification(message) {
   }, 2000);
 }
 
-// Initialize cart count on page load
-document.addEventListener('DOMContentLoaded', function() {
-  updateCartCount();
-});
+// Cart count is rendered server-side in the header; no init needed here
 
 // Add CSS animations
 const style = document.createElement('style');

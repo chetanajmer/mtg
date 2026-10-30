@@ -5,6 +5,10 @@
   <meta name="description" content="View your shopping cart items and proceed to checkout.">
 @endsection
 
+@section('styles')
+<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/cart-auth.css') }}">
+@endsection
+
 @section('content')
 <!-- BREADCRUMB -->
 <div class="container-fluid px-4 px-xl-5">
@@ -24,17 +28,46 @@
     <!-- CART ITEMS -->
     <div class="col-lg-8">
       <div class="cart-header">
-        <h2>Your Cart Items <span id="cartItemsCount">(0)</span></h2>
+        <h2>Your Cart Items <span id="cartItemsCount">({{ $items->count() }})</span></h2>
+        @if($items->count() > 0)
         <button class="clear-cart-btn" onclick="clearCart()">
           <i class="bi bi-trash"></i> Clear Cart
         </button>
+        @endif
       </div>
 
       <div class="cart-items-container" id="cartItemsContainer">
-        <!-- Cart items will be loaded here via JavaScript -->
+        @foreach($items as $item)
+        <div class="cart-item">
+          <div class="item-image">
+            @if($item->image)
+              <img src="{{ asset('upload/product/' . $item->image) }}" alt="{{ $item->name }}">
+            @else
+              <img src="{{ asset('web_frontend/assets/images/product-main.jpg') }}" alt="{{ $item->name }}">
+            @endif
+          </div>
+          <div class="item-details">
+            <h4>{{ $item->name }}</h4>
+            <span class="item-sku">SKU: {{ $item->modelno ?? 'N/A' }}</span>
+            <p class="item-description">Premium quality corporate gift item with custom branding options available.</p>
+            <div class="item-price">AED {{ number_format($item->price, 2) }}</div>
+          </div>
+          <div class="item-quantity">
+            <button class="qty-btn minus" onclick="changeQuantity({{ $item->id }}, -1, {{ $item->quantity }})">−</button>
+            <input type="number" class="qty-input" value="{{ $item->quantity }}" min="1" onchange="setQuantity({{ $item->id }}, this.value)">
+            <button class="qty-btn plus" onclick="changeQuantity({{ $item->id }}, 1, {{ $item->quantity }})">+</button>
+          </div>
+          <div class="item-total">
+            <span>AED {{ number_format($item->price * $item->quantity, 2) }}</span>
+            <button class="delete-btn" onclick="removeItem({{ $item->id }})">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+        @endforeach
       </div>
 
-      <div class="empty-cart" id="emptyCart" style="display: none;">
+      <div class="empty-cart" id="emptyCart" style="display: {{ $items->count() ? 'none' : 'block' }};">
         <i class="bi bi-cart-x"></i>
         <h3>Your cart is empty</h3>
         <p>Browse our products and add items to your cart.</p>
@@ -48,8 +81,8 @@
         <h3>Order Summary</h3>
 
         <div class="summary-row">
-          <span>Subtotal <small id="subtotalItems">(0 items)</small></span>
-          <span id="subtotal">AED 0.00</span>
+          <span>Subtotal <small id="subtotalItems">({{ $items->count() }} items)</small></span>
+          <span id="subtotal">AED {{ number_format($subtotal, 2) }}</span>
         </div>
 
         <div class="summary-row">
@@ -59,19 +92,30 @@
 
         <div class="summary-row">
           <span>Tax (5%)</span>
-          <span id="tax">AED 0.00</span>
+          <span id="tax">AED {{ number_format($tax, 2) }}</span>
         </div>
 
         <div class="summary-divider"></div>
 
         <div class="summary-row total">
           <span>Total</span>
-          <span id="total">AED 0.00</span>
+          <span id="total">AED {{ number_format($total, 2) }}</span>
         </div>
 
         <div class="cart-actions">
-          
-          <button class="btn btn-outline-secondary enquiry-btn">Send Enquiry</button>
+          @if(session()->has('userid'))
+            @if($items->count() > 0)
+              <form action="{{ route('cart.send-enquiry') }}" method="POST" style="width: 100%;">
+                @csrf
+                <button type="submit" class="btn btn-outline-secondary enquiry-btn" style="width: 100%;">Send Enquiry</button>
+              </form>
+            @else
+              <button type="button" class="btn btn-outline-secondary enquiry-btn" onclick="showCartToast()">Send Enquiry</button>
+            @endif
+          @else
+            <button type="button" class="btn btn-outline-secondary enquiry-btn" onclick="openAuthModal('login')">Send Enquiry</button>
+          @endif
+          <a href="/" class="btn btn-outline-secondary" style="width: 100%; text-align: center; margin-top: 10px; display: block;">Continue Shopping</a>
         </div>
 
         <div class="help-box">
@@ -86,336 +130,266 @@
   </div>
 </section>
 
-<!-- Send Enquiry Modal -->
-<div class="modal fade" id="enquiryModal" tabindex="-1" aria-labelledby="enquiryModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="enquiryModalLabel">Send Enquiry</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Empty Cart Toaster -->
+<div class="toaster-notification" id="cartToast">
+  <div class="toaster-icon warning">
+    <i class="bi bi-exclamation-circle"></i>
+  </div>
+  <div class="toaster-message">
+    <h4>Cart is empty</h4>
+    <p>Your cart is empty. Please add a product to continue</p>
+  </div>
+  <button class="toaster-close" onclick="hideCartToast()">
+    <i class="bi bi-x"></i>
+  </button>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="auth-overlay" id="loginModal">
+  <div class="auth-modal">
+    <button type="button" class="auth-close" onclick="closeAuthModal()">&times;</button>
+    <div class="auth-side">
+      <h2>Welcome Back</h2>
+      <p>Login to continue your corporate journey</p>
+      <div class="auth-side-img">
+        <img src="{{ asset('web_frontend/assets/images/product-main.jpg') }}" alt="More Than Giftz">
       </div>
-      <div class="modal-body">
-        <p class="modal-description">Please fill in your details and we'll get back to you.</p>
+    </div>
+    <div class="auth-form-side">
+      @if(session('error'))
+        <div class="auth-alert auth-alert-error">{{ session('error') }}</div>
+      @endif
+      <form action="{{ route('corporate.login.submit') }}" method="POST">
+        @csrf
+        <input type="hidden" name="redirect" value="/cart">
+        <input type="hidden" name="auth_modal" value="1">
 
-        <form id="enquiryForm">
-          <div class="mb-3">
-            <label for="fullName" class="form-label">Full Name <span class="required">*</span></label>
-            <input type="text" class="form-control" id="fullName" placeholder="Enter your full name" required>
-          </div>
+        <div class="auth-field">
+          <i class="bi bi-envelope"></i>
+          <input type="email" name="email" placeholder="Email Address" required>
+        </div>
 
-          <div class="mb-3">
-            <label for="companyName" class="form-label">Company Name</label>
-            <input type="text" class="form-control" id="companyName" placeholder="Enter your company name">
-          </div>
+        <div class="auth-field">
+          <i class="bi bi-lock"></i>
+          <input type="password" name="password" id="loginPassword" placeholder="Password" required>
+          <i class="bi bi-eye-slash auth-eye" onclick="togglePassword('loginPassword', this)"></i>
+        </div>
 
-          <div class="mb-3">
-            <label for="email" class="form-label">Email Address <span class="required">*</span></label>
-            <input type="email" class="form-control" id="email" placeholder="Enter your email address" required>
-          </div>
+        <div class="auth-row">
+          <label class="auth-check">
+            <input type="checkbox" name="remember">
+            <span>Remember me</span>
+          </label>
+          <a href="{{ route('corporate.forgot.password') }}" class="auth-link">Forgot Password?</a>
+        </div>
 
-          <div class="mb-3">
-            <label for="mobile" class="form-label">Mobile Number <span class="required">*</span></label>
-            <input type="tel" class="form-control" id="mobile" placeholder="Enter your mobile number" required>
-          </div>
+        <button type="submit" class="auth-submit">Login <i class="bi bi-arrow-right"></i></button>
 
-          <div class="mb-3">
-            <label for="message" class="form-label">Message / Enquiry <span class="required">*</span></label>
-            <textarea class="form-control" id="message" rows="4" placeholder="Tell us about your requirements..." required></textarea>
-          </div>
+        <div class="auth-divider"><span>OR</span></div>
 
-          <div class="enquiry-summary">
-            <h6>Enquiry Summary</h6>
-            <p>Cart Items: <span id="cartItemsCountModal">0</span> products</p>
-            <p class="text-muted">Your selected cart products will be included in this enquiry.</p>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-submit-enquiry">Submit Enquiry</button>
-      </div>
+        <a href="{{ route('corporate.google', ['redirect' => '/cart']) }}" class="auth-google">
+          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>
+          Continue with Google
+        </a>
+
+        <p class="auth-switch">Don't have an account? <a href="javascript:void(0)" onclick="switchAuthModal('register')">Register Now</a></p>
+      </form>
     </div>
   </div>
 </div>
 
-<!-- Toaster Notification -->
-<div class="toaster-notification" id="toasterNotification">
-  <div class="toaster-icon">
-    <i class="bi bi-check-circle"></i>
+<!-- REGISTER MODAL -->
+<div class="auth-overlay" id="registerModal">
+  <div class="auth-modal">
+    <button type="button" class="auth-close" onclick="closeAuthModal()">&times;</button>
+    <div class="auth-side">
+      <h2>Create Your <span class="auth-gold">Account</span></h2>
+      <p>Register to unlock exclusive offers, save your favourite corporate gifts and explore more for your business needs.</p>
+      <div class="auth-side-img">
+        <img src="{{ asset('web_frontend/assets/images/product-main.jpg') }}" alt="More Than Giftz">
+      </div>
+    </div>
+    <div class="auth-form-side">
+      @if(session('auth_form') === 'register' && $errors->any())
+        <div class="auth-alert auth-alert-error">
+          @foreach($errors->all() as $error)
+            <div>{{ $error }}</div>
+          @endforeach
+        </div>
+      @endif
+      <form action="{{ route('cart.register') }}" method="POST">
+        @csrf
+        <input type="hidden" name="redirect" value="/cart">
+
+        <div class="auth-field-row">
+          <div class="auth-field">
+            <i class="bi bi-person"></i>
+            <input type="text" name="first_name" placeholder="First Name *" required>
+          </div>
+          <div class="auth-field">
+            <i class="bi bi-person"></i>
+            <input type="text" name="last_name" placeholder="Last Name *">
+          </div>
+        </div>
+
+        <div class="auth-field">
+          <i class="bi bi-building"></i>
+          <input type="text" name="company" placeholder="Company Name *">
+        </div>
+
+        <div class="auth-field">
+          <i class="bi bi-envelope"></i>
+          <input type="email" name="email" placeholder="Email Address *" required>
+        </div>
+
+        <div class="auth-field">
+          <i class="bi bi-geo-alt"></i>
+          <input type="text" name="address" placeholder="Address">
+        </div>
+
+        <div class="auth-field-row">
+          <div class="auth-field auth-field-code">
+            <select name="country_code">
+              <option value="+91" selected>&#x1F1EE;&#x1F1F3; +91</option>
+              <option value="+971">&#x1F1E6;&#x1F1EA; +971</option>
+              <option value="+1">&#x1F1FA;&#x1F1F8; +1</option>
+              <option value="+44">&#x1F1EC;&#x1F1E7; +44</option>
+            </select>
+          </div>
+          <div class="auth-field">
+            <i class="bi bi-telephone"></i>
+            <input type="tel" name="mobile" placeholder="Mobile Number *">
+          </div>
+        </div>
+
+        <div class="auth-field-row">
+          <div class="auth-field">
+            <i class="bi bi-lock"></i>
+            <input type="password" name="password" id="regPassword" placeholder="Password *" required>
+            <i class="bi bi-eye-slash auth-eye" onclick="togglePassword('regPassword', this)"></i>
+          </div>
+          <div class="auth-field">
+            <i class="bi bi-lock"></i>
+            <input type="password" name="password_confirmation" id="regPasswordConfirm" placeholder="Confirm Password *" required>
+            <i class="bi bi-eye-slash auth-eye" onclick="togglePassword('regPasswordConfirm', this)"></i>
+          </div>
+        </div>
+
+        <label class="auth-check auth-terms">
+          <input type="checkbox" required>
+          <span>I agree to the <u>Terms &amp; Conditions</u> and <u>Privacy Policy</u></span>
+        </label>
+
+        <button type="submit" class="auth-submit">Create Account <i class="bi bi-arrow-right"></i></button>
+
+        <div class="auth-divider"><span>OR</span></div>
+
+        <a href="{{ route('corporate.google', ['redirect' => '/cart']) }}" class="auth-google">
+          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 13 4 4 13 4 24s9 20 20 20 20-9 20-20c0-1.3-.1-2.7-.4-3.9z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.9 1.2 8 3l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C36.9 39.2 44 34 44 24c0-1.3-.1-2.7-.4-3.9z"/></svg>
+          Continue with Google
+        </a>
+
+        <p class="auth-switch">Already have an account? <a href="javascript:void(0)" onclick="switchAuthModal('login')">Login</a></p>
+      </form>
+    </div>
   </div>
-  <div class="toaster-message">
-    <h4>Success!</h4>
-    <p>Your enquiry has been sent successfully. We'll get back to you soon.</p>
-  </div>
-  <button class="toaster-close" onclick="hideToaster()">
-    <i class="bi bi-x"></i>
-  </button>
 </div>
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-// Dummy cart data
-const dummyCart = [
-  {
-    id: 1,
-    name: 'Stainless Steel Bottle',
-    sku: 'SKU-001',
-    price: 45.00,
-    quantity: 50,
-    image: 'https://via.placeholder.com/100'
-  },
-  {
-    id: 2,
-    name: 'Notebook & Pen Set',
-    sku: 'SKU-002',
-    price: 25.00,
-    quantity: 100,
-    image: 'https://via.placeholder.com/100'
-  },
-  {
-    id: 3,
-    name: 'Ceramic Coffee Mug',
-    sku: 'SKU-003',
-    price: 15.00,
-    quantity: 75,
-    image: 'https://via.placeholder.com/100'
-  },
-  {
-    id: 4,
-    name: 'Laptop Backpack',
-    sku: 'SKU-004',
-    price: 85.00,
-    quantity: 25,
-    image: 'https://via.placeholder.com/100'
-  },
-  {
-    id: 5,
-    name: 'Corporate Cap',
-    sku: 'SKU-005',
-    price: 20.00,
-    quantity: 150,
-    image: 'https://via.placeholder.com/100'
-  }
-];
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
 
-let enquiryModal;
-
-document.addEventListener('DOMContentLoaded', function() {
-  loadCart();
-  // Initialize Bootstrap modal
-  enquiryModal = new bootstrap.Modal(document.getElementById('enquiryModal'));
-
-  // Enquiry button click handler
-  document.querySelector('.enquiry-btn').addEventListener('click', function() {
-    // Update cart items count in modal
-    document.getElementById('cartItemsCountModal').textContent = dummyCart.length;
-    // Show modal
-    enquiryModal.show();
-  });
-
-  // Submit enquiry button click handler
-  document.querySelector('.btn-submit-enquiry').addEventListener('click', function() {
-    submitEnquiry();
-  });
-});
-
-function loadCart() {
-  const container = document.getElementById('cartItemsContainer');
-  const emptyCart = document.getElementById('emptyCart');
-  const itemsCount = document.getElementById('cartItemsCount');
-  const subtotalItems = document.getElementById('subtotalItems');
-
-  // Load dummy data
-  const cart = dummyCart;
-
-  if (cart.length === 0) {
-    container.style.display = 'none';
-    emptyCart.style.display = 'block';
-    itemsCount.textContent = '(0)';
-    subtotalItems.textContent = '(0 items)';
-    updateSummary(0);
-    return;
-  }
-
-  container.style.display = 'block';
-  emptyCart.style.display = 'none';
-  itemsCount.textContent = '(' + cart.length + ')';
-  subtotalItems.textContent = '(' + cart.length + ' items)';
-
-  let html = '';
-  let subtotal = 0;
-
-  cart.forEach((item, index) => {
-    const itemTotal = item.price * item.quantity;
-    subtotal += itemTotal;
-
-    html += `
-      <div class="cart-item" data-index="${index}">
-        <div class="item-image">
-          <img src="${item.image}" alt="${item.name}">
-        </div>
-        <div class="item-details">
-          <h4>${item.name}</h4>
-          <span class="item-sku">${item.sku}</span>
-          <p class="item-description">Premium quality corporate gift item with custom branding options available.</p>
-          <div class="item-price">AED ${item.price.toFixed(2)}</div>
-        </div>
-        <div class="item-quantity">
-          <button class="qty-btn minus" onclick="updateQuantity(${index}, -50)">−</button>
-          <input type="number" class="qty-input" value="${item.quantity}" min="50" step="50" onchange="setQuantity(${index}, this.value)">
-          <button class="qty-btn plus" onclick="updateQuantity(${index}, 50)">+</button>
-        </div>
-        <div class="item-total">
-          <span>AED ${itemTotal.toFixed(2)}</span>
-          <button class="delete-btn" onclick="removeItem(${index})">
-            <i class="bi bi-trash"></i>
-          </button>
-        </div>
-      </div>
-    `;
-  });
-
-  container.innerHTML = html;
-  updateSummary(subtotal);
+function changeQuantity(itemId, delta, current) {
+  const newQty = parseInt(current) + delta;
+  if (newQty < 1) return;
+  setQuantity(itemId, newQty);
 }
 
-// Initial cart count update
-const totalItems = dummyCart.reduce((sum, item) => sum + item.quantity, 0);
-const cartCount = document.getElementById('cartCount');
-if (cartCount) {
-  cartCount.textContent = totalItems;
+function setQuantity(itemId, quantity) {
+  const qty = parseInt(quantity);
+  if (!qty || qty < 1) return;
+
+  fetch('/cart/item/' + itemId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+    body: JSON.stringify({ quantity: qty })
+  }).then(() => location.reload());
 }
 
-function updateQuantity(index, change) {
-  dummyCart[index].quantity += change;
-  if (dummyCart[index].quantity < 50) {
-    dummyCart[index].quantity = 50;
-  }
-  loadCart();
-}
-
-function setQuantity(index, value) {
-  const qty = parseInt(value) || 50;
-  dummyCart[index].quantity = qty < 50 ? 50 : qty;
-  loadCart();
-}
-
-function removeItem(index) {
-  dummyCart.splice(index, 1);
-  loadCart();
+function removeItem(itemId) {
+  fetch('/cart/item/' + itemId, {
+    method: 'DELETE',
+    headers: { 'X-CSRF-TOKEN': csrfToken }
+  }).then(() => location.reload());
 }
 
 function clearCart() {
-  if (confirm('Are you sure you want to clear your cart?')) {
-    dummyCart.length = 0;
-    loadCart();
+  if (!confirm('Are you sure you want to clear your cart?')) return;
+  fetch('/cart/clear', {
+    method: 'DELETE',
+    headers: { 'X-CSRF-TOKEN': csrfToken }
+  }).then(() => location.reload());
+}
+
+// Empty cart toaster
+function showCartToast() {
+  const toast = document.getElementById('cartToast');
+  toast.classList.add('show');
+  setTimeout(hideCartToast, 4000);
+}
+
+function hideCartToast() {
+  document.getElementById('cartToast').classList.remove('show');
+}
+
+@if(session('error'))
+document.addEventListener('DOMContentLoaded', showCartToast);
+@endif
+
+// Auth modals
+function openAuthModal(type) {
+  closeAuthModal();
+  document.getElementById(type === 'register' ? 'registerModal' : 'loginModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function switchAuthModal(type) {
+  openAuthModal(type);
+}
+
+function closeAuthModal() {
+  document.querySelectorAll('.auth-overlay').forEach(el => el.classList.remove('show'));
+  document.body.style.overflow = '';
+}
+
+function togglePassword(fieldId, icon) {
+  const field = document.getElementById(fieldId);
+  if (field.type === 'password') {
+    field.type = 'text';
+    icon.classList.replace('bi-eye-slash', 'bi-eye');
+  } else {
+    field.type = 'password';
+    icon.classList.replace('bi-eye', 'bi-eye-slash');
   }
 }
 
-function updateSummary(subtotal) {
-  const tax = subtotal * 0.05;
-  const total = subtotal + tax;
-
-  document.getElementById('subtotal').textContent = 'AED ' + subtotal.toFixed(2);
-  document.getElementById('tax').textContent = 'AED ' + tax.toFixed(2);
-  document.getElementById('total').textContent = 'AED ' + total.toFixed(2);
-
-  // Update cart count in header
-  const totalItems = dummyCart.reduce((sum, item) => sum + item.quantity, 0);
-  const cartCount = document.getElementById('cartCount');
-  if (cartCount) {
-    cartCount.textContent = totalItems;
-  }
-}
-
-// Submit Enquiry
-function submitEnquiry() {
-  const form = document.getElementById('enquiryForm');
-  const fullName = document.getElementById('fullName').value.trim();
-  const companyName = document.getElementById('companyName').value.trim();
-  const email = document.getElementById('email').value.trim();
-  const mobile = document.getElementById('mobile').value.trim();
-  const message = document.getElementById('message').value.trim();
-
-  // Form validation
-  if (!fullName || !email || !mobile || !message) {
-    alert('Please fill in all required fields.');
-    return;
-  }
-
-  // Email validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    alert('Please enter a valid email address.');
-    return;
-  }
-
-  const cartItems = JSON.stringify(dummyCart);
-  const subtotal = dummyCart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const tax = subtotal * 0.05;
-  const total = subtotal + tax;
-
-  fetch('/send-enquiry', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRF-TOKEN': '{{ csrf_token() }}'
-    },
-    body: JSON.stringify({
-      name: fullName,
-      email: email,
-      phone: mobile,
-      company: companyName,
-      message: message,
-      subtotal: subtotal,
-      tax: tax,
-      total: total,
-      cart_items: cartItems
-    })
-  })
-  .then(response => {
-    console.log('Response status:', response.status);
-    return response.json();
-  })
-  .then(data => {
-    console.log('Response data:', data);
-    if (data.success) {
-      // Hide modal
-      enquiryModal.hide();
-      // Show toaster notification
-      showToaster();
-      // Clear form
-      form.reset();
-      // Clear cart
-      dummyCart.length = 0;
-      loadCart();
-    } else {
-      alert('Error sending enquiry: ' + (data.message || 'Unknown error'));
-    }
-  })
-  .catch(error => {
-    console.error('Error:', error);
-    alert('Error sending enquiry: ' + error.message);
+// Close on overlay click
+document.querySelectorAll('.auth-overlay').forEach(overlay => {
+  overlay.addEventListener('click', function(e) {
+    if (e.target === this) closeAuthModal();
   });
-}
+});
 
-// Show Toaster Notification
-function showToaster() {
-  const toaster = document.getElementById('toasterNotification');
-  toaster.classList.add('show');
-
-  // Auto hide after 5 seconds
-  setTimeout(() => {
-    hideToaster();
-  }, 5000);
-}
-
-// Hide Toaster Notification
-function hideToaster() {
-  const toaster = document.getElementById('toasterNotification');
-  toaster.classList.remove('show');
-}
+// Re-open modal after failed auth attempt
+@if(session('auth_form'))
+  document.addEventListener('DOMContentLoaded', function() {
+    openAuthModal('{{ session('auth_form') }}');
+  });
+@elseif($errors->any())
+  document.addEventListener('DOMContentLoaded', function() {
+    openAuthModal('login');
+  });
+@endif
 </script>
 @endsection

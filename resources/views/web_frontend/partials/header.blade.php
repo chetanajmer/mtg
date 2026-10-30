@@ -24,10 +24,15 @@
             <i class="bi bi-search"></i>
             <input type="text" placeholder="Search corporate gifts..." aria-label="Search">
           </div>
-          <button class="icon-button" aria-label="Account"><i class="bi bi-person"></i></button>
+          @if(session()->has('userid'))
+            <a href="{{ route('corporate.portal') }}" class="icon-button" aria-label="Dashboard" title="Dashboard"><i class="bi bi-person-circle"></i></a>
+            <a href="{{ route('corporate.logout') }}" class="icon-button" aria-label="Logout" title="Logout" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i></a>
+          @else
+            <a href="{{ route('corporate.login') }}" class="icon-button" aria-label="Login" title="Login"><i class="bi bi-person"></i></a>
+          @endif
           <button class="icon-button cart-button" aria-label="Cart" onclick="window.location.href='/cart'">
             <i class="bi bi-cart3"></i>
-            <span class="cart-count" id="cartCount">0</span>
+            <span class="cart-count" id="cartCount">{{ $cartItemCount ?? 0 }}</span>
           </button>
           <a href="tel:+971557863450" class="phone-button">
             <i class="bi bi-telephone"></i>
@@ -37,14 +42,15 @@
       </div>
     </div>
 
+    <!-- SECONDARY NAV -->
     <div class="secondary-bar">
       <div class="container-fluid px-4 px-xl-5">
-        <div class="secondary-nav">
+        <nav class="secondary-nav">
           <div class="secondary-left">
             <a href="#">About us</a>
             <a href="#">Branding</a>
             <a href="/annual-corporate-membership" class="{{ request()->is('annual-corporate-membership') ? 'active' : '' }}">Annual Contract</a>
-            <a href="/order-tracking" class="{{ request()->is('order-tracking') ? 'active' : '' }}">Track your Order</a>
+            <a href="/track-order" class="{{ request()->is('track-order') ? 'active' : '' }}">Track your Order</a>
           </div>
           <div class="secondary-right">
             <a href="#">For Businesses</a>
@@ -53,7 +59,7 @@
             <span class="divider"></span>
             <a href="#">Request a Quote</a>
           </div>
-        </div>
+        </nav>
       </div>
     </div>
   </header>

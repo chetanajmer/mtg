@@ -1,0 +1,19 @@
+.orders-section {
+  padding: 20px;
+}
+
+.orders-table {
+  margin-top: 20px;
+}
+
+.orders-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.orders-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.orders-table a:hover {
+  background: #2d3035;
+}

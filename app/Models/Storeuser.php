@@ -12,7 +12,11 @@ class Storeuser extends Model
         'email',
         'fname',
         'lname',
-        'password','socialid','socialaccount'
+        'password',
+        'mobile',
+        'location',
+        'socialid',
+        'socialaccount'
     ];
     
 }
