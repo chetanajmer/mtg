@@ -51,6 +51,7 @@ use App\Http\Controllers\OrderProcessingController;
 use App\Http\Controllers\Frontend\HomepageController;
 use App\Http\Controllers\Frontend\Storeproductcontroller;
 use App\Http\Controllers\Frontend\UsersController;
+use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\StoreCategoryController;
 use App\Http\Controllers\Frontend\StoreBrandController;
 use App\Http\Controllers\Frontend\FiltersController;
@@ -476,7 +477,12 @@ Route::any('delete_flipbook/{id}', [FlipbookController::class, 'delete_flipbook'
 Route::any('reviews', [ReviewController::class, 'index']);
 
 // Order Tracking (Backend)
-Route::any('order-tracking', [OrderTrackingController::class, 'index'])->name('ordertracking.index');
+Route::prefix('order-tracking')->name('ordertracking.')->group(function () {
+    Route::get('/', [OrderTrackingController::class, 'index'])->name('index');
+    Route::get('/list', [OrderTrackingController::class, 'list'])->name('list');
+    Route::get('/{id}', [OrderTrackingController::class, 'show'])->name('show');
+    Route::match(['get', 'post'], '/step/{step}/save', [OrderTrackingController::class, 'saveStep'])->name('saveStep');
+});
 
 
 
@@ -537,19 +543,79 @@ Route::any('category/quick-view/{slug}/gridview', [HomepageController::class, 'q
 /*Users Login*/
 
 Route::any('/store/login', [UsersController::class, 'storelogin']);
-Route::any('/store/dologin', [UsersController::class, 'dostorelogin'])->name('dostorelogin'); 
-Route::any('/store/dologout', [UsersController::class, 'dostorelogout'])->name('dostorelogout'); 
+Route::any('/store/dologin', [UsersController::class, 'dostorelogin'])->name('dostorelogin');
+Route::any('/store/dologout', [UsersController::class, 'dostorelogout'])->name('dostorelogout');
 Route::any('/store/register', [UsersController::class, 'storeregister']);
-Route::any('/store/doregister', [UsersController::class, 'dostoreregister'])->name('dostoreregister'); 
+Route::any('/store/doregister', [UsersController::class, 'dostoreregister'])->name('dostoreregister');
 Route::any('/store/myaccount', [UsersController::class, 'myaccount']);
-Route::any('/corporate-portal', [UsersController::class, 'corporatePortal']);
+
+// Corporate Portal Authentication Routes
+Route::get('/corporate-portal', [UsersController::class, 'corporatePortal'])
+    ->name('corporate.portal')
+    ->middleware('corporate.auth');
+
+Route::get('/corporate/login', [UsersController::class, 'corporateLogin'])
+    ->name('corporate.login');
+
+Route::post('/corporate/login', [UsersController::class, 'doCorporateLogin'])
+    ->name('corporate.login.submit');
+
+Route::get('/corporate/register', [UsersController::class, 'corporateRegister'])
+    ->name('corporate.register');
+
+Route::post('/corporate/register', [UsersController::class, 'doCorporateRegister'])
+    ->name('corporate.register.submit');
+
+Route::get('/corporate/forgot-password', [UsersController::class, 'resetpassword'])
+    ->name('corporate.forgot.password');
+
+Route::post('/corporate/forgot-password', [UsersController::class, 'doresetpassword'])
+    ->name('corporate.forgot.password.submit');
+
+Route::get('/corporate-addresses', [UsersController::class, 'corporateAddresses'])
+    ->name('corporate.addresses');
+
+Route::post('/corporate-addresses/update', [UsersController::class, 'updateCorporateAddress'])
+    ->name('corporate.addresses.update');
+
+Route::post('/corporate-addresses', [UsersController::class, 'storeCorporateAddress'])
+    ->name('corporate.addresses.store');
+
+Route::post('/corporate-addresses/{id}/select', [UsersController::class, 'selectCorporateAddress'])
+    ->name('corporate.addresses.select');
+
+Route::delete('/corporate-addresses/{id}', [UsersController::class, 'deleteCorporateAddress'])
+    ->name('corporate.addresses.delete');
+
+Route::get('/corporate-account-settings', [UsersController::class, 'accountSettings'])
+    ->name('corporate.account-settings');
+
+Route::post('/corporate-account-settings', [UsersController::class, 'updateAccountSettings'])
+    ->name('corporate.account-settings.update');
+
+Route::match(['get', 'post'], '/corporate/logout', [UsersController::class, 'dostorelogout'])
+    ->name('corporate.logout');
 Route::any('/corporate-portal/wishlist', function () {
     return view('web_frontend.corporate-wishlist');
 });
-Route::post('/collections', [UsersController::class, 'createCollection']);
-Route::any('/cart', function () {
-    return view('web_frontend.cart');
-});
+Route::post('/collections', [UsersController::class, 'createCollection'])->name('collections.create');
+Route::get('/collections/{id}', [UsersController::class, 'viewCollection'])->name('collections.view');
+Route::delete('/collections/{id}', [UsersController::class, 'deleteCollection'])->name('collections.delete');
+Route::put('/collections/{id}', [UsersController::class, 'updateCollection'])->name('collections.update');
+Route::get('/collections-all', [UsersController::class, 'allCollections'])->name('collections.all');
+Route::post('/collections/{id}/items', [UsersController::class, 'addItemToCollection'])->name('collections.add-item');
+Route::delete('/collections/{id}/items/{itemId}', [UsersController::class, 'removeItemFromCollection'])->name('collections.remove-item');
+Route::put('/collections/{id}/items/{itemId}', [UsersController::class, 'updateItemQuantity'])->name('collections.update-item');
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add', [CartController::class, 'addItem'])->name('cart.add');
+Route::post('/cart/item/{id}', [CartController::class, 'updateItem'])->name('cart.update-item');
+Route::delete('/cart/item/{id}', [CartController::class, 'removeItem'])->name('cart.remove-item');
+Route::delete('/cart/clear', [CartController::class, 'clearCart'])->name('cart.clear');
+Route::post('/cart/send-enquiry', [CartController::class, 'sendEnquiry'])->name('cart.send-enquiry');
+Route::post('/cart/register', [UsersController::class, 'storeCartRegister'])->name('cart.register');
+Route::get('/enquiry/success/{id}', [CartController::class, 'enquirySuccess'])->name('enquiry.success');
+Route::get('/corporate/auth/google', [UsersController::class, 'redirectToGoogleCorporate'])->name('corporate.google');
+Route::get('/corporate/auth/google/callback', [UsersController::class, 'handleGoogleCallback'])->name('corporate.google.callback');
 Route::any('/track-order', function () {
     return view('web_frontend.order-tracking');
 });

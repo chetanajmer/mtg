@@ -237,26 +237,12 @@ window.location.href = "{{url('/admin')}}";
                             <h4>Customer Message</h4>
                             <textarea rows="3">Please find attached the mockup design for your review.
 Let us know if any changes are required.</textarea>
-                            <h4>Internal Remarks</h4>
+                            
                             <textarea rows="3" placeholder="Add internal remarks..."></textarea>
                         </div>
                     </div>
 
-                    <h4 class="order-workflow-section-title">Design Revisions</h4>
-                    <ul class="order-workflow-revisions">
-                        <li class="rev-current">
-                            <div class="order-workflow-rev-info"><strong>Revision 3 (Current)</strong><small>Uploaded by Rohan Sharma &nbsp;•&nbsp; 25-Sep-2026 11:30 AM &nbsp;•&nbsp; Mockup_v3.jpg</small></div>
-                            <button class="order-workflow-btn order-workflow-btn-outline">👁 View</button><button class="order-workflow-btn order-workflow-btn-outline">⭳ Download</button><span class="order-workflow-pill order-workflow-pill-orange">Sent to Customer</span>
-                        </li>
-                        <li>
-                            <div class="order-workflow-rev-info"><strong>Revision 2</strong><small>Uploaded by Neha Verma &nbsp;•&nbsp; 24-Sep-2026 04:15 PM &nbsp;•&nbsp; Mockup_v2.jpg</small></div>
-                            <button class="order-workflow-btn order-workflow-btn-outline">👁 View</button><button class="order-workflow-btn order-workflow-btn-outline">⭳ Download</button><span class="order-workflow-pill order-workflow-pill-red">Revision Requested</span>
-                        </li>
-                        <li>
-                            <div class="order-workflow-rev-info"><strong>Revision 1</strong><small>Uploaded by Rohan Sharma &nbsp;•&nbsp; 24-Sep-2026 10:20 AM &nbsp;•&nbsp; Mockup_v1.jpg</small></div>
-                            <button class="order-workflow-btn order-workflow-btn-outline">👁 View</button><button class="order-workflow-btn order-workflow-btn-outline">⭳ Download</button><span class="order-workflow-pill order-workflow-pill-grey">Replaced</span>
-                        </li>
-                    </ul>
+                
 
                     <div class="order-workflow-two-col order-workflow-bottom">
                         <div class="col-left">

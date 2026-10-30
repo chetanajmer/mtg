@@ -385,8 +385,26 @@ class HomepageController extends Controller
 
 	public function orders(Request $request)
 	{
-		$items_array=Cartorder::orderBy('created_at','desc')->get()->unique('orderid');
-		return view('backend.orders.list',compact('items_array'));
+		// Check if user is authenticated
+		$userid = session()->get('userid');
+
+		if ($userid) {
+			// Set fullname in session if not already set
+			if (!session()->has('fullname')) {
+				$user = Storeuser::where('id', $userid)->first();
+				if ($user) {
+					session()->put('fullname', $user->fname . ' ' . $user->lname);
+				}
+			}
+
+			// Frontend orders for logged-in user - use unique('id') instead of 'orderid' to show all orders
+			$items_array = Cartorder::where('userid', $userid)->orderBy('created_at', 'desc')->get()->unique('id');
+			return view('web_frontend.orders', compact('items_array'));
+		} else {
+			// Backend orders (admin view)
+			$items_array = Cartorder::orderBy('created_at', 'desc')->get()->unique('orderid');
+			return view('backend.orders.list', compact('items_array'));
+		}
 	}
 
 	public function printinvoice($id)

@@ -28,6 +28,10 @@ class OrderProcessingWorkflow extends Model
         'delivery_date',
         'notes',
         'completed_by',
+        'mockup_files',
+        'customer_message',
+        'approved_date',
+        'mockup_status',
     ];
 
     protected $casts = [
@@ -43,6 +47,8 @@ class OrderProcessingWorkflow extends Model
         'step5_completed_at' => 'datetime',
         'dispatch_date' => 'date',
         'delivery_date' => 'date',
+        'mockup_files' => 'array',
+        'approved_date' => 'datetime',
     ];
 
     public function cartorder()

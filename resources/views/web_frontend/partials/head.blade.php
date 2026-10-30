@@ -1,5 +1,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>@yield('title', 'More Than Giftz')</title>
   @yield('meta')
 
@@ -17,3 +18,4 @@
   <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/lightslider.css') }}">
   <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/owl.carousel.min.css') }}">
   <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/bootstrap.min.css') }}">
+  @yield('styles')

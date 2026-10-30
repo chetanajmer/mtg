@@ -1,0 +1,246 @@
+.collections-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  margin: 20px 0;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f9fafb;
+  padding: 8px 16px;
+  border-radius: 6px;
+  flex: 1;
+  max-width: 400px;
+}
+
+.search-box i {
+  color: #6b7280;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  flex: 1;
+  font-size: 14px;
+  outline: none;
+}
+
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.collection-card {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.collection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  position: relative;
+}
+
+.collection-icon {
+  width: 40px;
+  height: 40px;
+  background: #15171a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 20px;
+}
+
+.collection-menu {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: #6b7280;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.collection-menu:hover {
+  background: #e5e7eb;
+}
+
+.collection-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 16px;
+  background: #fff;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border: 1px solid #e5e7eb;
+  min-width: 150px;
+  z-index: 10;
+}
+
+.collection-dropdown a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  color: #374151;
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+
+.collection-dropdown a:hover {
+  background: #f9fafb;
+}
+
+.collection-body {
+  padding: 20px;
+}
+
+.collection-body h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  color: #374151;
+}
+
+.collection-body p {
+  margin: 0 0 16px 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.collection-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.collection-stats .stat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.collection-footer {
+  padding: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: #15171a;
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: #2d3035;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid #15171a;
+  color: #15171a;
+  width: 100%;
+  justify-content: center;
+}
+
+.btn-outline:hover {
+  background: #15171a;
+  color: #fff;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.empty-state i {
+  font-size: 80px;
+  color: #d1d5db;
+  margin-bottom: 20px;
+}
+
+.empty-state h2 {
+  color: #374151;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #6b7280;
+  margin-bottom: 30px;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 0;
+}
+
+.pagination a,
+.pagination span {
+  padding: 8px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #374151;
+  transition: all 0.3s;
+}
+
+.pagination a:hover {
+  background: #15171a;
+  color: #fff;
+  border-color: #15171a;
+}
+
+.pagination .active {
+  background: #15171a;
+  color: #fff;
+  border-color: #15171a;
+}
+
+.collection-card.hidden {
+  display: none;
+}

@@ -345,6 +345,10 @@ figure figcaption {
                                 <a href="{{route('ordertracking.index')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Order Tracking</span></a>
                             </li>
 
+                            <li>
+                                <a href="{{route('ordertracking.list')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Order Tracking List</span></a>
+                            </li>
+
                             
                          
                              <!-- <li>
