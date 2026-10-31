@@ -161,7 +161,7 @@ window.location.href = "{{url('/admin')}}";
                     <p class="order-workflow-breadcrumb">Store Enquiries <span>/</span> Order #{{ $order->id ?? 'N/A' }}</p>
                     <h1>Order Workflow — #{{ $order->id ?? 'N/A' }}</h1>
                 </div>
-                <a href="{{url('orders')}}" class="order-workflow-btn order-workflow-btn-primary">← Back to Orders</a>
+                <a href="{{route('orders.index')}}" class="order-workflow-btn order-workflow-btn-primary">← Back to Orders</a>
             </div>
 
             <!-- ===== Order summary + stepper ===== -->

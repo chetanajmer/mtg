@@ -38,6 +38,7 @@ class Kernel extends HttpKernel
             // \Illuminate\Session\Middleware\AuthenticateSession::class,
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
+            \App\Http\Middleware\RejectDangerousUploads::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
@@ -65,6 +66,7 @@ class Kernel extends HttpKernel
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'corporate.auth' => \App\Http\Middleware\CorporatePortalAuth::class,
+        'admin.auth' => \App\Http\Middleware\AdminAuth::class,
         //'cors' => \App\Http\Middleware\Cors::class,
     ];
 }

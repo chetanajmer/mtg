@@ -289,9 +289,13 @@ $(window).resize(function(e) {
 <script>
   var chrt = document.getElementById("line_chart").getContext("2d");
   <?php
-    $start_date=substr($user[0]['date'], 0, 4)."-".substr($user[0]['date'],4,2)."-".substr($user[0]['date'],6,2);
+    // Analytics can be empty (e.g. no credentials on a local copy)
+    $user_list=collect($user)->values();
+    $first_day=$user_list->first()['date'] ?? date('Ymd');
+    $last_day=$user_list->last()['date'] ?? date('Ymd');
+    $start_date=substr($first_day, 0, 4)."-".substr($first_day,4,2)."-".substr($first_day,6,2);
     $startdate=date('d-m-Y',strtotime($start_date));
-    $end_date=substr($user[6]['date'], 0, 4)."-".substr($user[6]['date'],4,2)."-".substr($user[6]['date'],6,2);
+    $end_date=substr($last_day, 0, 4)."-".substr($last_day,4,2)."-".substr($last_day,6,2);
     $enddate=date('d-m-Y',strtotime($end_date));
   ?>
   var chartId = new Chart(chrt, {

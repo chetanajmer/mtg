@@ -20,9 +20,38 @@ class CartController extends Controller
         return CartItem::where('session_id', session()->getId());
     }
 
+    /**
+     * Re-price every cart line from the product so the cart always uses the
+     * current tier price for its quantity.
+     */
+    private function refreshPrices($items)
+    {
+        $products = Product::whereIn('id', $items->pluck('product_id'))->get()->keyBy('id');
+
+        foreach ($items as $item) {
+            $product = $products->get($item->product_id);
+            if (!$product) {
+                continue;
+            }
+
+            $price = $product->priceForQuantity($item->quantity);
+            if ((float) $item->price !== $price) {
+                $item->price = $price;
+                $item->save();
+            }
+        }
+
+        return $items;
+    }
+
+    private function taxRate()
+    {
+        return (float) config('app.cart_tax_rate', 0.05);
+    }
+
     public function index(Request $request)
     {
-        $items = $this->cartQuery()->orderBy('id')->get();
+        $items = $this->refreshPrices($this->cartQuery()->orderBy('id')->get());
         $user = session()->has('userid')
             ? DB::table('storeusers')->where('id', session()->get('userid'))->first()
             : null;
@@ -30,7 +59,7 @@ class CartController extends Controller
         $subtotal = $items->sum(function ($item) {
             return $item->price * $item->quantity;
         });
-        $tax = round($subtotal * 0.05, 2);
+        $tax = round($subtotal * $this->taxRate(), 2);
         $total = $subtotal + $tax;
 
         return view('web_frontend.cart', compact('items', 'user', 'subtotal', 'tax', 'total'));
@@ -51,6 +80,7 @@ class CartController extends Controller
 
         if ($existing) {
             $existing->quantity += $quantity;
+            $existing->price = $product->priceForQuantity($existing->quantity);
             $existing->save();
         } else {
             $item = new CartItem();
@@ -59,7 +89,7 @@ class CartController extends Controller
             $item->product_id = $product->id;
             $item->name = $product->name;
             $item->modelno = $product->modelno;
-            $item->price = $product->price ?? 0;
+            $item->price = $product->priceForQuantity($quantity);
             $item->quantity = $quantity;
             $item->image = $product->image1;
             $item->save();
@@ -87,9 +117,13 @@ class CartController extends Controller
         }
 
         $item->quantity = $request->quantity;
+        $product = Product::find($item->product_id);
+        if ($product) {
+            $item->price = $product->priceForQuantity($item->quantity);
+        }
         $item->save();
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'price' => (float) $item->price]);
     }
 
     public function removeItem($id)
@@ -112,7 +146,7 @@ class CartController extends Controller
             return redirect()->route('cart.index');
         }
 
-        $items = $this->cartQuery()->orderBy('id')->get();
+        $items = $this->refreshPrices($this->cartQuery()->orderBy('id')->get());
 
         if ($items->isEmpty()) {
             $request->session()->flash('error', 'Your cart is empty.');
@@ -124,7 +158,7 @@ class CartController extends Controller
         $subtotal = $items->sum(function ($item) {
             return $item->price * $item->quantity;
         });
-        $tax = round($subtotal * 0.05, 2);
+        $tax = round($subtotal * $this->taxRate(), 2);
         $total = $subtotal + $tax;
 
         $enquiry = new Enquiry();

@@ -61,7 +61,9 @@ $headersettings= \App\Models\Header_setting::where('id','1')->first();
 
 <p style="margin:0 0 16px">Thanks for creating an account on {{$site_settings->sitename}}. Your username is <strong><a href="mailto:{{$details['email']}}" target="_blank">{{$details['email']}}</a></strong>.</p>
 
-		<p style="margin:0 0 16px">Your password is: <strong>{{$details['password']}}</strong></p>
+		@if(!empty($details['password']))
+		<p style="margin:0 0 16px">Your temporary password is: <strong>{{$details['password']}}</strong>. Please change it after you log in.</p>
+		@endif
 
 
 

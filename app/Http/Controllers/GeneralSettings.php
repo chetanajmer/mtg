@@ -501,33 +501,6 @@ class GeneralSettings extends Controller
     }
 
 
-    public function env_key_update(Request $request)
-    {
-
-        //echo"<pre>";print_r($_POST);die;
-        foreach ($request->types as $key => $type) {
-                $this->overWriteEnvFile($type, $request[$type]);
-        }
-
-        $request->session()->flash('success','Updated Successfully !');    
-        return Redirect::back(); 
-    }
-
-
-    
-
-    public function overWriteEnvFile($type, $val)
-    {
-        $path = base_path('.env');
-
-        if (file_exists($path)) {
-
-            file_put_contents($path, str_replace(
-                $type . '=' . env($type), $type . '=' . $val, file_get_contents($path)
-            ));
-        }
-    }
-
     /*public function overWriteEnvFile($type, $val)
     {
         $path = base_path('.env');

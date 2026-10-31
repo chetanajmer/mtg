@@ -11,4 +11,5 @@ Homestead.yaml
 npm-debug.log
 yarn-error.log
 /public/upload
+/log_laravel
 /storage/framework/cache/data/*

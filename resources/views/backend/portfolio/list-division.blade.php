@@ -22,7 +22,7 @@ else
     $pageid=1;
 }
 
-$email=session()->get('username');
+$email=session()->get('admin_email');
 @endphp
 @extends('layouts.app')
 

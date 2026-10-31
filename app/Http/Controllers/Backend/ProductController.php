@@ -1639,7 +1639,7 @@ class ProductController extends Controller
 
         $request->session()->flash('success','Saved Successfully!');
 
-        $username=session()->get('username');
+        $username=session()->get('admin_email');
         
         return Redirect::to('listproduct');
         

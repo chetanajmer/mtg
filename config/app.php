@@ -54,6 +54,11 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    /*
+    | Tax added to cart and enquiry totals (0.05 = 5% UAE VAT).
+    */
+    'cart_tax_rate' => env('CART_TAX_RATE', 0.05),
+
     'asset_url' => env('ASSET_URL', null),
 
     /*

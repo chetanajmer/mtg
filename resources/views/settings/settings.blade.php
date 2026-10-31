@@ -58,7 +58,10 @@
 
 
 
-                                    <form action="{{ route('env_key_update') }}" method="post" class="form-horizontal" enctype="multipart/form-data">
+                                    <div class="alert alert-info">Mail settings are read-only here. To change them, edit the MAIL_* values in the server's .env file, then run <code>php artisan config:cache</code>.</div>
+
+                                    <form onsubmit="return false;" class="form-horizontal">
+                                    <fieldset disabled>
 
                                                        {{ csrf_field() }}
 
@@ -143,7 +146,7 @@
                             <label class="control-label">{{__('MAIL PASSWORD')}}</label>
                         </div>
                         <div class="col-lg-6">
-                            <input type="text" class="form-control" name="MAIL_PASSWORD" value="{{  env('MAIL_PASSWORD') }}" placeholder="MAIL PASSWORD">
+                            <input type="text" class="form-control" name="MAIL_PASSWORD" value="{{ config('mail.mailers.smtp.password') ? '********' : '' }}" placeholder="MAIL PASSWORD">
                         </div>
                     </div>
                     <div class="form-group">
@@ -215,7 +218,7 @@
 
                                                 <a href="{{url('dashboard')}}" ><button type="button" class="btn w-sm btn-white waves-effect">Cancel</button></a>
 
-                                                <button type="submit"  id="save" class="btn w-sm btn-default waves-effect waves-light">Save</button>
+
 
 
 
@@ -337,6 +340,7 @@
 
                                         </div>
 
+                                    </fieldset>
                                     </form>
 
                                 </div>

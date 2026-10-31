@@ -148,7 +148,7 @@ class OrderProcessingController extends Controller
                     $workflow->step5_completed_at = now();
                     $workflow->delivery_date = $request->delivery_date;
                     $workflow->current_step = 6; // Completed
-                    $workflow->completed_by = session()->get('userid');
+                    $workflow->completed_by = session()->get('admin_id');
                     break;
 
                 default:

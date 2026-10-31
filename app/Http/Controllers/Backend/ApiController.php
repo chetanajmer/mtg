@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Schema;
 //use App\Models\Header_setting;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use DB;
 use Mail;
 use Illuminate\Support\Facades\File;
@@ -936,36 +937,26 @@ class ApiController extends Controller
 			$order_details=Tmporder::where('orderid',$orderid)->first();
 			$order_amount=$order_details->subtotal;     
 
-			 $orderdata= <<<DATA
-				{
-					"profile_id": 48334,
-					"tran_type": "sale",
-					"tran_class": "ecom" ,
-					"cart_id":"$orderid",
-					"cart_description": "$cust_email",
-					"cart_currency": "AED",
-					"cart_amount": "$order_amount",
-					"customer_details": {
-					  "name": "$cust_name",
-					  "email": "$cust_email",
-					  "street1": "$cust_address",
-					  "city": "$cust_city",
-					  "country": "$cust_country",
-					  "ip": "94.204.129.89"
-					  
-					},
-					"shipping_details": {
-					  "name": "$cust_name",
-					  "email": "$cust_email",
-					  "street1": "$cust_address",
-					  "city": "$cust_city",
-					  "country": "$cust_country",
-					  "ip": "94.204.129.89"
-					},
-					"callback": "https://beta.sevenwonder.ae/callback",
-					"return": "https://beta.sevenwonder.ae/paytab_returnurl"
-				}
-				DATA;
+			 $customer=array(
+					"name" => $cust_name,
+					"email" => $cust_email,
+					"street1" => $cust_address,
+					"city" => $cust_city,
+					"country" => $cust_country,
+					"ip" => $request->ip(),
+				);
+			 $orderdata=array(
+					"tran_type" => "sale",
+					"tran_class" => "ecom",
+					"cart_id" => (string)$orderid,
+					"cart_description" => (string)$cust_email,
+					"cart_currency" => "AED",
+					"cart_amount" => (float)$order_amount,
+					"customer_details" => $customer,
+					"shipping_details" => $customer,
+					"callback" => route('callback'),
+					"return" => route('paytab_returnurl'),
+				);
 
 				return $payment_url=paytabs($orderdata);
 			}
@@ -1095,25 +1086,22 @@ class ApiController extends Controller
 	}
 
 	public function paytab_returnurl(Request $request)
-	{   
+	{
+	   // Never trust the status the browser posts back; ask PayTabs directly
+	   $orderid=$request->cartId;
+	   $frontend=rtrim(config('services.paytabs.frontend_url'),'/');
+	   $result=$request->tranRef ? paytabs_query($request->tranRef) : null;
 
-		//echo url('/');die ;
-	   // echo $request->respStatus;
-		//print_r($_POST);
-	   $orderid=$request->cartId; 
-	   if($request->respStatus=="D")
+	   $approved=$result
+		   && (string)($result['cart_id'] ?? '')===(string)$orderid
+		   && ($result['payment_result']['response_status'] ?? null)==='A';
+
+	   if($approved)
 	   {
-		  return   Redirect::to('http://localhost:4200/failed/'.$orderid);
+			return Redirect::to($frontend.'/thankyou/'.urlencode($orderid));
 	   }
-	   else if ($request->respStatus=="A") 
-	   {
-		   // echo "die";
-			return  Redirect::to('http://localhost:4200/thankyou/'.$orderid);
-	   } 
-	   else
-	   {
 
-	   } 
+	   return Redirect::to($frontend.'/failed/'.urlencode($orderid));
 	}
 
 
@@ -1148,7 +1136,7 @@ class ApiController extends Controller
 			'email' => $email,
 			'fname' => $request->userinfo['first_name'],
 			'lname' => $request->userinfo['last_name'],
-			'password' =>$password
+			'password' =>Hash::make($password)
 			]);
 
 
@@ -1271,10 +1259,14 @@ class ApiController extends Controller
 
 	  $email=$request->userinfo['email_address'];
 	  $password=$request->userinfo['password'];
-	  $checkuser=DB::table('storeusers')->select('*')->where('email', $email)
-	  ->where('password',$password)->first();
-	  
-	  if(!empty($checkuser))
+	  $checkuser=DB::table('storeusers')->select('*')->where('email', $email)->first();
+
+	  $valid=!empty($checkuser) && !empty($checkuser->password) && !empty($password)
+		  && (strpos($checkuser->password, '$2y$')===0
+			  ? Hash::check($password, $checkuser->password)
+			  : hash_equals((string)$checkuser->password, (string)$password));
+
+	  if($valid)
 	  {
 		  
 		$userid=$checkuser->id; 

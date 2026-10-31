@@ -17,4 +17,34 @@ class Product extends Model
 
         public $timestamps=false;
 
+    /**
+     * Unit price for a given order quantity. Uses the product's quantity
+     * slabs (product_tier_prices) when one matches, otherwise the sale price
+     * when it is lower, otherwise the normal price. This matches what the
+     * product page shows.
+     */
+    public function priceForQuantity($quantity)
+    {
+        $quantity = max(1, (int) $quantity);
+
+        $tier = \DB::table('product_tier_prices')
+            ->where('product_id', $this->id)
+            ->where('min_qty', '<=', $quantity)
+            ->where(function ($query) use ($quantity) {
+                $query->whereNull('max_qty')->orWhere('max_qty', '>=', $quantity);
+            })
+            ->orderByDesc('min_qty')
+            ->first();
+
+        if ($tier) {
+            return (float) $tier->price;
+        }
+
+        if (!empty($this->sprice) && $this->sprice > 0 && $this->sprice < $this->price) {
+            return (float) $this->sprice;
+        }
+
+        return (float) ($this->price ?? 0);
+    }
+
 }

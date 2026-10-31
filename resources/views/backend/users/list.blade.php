@@ -76,7 +76,7 @@ window.location.href = "{{url('/admin')}}";</script>
                                                    
                                                     <td>{{$items->name}}</td>
                                                     <td>{{$items->email}}</td>
-                                                    <td>{{$items->password}}</td>
+                                                    <td>********</td>
                                                     <td>{{$items->role}}</td>
                                                      <td>
                                                         <button type="button" data-toggle="modal" data-target="#edit-close-modal"   class=" editbutton btn btn-success waves-effect waves-light" value="{{$items->id}}" ><i class="fa fa-edit"></i>
@@ -231,7 +231,7 @@ window.location.href = "{{url('/admin')}}";</script>
                     <div class="col-md-6"> 
                         <div class="form-group"> 
                             <label for="field-1"  class="control-label">Password</label> 
-                                <input type="password"  class="form-control"  id="updatepassword" placeholder="Sharjah"> 
+                                <input type="password"  class="form-control"  id="updatepassword" placeholder="Leave blank to keep current password"> 
                         </div> 
                     </div> 
                     <div class="col-md-6"> 
@@ -419,7 +419,7 @@ $(document).on('click', '.editbutton', function() {
                     //swal("success",'Shipping Added Successfully !');
                     $("#updatename").val(data['name']);
                     $("#updateemail").val(data['email']);
-                    $("#updatepassword").val(data['password']);
+                    $("#updatepassword").val('');
                     $("#updaterole").val(data['role']);
                     $("#editid").val(data['id']);
 
@@ -541,10 +541,6 @@ $(document).on('click', '.updateadminuser', function() {
         else if(email=='')
         {
             swal("Warning","Email is required");
-        }
-        else if(password=='')
-        {
-            swal("Warning","Password is required");
         }
         else
         {

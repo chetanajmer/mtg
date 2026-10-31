@@ -48,7 +48,19 @@ return [
 
        'redirect' => env('Facebook_redirect'),
 
-    ]
+    ],
+
+    'paytabs' => [
+        'profile_id' => env('PAYTABS_PROFILE_ID'),
+        'server_key' => env('PAYTABS_SERVER_KEY'),
+        'base_url' => env('PAYTABS_BASE_URL', 'https://secure.paytabs.com'),
+        // Where shoppers are sent after paying (the old Angular storefront used http://localhost:4200)
+        'frontend_url' => env('PAYTABS_FRONTEND_URL', env('APP_URL')),
+    ],
+
+    'midocean' => [
+        'api_key' => env('MIDOCEAN_API_KEY'),
+    ],
 
 
 ];

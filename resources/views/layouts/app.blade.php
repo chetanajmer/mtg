@@ -1,8 +1,8 @@
 @php
 $settings=\App\Models\General_setting::where('id',1)->first();
 $role=session()->get('role');
-$email=session()->get('username');
-$admin_permission=\App\Models\Admin::where('id',session()->get('userid'))->first();    
+$email=session()->get('admin_email');
+$admin_permission=\App\Models\Admin::where('id',session()->get('admin_id'))->first();    
 @endphp
 <!DOCTYPE html>
 <html>
@@ -411,7 +411,7 @@ figure figcaption {
 
                             </li> -->
                             <li>
-                                <a href="{{url('orders')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Store Enquiries</span></a>
+                                <a href="{{route('orders.index')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Store Enquiries</span></a>
                               
                             </li>
 

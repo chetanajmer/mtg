@@ -36,12 +36,11 @@ class UsersController extends Controller
 
       $email=$request->get('email');
       $password=$request->get('password');
-      $checkuser=DB::table('storeusers')->select('*')->where('email', $email)
-      ->where('password',$password)->first();
-      
-      if(!empty($checkuser))
+      $checkuser=DB::table('storeusers')->select('*')->where('email', $email)->first();
+
+      if(!empty($checkuser) && !empty($password) && $this->passwordMatches($checkuser, $password))
       {
-        //print_r($checkuser->id); die;  
+        $request->session()->regenerate();
         $userid=$checkuser->id; 
         $useremail=$checkuser->email;
         session()->put('userid',$userid);
@@ -97,7 +96,7 @@ class UsersController extends Controller
          	$user->email=$email;
          	$user->fname=$request->firstname;
          	$user->lname=$request->lastname;
-         	$user->password=$request->password;
+         	$user->password=Hash::make($request->password);
          	$user->offersopted=$request->offers;
          	$user->newsletteropted=$request->newsletter;
          	$user->save();
@@ -110,7 +109,7 @@ class UsersController extends Controller
 
          	$details = [
           	'email'=>$email,
-          	'password'=>$password,
+          	'password'=>null,
           	'$admin_email'=>$admin_email,
           	'mail_from'=>$mail_from,
         	 ];
@@ -208,23 +207,18 @@ class UsersController extends Controller
         $checkuser = DB::table('storeusers')->select('*')->where('email', $email)->first();
 
         if (!empty($checkuser)) {
-            // Check password - support both plain text (for existing users) and hashed passwords
-            if (Hash::check($password, $checkuser->password) || $checkuser->password === $password) {
-                // If password is plain text, hash it for future use
-                if ($checkuser->password === $password) {
-                    DB::table('storeusers')
-                        ->where('id', $checkuser->id)
-                        ->update(['password' => Hash::make($password)]);
-                }
+            if ($this->passwordMatches($checkuser, $password)) {
+                $guestSessionId = session()->getId();
+                $request->session()->regenerate();
 
                 session()->put('userid', $checkuser->id);
                 session()->put('username', $checkuser->email);
                 session()->put('fullname', $checkuser->fname . ' ' . $checkuser->lname);
 
-                $this->mergeSessionCart($checkuser->id);
+                $this->mergeSessionCart($checkuser->id, $guestSessionId);
 
                 $request->session()->flash('success', 'Login Successful!');
-                return redirect($request->input('redirect') ?: route('corporate.portal'));
+                return redirect($this->safeRedirect($request->input('redirect'), route('corporate.portal')));
             } else {
                 $request->session()->flash('error', 'Invalid Password');
                 if ($request->input('auth_modal')) {
@@ -239,6 +233,30 @@ class UsersController extends Controller
             }
             return redirect()->back()->withInput();
         }
+    }
+
+    /**
+     * Check a store user's password. Old accounts may still have a plain text
+     * password; those are upgraded to a hash the first time they log in.
+     */
+    private function passwordMatches($user, $password)
+    {
+        if (empty($user->password)) {
+            return false;
+        }
+
+        if (strpos($user->password, '$2y$') === 0) {
+            return Hash::check($password, $user->password);
+        }
+
+        if (hash_equals((string) $user->password, (string) $password)) {
+            DB::table('storeusers')
+                ->where('id', $user->id)
+                ->update(['password' => Hash::make($password)]);
+            return true;
+        }
+
+        return false;
     }
 
     public function corporateRegister(Request $request)
@@ -326,7 +344,7 @@ class UsersController extends Controller
         $this->mergeSessionCart($user->id);
 
         $request->session()->flash('success', 'Registered successfully!');
-        return redirect($request->input('redirect') ?: route('cart.index'));
+        return redirect($this->safeRedirect($request->input('redirect'), route('cart.index')));
     }
 
     public function accountSettings(Request $request)
@@ -386,17 +404,35 @@ class UsersController extends Controller
         return redirect()->route('corporate.account-settings');
     }
 
-    private function mergeSessionCart($userId)
+    private function mergeSessionCart($userId, $sessionId = null)
     {
-        CartItem::where('session_id', session()->getId())
+        CartItem::where('session_id', $sessionId ?: session()->getId())
             ->whereNull('user_id')
             ->update(['user_id' => $userId, 'session_id' => null]);
+    }
+
+    /**
+     * Only follow redirects that stay on this site.
+     */
+    private function safeRedirect($target, $fallback)
+    {
+        if (is_string($target) && $target !== '') {
+            if (strpos($target, '/') === 0 && strpos($target, '//') !== 0 && strpos($target, '/\\') !== 0) {
+                return $target;
+            }
+            $home = url('/');
+            if ($target === $home || strpos($target, $home . '/') === 0) {
+                return $target;
+            }
+        }
+
+        return $fallback;
     }
 
     public function redirectToGoogleCorporate(Request $request)
     {
         if ($request->input('redirect')) {
-            session()->put('google_redirect', $request->input('redirect'));
+            session()->put('google_redirect', $this->safeRedirect($request->input('redirect'), route('corporate.portal')));
         }
 
         return Socialite::driver('google')
