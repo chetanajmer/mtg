@@ -15,7 +15,9 @@ $categorydata=\App\Models\Category::findorFail($catid);
        @php
           $breadcrumb_brand=\App\Models\Brand::where('id',$categorydata->brand_id)->first();
        @endphp
-        <li><a href="{{url('brand/'.$breadcrumb_brand->slug)}}">{{$breadcrumb_brand->brandname}}</a></li>
+        @if(!empty($breadcrumb_brand))
+       <li><a href="{{url('brand/'.$breadcrumb_brand->slug)}}">{{$breadcrumb_brand->brandname}}</a></li>
+       @endif
        <li>{{$categorydata->catname}}</li>
      </ul>
   </div>

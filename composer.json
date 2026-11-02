@@ -61,7 +61,10 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": [
+                "baselrabia/paytabs-with-laravel",
+                "paytabscom/laravel_paytabs"
+            ]
         }
     },
     "config": {

@@ -167,7 +167,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
          Laravel\Socialite\SocialiteServiceProvider::class,
-         Basel\Paytabs\PaytabsServiceProvider::class,
+         // Basel PayTabs provider removed: it only registered a public /paytabs_payment test page
         
 
         /*
@@ -239,7 +239,6 @@ return [
         'Image' => Intervention\Image\Facades\Image::class,
         'Input' => Illuminate\Support\Facades\Input::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
-        'Paytabs' => Basel\Paytabs\Facades\PaytabsFacade::class,
 
 
     ],

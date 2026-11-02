@@ -21,12 +21,10 @@ use App\Http\Controllers\Backend\OccasionController;
 use App\Http\Controllers\Backend\PreferenceController;
 use App\Http\Controllers\Backend\ExhibitionEventController;
 use App\Http\Controllers\Backend\CouponController;
-use App\Http\Controllers\Backend\RewardController;
 use App\Http\Controllers\Backend\FilterController;
 use App\Http\Controllers\GeneralSettings;
 use App\Http\Controllers\Backend\HomepagesettingController;
 use App\Http\Controllers\Backend\ApiController;
-use App\Http\Controllers\Backend\MiscController;
 use App\Http\Controllers\Backend\AnalyticsController;
 use App\Http\Controllers\Backend\FastexcelController;
 use App\Http\Controllers\Backend\PaytabController;
@@ -38,14 +36,16 @@ use App\Http\Controllers\Backend\FlipbookController;
 use App\Http\Controllers\Backend\ReviewController;
 use App\Http\Controllers\Backend\PortfolioController;
 use App\Http\Controllers\Backend\OrderTrackingController;
+use App\Http\Controllers\Backend\OrderWorkflowController;
 use App\Http\Controllers\NewBrandController;
 use App\Http\Controllers\OrderProcessingController;
 
 /*Store*/
 use App\Http\Controllers\Frontend\HomepageController;
-use App\Http\Controllers\Frontend\Storeproductcontroller;
 use App\Http\Controllers\Frontend\UsersController;
 use App\Http\Controllers\Frontend\CartController;
+use App\Http\Controllers\Frontend\CustomerOrderController;
+use App\Http\Controllers\Frontend\CustomerReportController;
 use App\Http\Controllers\Frontend\StoreCategoryController;
 use App\Http\Controllers\Frontend\StoreBrandController;
 use App\Http\Controllers\Frontend\FiltersController;
@@ -78,13 +78,19 @@ Route::any('decrementquantity', [HomepageController::class, 'decrementquantity']
 Route::any('deleteproduct', [HomepageController::class, 'deleteproduct'])->name('deleteproduct');
 Route::any('clearcart', [HomepageController::class, 'clearcart'])->name('clearcart');
 
-Route::any('checkout', [HomepageController::class, 'checkout']);
-Route::any('docheckout', [HomepageController::class, 'docheckout'])->name('docheckout');
+// The old checkout could never submit (docheckout was commented out); use the new cart
+Route::redirect('checkout', '/cart');
 
-Route::any('guestcheckout', [HomepageController::class, 'guestcheckout']);
+Route::redirect('guestcheckout', '/cart');
 
 // Logged-in customer's own orders (the admin list is /admin/orders)
 Route::any('orders', [HomepageController::class, 'orders']);
+Route::get('orders/{orderid}', [CustomerOrderController::class, 'show'])->name('customer.orders.show')->where('orderid', '[0-9]+');
+Route::post('orders/{orderid}/steps/{step}/{action}', [CustomerOrderController::class, 'act'])->name('customer.orders.act')
+    ->where(['orderid' => '[0-9]+', 'step' => '[0-9]+', 'action' => '[a-z]+'])->middleware('throttle:order-answer');
+// Signed link from order emails: approve / request changes / rate without logging in
+Route::match(['get', 'post'], 'order-response/{orderid}/{step}/{round}', [CustomerOrderController::class, 'respond'])->name('customer.orders.respond')
+    ->where(['orderid' => '[0-9]+', 'step' => '[0-9]+', 'round' => '[0-9]+'])->middleware('throttle:order-answer');
 
 Route::any('contactus', [HomepageController::class, 'contactus']);
 Route::any('aboutus', [HomepageController::class, 'aboutus']);
@@ -98,10 +104,6 @@ Route::any('deletewishlist/{id}', [HomepageController::class, 'deletewishlist'])
 Route::any('privacy-policy', [HomepageController::class, 'privacy']);
 Route::any('return-policy', [HomepageController::class, 'return']);
 Route::any('shippment-policy', [HomepageController::class, 'shippment']);
-Route::any('quick-view/{slug}', [HomepageController::class, 'quickview'])->name('quickview');
-Route::any('category/quick-view/{slug}', [HomepageController::class, 'quickview']);
-Route::any('product/quick-view/{slug}', [HomepageController::class, 'quickview']);
-Route::any('category/quick-view/{slug}/gridview', [HomepageController::class, 'quickview']);
 
 
 /*Users Login*/
@@ -116,6 +118,15 @@ Route::any('/store/myaccount', [UsersController::class, 'myaccount']);
 // Corporate Portal Authentication Routes
 Route::get('/corporate-portal', [UsersController::class, 'corporatePortal'])
     ->name('corporate.portal')
+    ->middleware('corporate.auth');
+
+// Customer's own reports and CSV downloads
+Route::get('/corporate-reports', [CustomerReportController::class, 'index'])
+    ->name('corporate.reports')
+    ->middleware('corporate.auth');
+Route::get('/corporate-reports/download/{type}', [CustomerReportController::class, 'download'])
+    ->name('corporate.reports.download')
+    ->where('type', 'orders|spending|approvals')
     ->middleware('corporate.auth');
 
 Route::get('/corporate/login', [UsersController::class, 'corporateLogin'])
@@ -137,6 +148,13 @@ Route::get('/corporate/forgot-password', [UsersController::class, 'resetpassword
 
 Route::post('/corporate/forgot-password', [UsersController::class, 'doresetpassword'])
     ->name('corporate.forgot.password.submit')
+    ->middleware('throttle:5,1');
+
+Route::get('/corporate/reset-password/{token}', [UsersController::class, 'showResetPasswordForm'])
+    ->name('corporate.password.reset');
+
+Route::post('/corporate/reset-password', [UsersController::class, 'doResetPasswordWithToken'])
+    ->name('corporate.password.update')
     ->middleware('throttle:5,1');
 
 Route::get('/corporate-addresses', [UsersController::class, 'corporateAddresses'])
@@ -168,6 +186,8 @@ Route::get('/collections/{id}', [UsersController::class, 'viewCollection'])->nam
 Route::delete('/collections/{id}', [UsersController::class, 'deleteCollection'])->name('collections.delete');
 Route::put('/collections/{id}', [UsersController::class, 'updateCollection'])->name('collections.update');
 Route::get('/collections-all', [UsersController::class, 'allCollections'])->name('collections.all');
+Route::post('/collections/{id}/to-cart', [UsersController::class, 'collectionToCart'])->name('collections.to-cart');
+Route::get('/collection-products/search', [UsersController::class, 'collectionProductSearch'])->name('collections.products');
 Route::post('/collections/{id}/items', [UsersController::class, 'addItemToCollection'])->name('collections.add-item');
 Route::delete('/collections/{id}/items/{itemId}', [UsersController::class, 'removeItemFromCollection'])->name('collections.remove-item');
 Route::put('/collections/{id}/items/{itemId}', [UsersController::class, 'updateItemQuantity'])->name('collections.update-item');
@@ -181,7 +201,9 @@ Route::post('/cart/register', [UsersController::class, 'storeCartRegister'])->na
 Route::get('/enquiry/success/{id}', [CartController::class, 'enquirySuccess'])->name('enquiry.success');
 Route::get('/corporate/auth/google', [UsersController::class, 'redirectToGoogleCorporate'])->name('corporate.google');
 Route::get('/corporate/auth/google/callback', [UsersController::class, 'handleGoogleCallback'])->name('corporate.google.callback');
-Route::view('/track-order', 'web_frontend.order-tracking');
+Route::get('/track-order', [CustomerOrderController::class, 'trackForm'])->name('track.form');
+Route::post('/track-order', [CustomerOrderController::class, 'trackLookup'])->name('track.lookup')->middleware('throttle:order-lookup');
+Route::get('/track-order/{orderid}', [CustomerOrderController::class, 'trackShow'])->name('track.show')->where('orderid', '[0-9]+');
 Route::view('/annual-corporate-membership', 'web_frontend.annual-corporate-membership');
 Route::view('/corporate-gifting-budget-planner', 'web_frontend.corporate-gifting-budget-planner');
 Route::any('/store/resetpassword', [UsersController::class, 'resetpassword']);
@@ -226,8 +248,6 @@ Route::get('getslider', [SliderController::class, 'getslider'])->name('getslider
 Route::get('getbannerlevel1', [ApiController::class, 'getbannerlevel1'])->name('getbannerlevel1');
 Route::get('getbannerlevel2', [ApiController::class, 'getbannerlevel2'])->name('getbannerlevel2');
 Route::get('getbannerlevel3', [ApiController::class, 'getbannerlevel3'])->name('getbannerlevel3');
-Route::get('getbannerlevel4', [ApiController::class, 'getbannerlevel4'])->name('getbannerlevel4');
-Route::get('getbannerlevel5', [ApiController::class, 'getbannerlevel5'])->name('getbannerlevel5');
 Route::get('getbannerlevel6', [ApiController::class, 'getbannerlevel6'])->name('getbannerlevel6');
 
 Route::get('categoryslider', [ApiController::class, 'categoryslider'])->name('categoryslider');
@@ -243,7 +263,6 @@ Route::get('productl7', [ApiController::class, 'productl7'])->name('productl7');
 Route::get('productl8', [ApiController::class, 'productl8'])->name('productl8');
 Route::get('productl9', [ApiController::class, 'productl9'])->name('productl9');
 
-Route::post('storeuser', [ApiController::class, 'storeuser'])->name('api.storeuser');
 
 Route::post('addtocart', [ApiController::class, 'addtocart'])->name('addtocart');
 Route::post('getcatproducts', [ApiController::class, 'getcatproducts'])->name('getcatproducts');
@@ -254,7 +273,6 @@ Route::get('gethomedata', [ApiController::class, 'gethomedata'])->name('gethomed
 
 Route::get('getallparentcategories', [ApiController::class, 'getallparentcategories'])->name('getallparentcategories');
 Route::get('getallcategories', [ApiController::class, 'getallcategories'])->name('getallcategories');
-Route::get('getallsubcategories', [ApiController::class, 'getallsubcategories'])->name('getallsubcategories');
 Route::get('getallbrands', [ApiController::class, 'getallbrands'])->name('getallbrands');
 
 Route::post('addsubscriber', [ApiController::class, 'addsubscriber'])->name('addsubscriber')->middleware('throttle:10,1');
@@ -263,13 +281,9 @@ Route::post('getproductdetails', [ApiController::class, 'getproductdetails'])->n
 Route::post('getbrandproducts', [ApiController::class, 'getbrandproducts'])->name('getbrandproducts');
 
 Route::post('searchproduct', [ApiController::class, 'searchproduct'])->name('searchproduct');
-Route::post('search_or_update', [ApiController::class, 'search_or_update'])->name('search_or_update');
 
 Route::any('paytab_returnurl', [ApiController::class, 'paytab_returnurl'])->name('paytab_returnurl');
 
-Route::post('registeruser', [ApiController::class, 'registeruser'])->name('registeruser')->middleware('throttle:5,1');
-Route::post('registersocialuser', [ApiController::class, 'registersocialuser'])->name('registersocialuser')->middleware('throttle:5,1');
-Route::post('loginuser', [ApiController::class, 'loginuser'])->name('loginuser')->middleware('throttle:5,1');
 
 // Removed: getuserdetails, getuserorderdetails and the API version of
 // updateuserdetails. They read or changed any customer's account (including
@@ -277,13 +291,11 @@ Route::post('loginuser', [ApiController::class, 'loginuser'])->name('loginuser')
 
 Route::post('stocknotify', [ApiController::class, 'stocknotify'])->name('stocknotify')->middleware('throttle:10,1');
 Route::post('b2benquiry', [ApiController::class, 'b2benquiry'])->name('b2benquiry')->middleware('throttle:10,1');
-Route::post('addtocompare', [ApiController::class, 'addtocompare'])->name('addtocompare');
-Route::post('getcomparelist', [ApiController::class, 'getcomparelist'])->name('getcomparelist');
 Route::post('abandancart', [ApiController::class, 'abandancart'])->name('abandancart');
-Route::post('enquiry', [ApiController::class, 'enquiry'])->name('enquiry')->middleware('throttle:10,1');
-Route::post('contact', [ApiController::class, 'contact'])->name('contact')->middleware('throttle:10,1');
+// Removed: enquiry, search_or_update and contact (old Angular storefront). They
+// emailed customer enquiries and orders to outside addresses (FX-02); website
+// quotes go through CartController::sendEnquiry.
 
-Route::get('headerfilter', [ApiController::class, 'headerfilter'])->name('headerfilter');
 Route::get('portfolio', [ApiController::class, 'portfolio'])->name('portfolio');
 Route::get('portfolio-detail', [ApiController::class, 'portfolio_detail'])->name('portfolio_detail');
 Route::get('featured_portfolio', [ApiController::class, 'featured_portfolio'])->name('featured_portfolio');
@@ -302,7 +314,7 @@ Route::any('/adminlogout', [AdminController::class, 'adminlogout'])->name('admin
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('admin.auth')->group(function () {
+Route::middleware(['admin.auth', 'admin.permission', 'admin.same-origin'])->group(function () {
 
 Route::any('crop-image-upload', [CropImageController::class, 'uploadCropImage']);
 
@@ -315,7 +327,6 @@ Route::any('search_yearly', [AdminController::class, 'search_yearly'])->name('se
 Route::any('add-brands', [BrandController::class, 'index']);
 Route::any('edit-brands/{id}', [BrandController::class, 'edit']);
 Route::post('addbrand', [BrandController::class, 'add'])->name('addbrand');
-Route::any('findbrand', [BrandController::class, 'findbrand']);
 Route::any('updatebrand', [BrandController::class, 'updatebrand'])->name('updatebrand');
 Route::any('deletebrand/{id}', [BrandController::class, 'deletebrand']);
 Route::any('listbrand', [BrandController::class, 'list']);
@@ -323,7 +334,6 @@ Route::any('brandfeatured', [BrandController::class, 'brandfeatured'])->name('br
 Route::any('brandactive', [BrandController::class, 'brandactive'])->name('brandactive');
 Route::any('delete_brand_thumbnail', [BrandController::class, 'delete_brand_thumbnail'])->name('delete_brand_thumbnail');
 Route::any('delete_brand_banner', [BrandController::class, 'delete_brand_banner'])->name('delete_brand_banner');
-Route::any('getslug', [BrandController::class, 'getslug'])->name('getslug');
 
 // New Brand Management
 Route::prefix('newbrand')->name('newbrand.')->group(function () {
@@ -363,7 +373,6 @@ Route::any('getparentcategories', [ParentcategoryController::class, 'getparentca
 Route::any('add-categories', [CategoryController::class, 'index']);
 Route::any('edit-categories/{id}', [CategoryController::class, 'edit']);
 Route::post('addcategory', [CategoryController::class, 'add'])->name('addcat');
-Route::any('findcat', [CategoryController::class, 'findcat']);
 Route::any('updatecat', [CategoryController::class, 'updatecat'])->name('updatecat');
 Route::any('deletecategory/{id}', [CategoryController::class, 'deletecat']);
 Route::any('listcategory', [CategoryController::class, 'list']);
@@ -447,8 +456,6 @@ Route::any('superadmin-update', [GeneralSettings::class, 'updatesuperadmin'])->n
 
 /*variants*/
 
-Route::any('variants', [GeneralSettings::class, 'variants']);
-Route::any('add-variants', [GeneralSettings::class, 'addvariants'])->name('addvariants');
 
 
 /*corporate pages*/
@@ -480,15 +487,10 @@ Route::any('deletebulkimage', [ProductController::class, 'deletebulkimage'])->na
 Route::any('newarrival', [ProductController::class, 'newarrival'])->name('newarrival');
 Route::any('sale', [ProductController::class, 'sale'])->name('sale');
 Route::any('active', [ProductController::class, 'active'])->name('active');
-Route::any('add_image', [ProductController::class, 'add_image'])->name('add_image');
-Route::any('addimage', [ProductController::class, 'addimage'])->name('addimage');
-Route::any('edit_image/{modelno}', [ProductController::class, 'edit_image'])->name('edit_image');
-Route::any('editimage', [ProductController::class, 'editimage'])->name('editimage');
 Route::any('add_product', [ProductController::class, 'add_products'])->name('add_products');
 Route::any('single_product_add', [ProductController::class, 'single_product_add'])->name('single_product_add');
 Route::any('sku_combination', [ProductController::class, 'sku_combination'])->name('sku_combination');
 Route::any('sku_combination_edit', [ProductController::class, 'sku_combination_edit'])->name('sku_combination_edit');
-Route::any('delete_sku_image', [ProductController::class, 'delete_sku_image'])->name('delete_sku_image');
 Route::any('findcategoryforproduct', [ProductController::class, 'findcategoryforproduct'])->name('findcategoryforproduct');
 Route::any('findsubcategoryforproduct', [ProductController::class, 'findsubcategoryforproduct'])->name('findsubcategoryforproduct');
 Route::any('findchildsubcategoryforproduct', [ProductController::class, 'findchildsubcategoryforproduct'])->name('findchildsubcategoryforproduct');
@@ -586,17 +588,7 @@ Route::any('update-adminuser', [AdminController::class, 'update'])->name('update
 Route::any('delete-adminuser', [AdminController::class, 'delete'])->name('deleteadminuser');
 
 
-/*Referral */
-Route::any('reward', [RewardController::class, 'index']);
-Route::any('addreward', [RewardController::class, 'addreward'])->name('addreward');
-Route::any('add_reward', [RewardController::class, 'add_reward'])->name('add_reward');
-Route::any('edit-reward/{id}', [RewardController::class, 'edit_reward'])->name('edit_reward');
-Route::any('update_reward/id', [RewardController::class, 'update_reward'])->name('update_reward');
-Route::any('deletereward/id', [RewardController::class, 'deletereward'])->name('deletereward');
-Route::any('totalsale_active', [RewardController::class, 'totalsale_active'])->name('totalsale_active');
-Route::any('rewardproductstatus', [RewardController::class, 'rewardproductstatus'])->name('rewardproductstatus');
-Route::any('rewardtotalsalestatus', [RewardController::class, 'rewardtotalsalestatus'])->name('rewardtotalsalestatus');
-Route::any('totalsalestatus', [RewardController::class, 'totalsalestatus'])->name('totalsalestatus');
+/* Referral / Reward: removed, its database tables were never created */
 
 /* Coupon */
 Route::any('add-coupon', [CouponController::class, 'index']);
@@ -612,14 +604,18 @@ Route::any('b2b-enquiry', [B2BenquiryController::class, 'list'])->name('b2benqui
 /*Instock Notifier */
 Route::any('instock-notifier', [Instock_notifierController::class, 'list'])->name('instock.list');
 
-/* Reports*/
+/* Reports (the three old URLs open admin/reports) */
+Route::get('admin/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('admin/reports/export', [ReportController::class, 'export'])->name('reports.export');
 Route::any('date_report', [ReportController::class, 'date_report'])->name('date_report');
 Route::any('user_report', [ReportController::class, 'user_report'])->name('user_report');
 Route::any('product_report', [ReportController::class, 'product_report'])->name('product_report');
 
 /*Orders - Backend Store Enquiries */
 Route::any('admin/orders', [OrderController::class, 'index'])->name('orders.index');
-Route::any('order-workflow/{id}', [OrderController::class, 'orderWorkflow'])->name('orders.workflow');
+Route::get('admin/orders/{order}', [OrderWorkflowController::class, 'show'])->name('orders.show')->where('order', '[0-9]+');
+Route::post('admin/orders/{order}/steps/{step}/{action}', [OrderWorkflowController::class, 'act'])->name('orders.act')
+    ->where(['order' => '[0-9]+', 'step' => '[0-9]+', 'action' => '[a-z]+']);
 Route::any('abandoned_order', [OrderController::class, 'abandoned_order'])->name('abandoned_order');
 Route::any('abandoned_orderdetails/{id}', [OrderController::class, 'abandoned_orderdetails'])->name('abandoned_orderdetails');
 Route::any('send_abandoned_mail', [OrderController::class, 'send_abandoned_mail'])->name('send_abandoned_mail');
@@ -676,7 +672,6 @@ Route::any('contentupdate', [HomepagesettingController::class, 'contentupdate'])
 Route::any('visited_page', [AnalyticsController::class, 'visited_page'])->name('visited_page');
 Route::any('mostvisitedpage', [AnalyticsController::class, 'mostvisitedpage'])->name('mostvisitedpage');
 Route::any('usersbydate', [AnalyticsController::class, 'usersbydate'])->name('usersbydate');
-Route::any('usersbycountry', [AnalyticsController::class, 'usersbycountry'])->name('usersbycountry');
 
 /* FastExcel */
 Route::any('exportcategory', [FastexcelController::class, 'exportcategory'])->name('exportcategory');
@@ -686,6 +681,7 @@ Route::any('importsubcategory', [FastexcelController::class, 'importsubcategory'
 Route::any('exportproduct', [FastexcelController::class, 'exportproduct'])->name('exportproduct');
 Route::any('importproduct', [FastexcelController::class, 'importproduct'])->name('importproduct');
 Route::any('exportstoreuser', [FastexcelController::class, 'exportstoreuser'])->name('exportstoreuser');
+Route::any('store-user', [UsersController::class, 'storeuser'])->name('storeuser');
 Route::any('exportappliances', [FastexcelController::class, 'exportappliances'])->name('exportappliances');
 Route::any('exportaccessories', [FastexcelController::class, 'exportaccessories'])->name('exportaccessories');
 Route::any('bulkdeleteproducts', [FastexcelController::class, 'bulkdeleteproducts'])->name('bulkdeleteproducts');

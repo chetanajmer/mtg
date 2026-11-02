@@ -9,7 +9,6 @@ use App\Models\Header_setting;
 use App\Models\Footer_setting;
 use App\Models\Homepage_setting;
 use App\Models\Product_setting;
-use App\Models\Reward_setting;
 use App\Models\Footerlevel1;
 use App\Models\Myproduct;
 use App\Models\Product;

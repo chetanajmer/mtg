@@ -189,6 +189,11 @@ class FiltersController extends Controller
       {
          
           $data=$request->all();
+          // Called by the old-theme filter form; without it there is nothing to filter
+          if(empty($data['url']))
+          {
+            return redirect('/');
+          }
          
           $subcategoryUrl="";
           if(!empty($data['subcategoryfilter']))

@@ -108,6 +108,8 @@ class CouponController extends Controller
   public function getinputvalue(Request $request)
   {
     $inputvalue=$request->inputvalue;
+    $data='';
+    $labelname='';
     if($inputvalue=='parentcategory')
     {
       $data=Parentcategory::where('is_active','online')->select(\DB::raw("catname as name,id"))->get();

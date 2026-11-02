@@ -25,7 +25,9 @@ window.location.href = "{{url('/admin')}}";
                                     <thead>
                                         <tr>
                                             <th>ID</th>
+                                            <th>Order #</th>
                                             <th>Customer</th>
+                                            <th>Product</th>
                                             <th>Order Date</th>
                                             <th>Total</th>
                                             <th>Status</th>
@@ -37,24 +39,29 @@ window.location.href = "{{url('/admin')}}";
                                             @foreach($items_array as $order)
                                             <tr>
                                                 <td>{{$order->id}}</td>
-                                                <td>{{$order->name ?? 'N/A'}}</td>
+                                                <td>{{$order->orderid ?? '-'}}</td>
+                                                <td>{{$order->customer_name ?: 'N/A'}}@if($order->customer_company)<br><small>{{$order->customer_company}}</small>@endif</td>
+                                                <td>{{$order->name ?? 'N/A'}}@if(($itemCounts[$order->orderid] ?? 1) > 1)<br><small>+ {{ $itemCounts[$order->orderid] - 1 }} more</small>@endif</td>
                                                 <td>{{$order->created_at ?? 'N/A'}}</td>
                                                 <td>{{$order->ordertotal ?? 'N/A'}}</td>
                                                 <td>{{$order->orderstatus ?? 'Pending'}}</td>
                                                 <td>
-                                                    <a href="{{route('orders.workflow', $order->id)}}" class="btn btn-sm btn-info waves-effect waves-light">
-                                                        View Workflow
+                                                    <a href="{{ $order->order_id ? route('orders.show', $order->order_id) : route('ordertracking.show', $order->id) }}" class="btn btn-sm btn-info waves-effect waves-light">
+                                                        Order Tracking
                                                     </a>
                                                 </td>
                                             </tr>
                                             @endforeach
                                         @else
                                             <tr>
-                                                <td colspan="6" style="text-align: center;">No orders found.</td>
+                                                <td colspan="8" style="text-align: center;">No orders found.</td>
                                             </tr>
                                         @endif
                                     </tbody>
                                 </table>
+                                @if(method_exists($items_array, 'links'))
+                                    {{ $items_array->links('pagination::bootstrap-4') }}
+                                @endif
                             </div>
                         </div>
                     </div>

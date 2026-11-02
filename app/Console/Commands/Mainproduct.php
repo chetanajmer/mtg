@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Subcategory;
 use App\Models\Color;
+use Illuminate\Support\Facades\DB;
 class Mainproduct extends Command
 {
     /**

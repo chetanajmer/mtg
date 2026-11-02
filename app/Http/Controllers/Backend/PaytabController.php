@@ -3,7 +3,6 @@ namespace App\Http\Controllers\Backend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Paytab;
 use App\Models\Paytab_callback;
 use App\Models\Cartorder;
 use App\Models\Tmporder;

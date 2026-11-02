@@ -26,7 +26,6 @@ use App\Models\Color;
 use App\Models\Subscribe;
 use App\Models\Footerlevel1;
 use App\Models\Corporatepage;
-use App\Models\User_reward;
 use App\Models\Midocean_product;
 use App\Models\Midocean_counter;
 //use App\Models\Header_setting;
@@ -43,10 +42,11 @@ class HomepageController extends Controller
 {
 	public function index()
 	{
-		$banners=Categorybanner::where('id','1')->first();
-		$all_brands=Brand::where('is_active','online')->get();
-		$brands=Brand::where('is_active','online')->where('featured','online')->orderby('ranking')->get()->take(3);
-		return view('frontend.index',compact('brands','banners','all_brands'));
+		// Basic new-design homepage (the old one only showed a SilverGiftz logo
+		// linking to silvergiftz.com)
+		$categories=Category::where('is_active','online')->orderBy('ranking')->orderBy('id')->get();
+		$products=Product::where('is_active','online')->orderByDesc('id')->take(8)->get();
+		return view('web_frontend.home',compact('categories','products'));
 	}
 
 	public function product($slug)
@@ -62,7 +62,10 @@ class HomepageController extends Controller
 		if(!$product) {
 			abort(404);
 		}
-		$tier_prices=\DB::table('product_tier_prices')->where('product_id',$product->id)->orderBy('min_qty')->orderBy('id')->get();
+		// Tier rows are kept when the toggle is off, so only use them when it is on
+		$tier_prices=$product->tier_pricing_enabled==='yes'
+			? \DB::table('product_tier_prices')->where('product_id',$product->id)->where('price','>',0)->orderBy('min_qty')->orderBy('id')->get()
+			: collect();
 		return view('web_frontend.product',compact('product','tier_prices'));
 	}
 
@@ -143,14 +146,6 @@ class HomepageController extends Controller
 	 
 	}
 
-	public function cart(Request $request)
-	{
-
-		$items_array=Tmporder::where('sessionid',session()->get('sessionid'))->get();
-		$brands=Brand::where('is_active','online')->where('featured','online')->orderby('ranking')->get()->take(3);
-		return view('frontend.cart',compact('items_array','brands'));
-	}
-
 	public function incrementquantity(Request $request)
 	{
 
@@ -227,51 +222,6 @@ class HomepageController extends Controller
 		Tmporder::truncate();
 		// session()->flash('success', 'Product Deleted successfully');
 		return $msg="Enquiry List is Empty !";
-	}
-
-	public function quickview($slug)
-	{
-		$item=Product::where('slug',$slug)->where('is_active',"online")->first();
-		// echo "<pre>";
-		// print_r($item);
-		// exit();
-		return view('frontend.quickview',compact('item'));
-	}
-
-	public function gridview($slug)
-	{
-		$item=Product::where('slug',$slug)->where('is_active',"online")->first();
-		return view('frontend.categorygrid',compact('item'));
-	}
-
-	public function checkout(Request $request)
-	{
-		$userid=session()->get('userid');
-		$guestid=session()->get('guestid');
-		$userdata=Storeuser::where('id',$userid)->get();
-		$footerlevel1=Footerlevel1::findorFail(1);	
-		$contact=Contact::where('id','1')->first();
-		if(!empty($userid))
-		{
-			$items_array=Tmporder::where('sessionid',session()->get('sessionid'))->get();
-			$userdata=Storeuser::where('id',$userid)->first();
-			$shipping=Shipping::all();
-			$weightshipping=Weightshipping::get()->unique('area');
-			return view('frontend.checkout',compact('items_array','userdata','shipping','weightshipping','footerlevel1','contact'));
-		}
-		elseif(!empty($guestid)) 
-		{
-			$items_array=Tmporder::where('sessionid',session()->get('sessionid'))->get();
-			$shipping=Shipping::all();
-			$weightshipping=Weightshipping::get()->unique('area');
-			return view('frontend.guestcheckout',compact('items_array','shipping','weightshipping','footerlevel','contact'));
-		}
-		else
-		{
-			return Redirect::to('/store/login');
-		}    
-
-		
 	}
 
 	// public function docheckout(Request $request)
@@ -377,12 +327,6 @@ class HomepageController extends Controller
 	// }
 
 
-	public function guestcheckout(Request $request)
-	{
-		session()->put('guestid',"guest");
-		return Redirect::to('/checkout');
-	}
-
 	public function orders(Request $request)
 	{
 		// Check if user is authenticated
@@ -397,9 +341,16 @@ class HomepageController extends Controller
 				}
 			}
 
-			// Frontend orders for logged-in user - use unique('id') instead of 'orderid' to show all orders
-			$items_array = Cartorder::where('userid', $userid)->orderBy('created_at', 'desc')->get()->unique('id');
-			return view('web_frontend.orders', compact('items_array'));
+			// One row per order: placed by this customer or sent to their email
+			$email = optional(Storeuser::find($userid))->email;
+			$orders = \App\Models\Order::with('items')
+				->where(function ($q) use ($userid, $email) {
+					$q->where('storeuser_id', $userid);
+					if ($email) {
+						$q->orWhere('customer_email', $email);
+					}
+				})->orderByDesc('created_at')->orderByDesc('id')->get();
+			return view('web_frontend.orders', compact('orders'));
 		}
 
 		// The admin order list lives at /admin/orders
@@ -408,8 +359,12 @@ class HomepageController extends Controller
 
 	public function printinvoice($id)
 	{
-		$items=Cartorder::where('orderid',$id)->first();
-		return view('backend.orders.invoice',compact('items'));
+		$orders=Cartorder::where('orderid',$id)->orderBy('id')->get();
+		if($orders->isEmpty()) {
+			abort(404);
+		}
+		$items=$orders->first();
+		return view('backend.orders.invoice',compact('items','orders'));
 	}
 
 	public function deleteorder($id)
@@ -422,7 +377,10 @@ class HomepageController extends Controller
 	public function orderdetails($id)
 
 	{
-		$orders=Cartorder::where('orderid',$id)->get();
+		$orders=Cartorder::where('orderid',$id)->orderBy('id')->get();
+		if($orders->isEmpty()) {
+			abort(404);
+		}
 		return view('backend.orders.orderdetail',compact('orders'));
 
 	}
@@ -653,6 +611,11 @@ class HomepageController extends Controller
 	  $subcatgory_id=$request->get('subcategories');
 
 	  $brand_slug=$request->get('brand_slug');
+	  // Called by the old-theme filter (AJAX); ignore requests without a brand
+	  if(empty($brand_slug) || !Brand::where('slug',$brand_slug)->exists())
+	  {
+		return response('',204);
+	  }
 	  
 	  if(!empty($category_id))
 	  {
@@ -675,6 +638,11 @@ class HomepageController extends Controller
 	  $subcategory_id=$request->get('subcategories');
 
 	  $cat_slug=$request->get('cat_slug');
+	  // Called by the old-theme filter (AJAX); ignore requests without a category
+	  if(empty($cat_slug) || !Category::where('slug',$cat_slug)->exists())
+	  {
+		return response('',204);
+	  }
 	  
 
 	  if(!empty($subcategory_id))
@@ -694,40 +662,50 @@ class HomepageController extends Controller
 	 
 	}
 
+   /**
+    * Contact Us form: emails MTG staff (Reply-To the customer), then a short
+    * confirmation to the customer that does not repeat their message, so the
+    * form cannot be used to send arbitrary text to any address.
+    */
    public function contactform(Request $request)
 	{
-		$username=$request->get('contact-name');
-		$phone=$request->get('contact-phone');
-		$msg=$request->get('message');
-		$email=$request->get('contact-email');
-		 $data = array(
-		  'username'=>$username,
-		  'msg'=>$msg,
-		  'email'=>$email,
-		  'phone'=>$phone,
-		);
+		$data = $request->validate([
+			'contact-name' => 'required|string|max:100',
+			'contact-email' => 'required|email|max:150',
+			'contact-phone' => 'nullable|string|max:30',
+			'message' => 'required|string|max:5000',
+		]);
+		$contact = [
+			'name' => trim($data['contact-name']),
+			'email' => trim($data['contact-email']),
+			'phone' => trim((string) ($data['contact-phone'] ?? '')),
+			'msg' => trim($data['message']),
+		];
 
-		$user['to']=$request->get('contact-email');
-		// $user['from']="";
-		$user['from']="richa@silverpixelz.com";
-		Mail::send('mail/usercontactmail', $data, function($message) use ($user) {
-		
-		 $message->to($user['to'], 'Meem Industrial')->subject
-			('Contact Information');
-		 $message->from($user['from'],'Meem Industrial');
-		 });
+		$staff = staff_email();
+		try {
+			if (empty($staff)) {
+				throw new \RuntimeException('no staff email set (QUOTE_REQUEST_EMAIL or Header Settings email)');
+			}
+			Mail::send('mail.contact_staff', $contact, function ($message) use ($staff, $contact) {
+				$message->to($staff)->replyTo($contact['email'], $contact['name'])
+					->subject('Website contact message from ' . $contact['name']);
+			});
+		} catch (\Throwable $e) {
+			\Log::error('Contact form email to staff failed: ' . $e->getMessage());
+			return Redirect::back()->withInput()->with('error', 'Sorry, we could not send your message just now. Please email us at info@morethangiftz.com or call +971 55 786 3450.');
+		}
 
-		
-		Mail::send('mail/admincontactmail', $data, function($message) use ($user) {
-		
-		 $message->to($user['from'], 'Meem Industrial')->subject
-			('Contact Information');
-		 $message->from($user['from'],'Meem Industrial');
-		 });
-	  
-		  $request->session()->flash('success','Your Message has been sent, we will get back to you soon !');
-		 return Redirect::back(); 
+		try {
+			Mail::send('mail.contact_customer', ['name' => $contact['name']], function ($message) use ($contact) {
+				$message->to($contact['email'], $contact['name'])->subject('We received your message - More Than Giftz');
+			});
+		} catch (\Throwable $e) {
+			\Log::error('Contact form confirmation to ' . $contact['email'] . ' failed: ' . $e->getMessage());
+		}
 
+		$request->session()->flash('success', 'Thank you, your message has been sent. We will get back to you soon.');
+		return Redirect::back();
    }
 
    public function brands()

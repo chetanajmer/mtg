@@ -1,22 +1,4 @@
 <?php
-function sendmail_to_admin($details,$admin_email)
-{
-	Mail::send('mail/enquiry_admin_email',  $details, function($message) use ($admin_email) {
-      $message->to($admin_email, 'SilverGiftz')->subject
-        ('Enquiry Alert');
-      $message->from($admin_email,'Enquiry Information');
-    });
-}
-
-function sendmail_to_customer($details,$customer_email,$admin_email)
-{
-	Mail::send('mail/enquiry_user_email',  $details, function($message) use ($customer_email,$admin_email) {
-    $message->to($customer_email, 'SilverGiftz')->subject
-      ('Enquiry Alert');
-    $message->from($admin_email,'Enquiry Information');
-  });
-}
-
 /**
  * Create a PayTabs payment page and return its redirect URL.
  * $orderdata can be an array (preferred) or a JSON string.
@@ -96,5 +78,15 @@ function paytabs_valid_callback($raw_body,$signature)
 			return false;
 		}
 		return hash_equals(hash_hmac('sha256', $raw_body, $server_key), (string)$signature);
+}
+
+/**
+ * Staff inbox for quotes, contact messages and order responses:
+ * QUOTE_REQUEST_EMAIL (config mail.staff_address), else the admin Header Settings email.
+ */
+function staff_email()
+{
+		return config('mail.staff_address')
+			?: optional(\Illuminate\Support\Facades\DB::table('header_settings')->where('id', 1)->first())->headeremail;
 }
 ?>

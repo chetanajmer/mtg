@@ -89,13 +89,12 @@ $email=session()->get('admin_email');
                   @php
                     $category=App\Models\Portfolio_category::where('id',$items->category)->first();
                   @endphp
-                  <td>{{$category->name}}</td>
+                  <td>{{ optional($category)->name ?? 'No Category' }}</td>
                   @php
                     $subcategory=App\Models\Portfolio_subcategory::where('id',$items->subcategory)->first();
-                    print_r($subcategory);
                   @endphp
                   <td>
-                    @if(!empty($items->subcategory))
+                    @if(!empty($subcategory))
                       {{$subcategory->name}}
                     @else
                          No Subcategory Available!

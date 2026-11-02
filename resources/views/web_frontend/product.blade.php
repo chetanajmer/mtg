@@ -275,50 +275,29 @@
             @endif
             @endif
 
+            @php
+              // The quantity starts at, and can't go below, this product's MOQ
+              $moq = max(1, (int) $product->min_order_quantity);
+              $moqUnit = $product->moq_unit ?: 'Pieces';
+              $startUnitPrice = $product->priceForQuantity($moq);
+            @endphp
             <div class="quantity-pricing-container">
               <div class="quantity-wrapper">
                 <div class="option-label">Quantity</div>
                 <div class="quantity-box">
-                  <button id="qtyMinus" type="button" class="qty-btn">−</button>
-                  <input id="quantity" type="number" value="50" min="50" step="1" class="qty-input">
+                  <button id="qtyMinus" type="button" class="qty-btn" disabled>−</button>
+                  <input id="quantity" type="text" value="{{ $moq }}" class="qty-input" readonly tabindex="-1" aria-label="Quantity" style="cursor: default;">
                   <button id="qtyPlus" type="button" class="qty-btn">+</button>
                 </div>
               </div>
               <div class="pricing-wrapper">
-                @php
-                  $displayPrice = $product->price ?? 0;
-                  $displayRange = '1';
-                  $lowestPrice = null;
-                  $highestRange = '';
-
-                  if(isset($tier_prices) && count($tier_prices) > 0) {
-                    foreach($tier_prices as $tier) {
-                      if($lowestPrice === null || $tier->price < $lowestPrice) {
-                        $lowestPrice = $tier->price;
-                        $maxQty = !empty($tier->max_qty) ? $tier->max_qty : 'Unlimited';
-                        if($maxQty === 'Unlimited') {
-                          $highestRange = $tier->min_qty;
-                        } else {
-                          $highestRange = $tier->min_qty . ' - ' . $maxQty;
-                        }
-                      }
-                    }
-                    if($lowestPrice !== null) {
-                      $displayPrice = $lowestPrice;
-                      $displayRange = $highestRange;
-                    }
-                  } elseif($product->sprice && $product->sprice < $product->price) {
-                    $displayPrice = $product->sprice;
-                    $displayRange = 'Bulk Order';
-                  }
-                @endphp
-                <div class="pricing-text"><span class="price-highlight">AED {{ number_format($displayPrice, 2) }}</span> on {{ $displayRange }} + Quantity</div>
-                <span class="minimum-text">Minimum order quantity: 50 Pieces</span>
-              </div>
+                <div class="pricing-text">Total: <span class="price-highlight" id="totalPrice">AED {{ number_format($startUnitPrice * $moq, 2) }}</span></div>
+                <span class="minimum-text" id="unitPriceText">AED {{ number_format($startUnitPrice, 2) }} per piece × {{ $moq }} {{ $moqUnit }}</span>
+                <span class="minimum-text">Minimum order quantity: {{ $moq }} {{ $moqUnit }}</span>              </div>
             </div>
 
             <div class="product-buttons">
-              <button class="btn btn-dark quote-button" onclick="addToCart({{ $product->id }}, '{{ $product->name }}', {{ $product->price ?? 0 }}, '{{ $mainImage }}', document.getElementById('quantity').value)"><i class="bi bi-cart3"></i> Add to Quote</button>
+              <button type="button" class="btn btn-dark quote-button" id="addToQuoteBtn"><i class="bi bi-cart3"></i> Add to Quote</button>
               <button class="btn sample-button"><i class="bi bi-gift"></i> Request a Sample</button>
             </div>
           </div>
@@ -327,6 +306,7 @@
         <!-- TIER PRICING -->
         <div class="col-xl-4">
           <aside class="pricing-card">
+            @if($product->tier_pricing_enabled === 'yes')
             <div class="pricing-header">
               <div>
                 <h2><i class="bi bi-coin"></i> Tier Pricing <span>(Per Piece)</span></h2>
@@ -368,6 +348,7 @@
                 </tbody>
               </table>
             </div>
+            @endif
 
             <div class="custom-quantity">
               <div class="custom-quantity-icon"><i class="bi bi-coin"></i></div>
@@ -631,24 +612,85 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Quantity controls
+    // Quantity controls (+ / - buttons only): never below the MOQ, with a live total
     const qtyMinus = document.getElementById('qtyMinus');
     const qtyPlus = document.getElementById('qtyPlus');
     const quantityInput = document.getElementById('quantity');
+    const moq = {{ $moq }};
+    const moqUnit = @json($moqUnit);
+    const basePrice = {{ $product->displayPrice() }};
+    // Same rule as Product::priceForQuantity() on the server
+    const tiers = @json(collect($tier_prices)->map(function ($t) { return ['min' => (int) $t->min_qty, 'max' => $t->max_qty ? (int) $t->max_qty : null, 'price' => (float) $t->price]; })->values());
 
-    if (qtyMinus && qtyPlus && quantityInput) {
-        qtyMinus.addEventListener('click', function() {
-            let currentValue = parseInt(quantityInput.value) || 0;
-            const minValue = parseInt(quantityInput.getAttribute('min')) || 0;
-            if (currentValue > minValue) {
-                quantityInput.value = currentValue - 1;
+    function unitPriceFor(qty) {
+        let match = null;
+        tiers.forEach(function (t) {
+            if (t.min <= qty && (t.max === null || t.max >= qty) && (match === null || t.min > match.min)) {
+                match = t;
             }
         });
+        return match ? match.price : basePrice;
+    }
 
-        qtyPlus.addEventListener('click', function() {
-            let currentValue = parseInt(quantityInput.value) || 0;
-            quantityInput.value = currentValue + 1;
+    function formatAed(value) {
+        return 'AED ' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function currentQty() {
+        return parseInt(quantityInput.value, 10) || 0;
+    }
+
+    function refreshTotal() {
+        const qty = Math.max(currentQty(), moq);
+        const unit = unitPriceFor(qty);
+        document.getElementById('totalPrice').textContent = formatAed(unit * qty);
+        document.getElementById('unitPriceText').textContent = formatAed(unit) + ' per piece × ' + qty + ' ' + moqUnit;
+        qtyMinus.disabled = currentQty() <= moq;
+    }
+
+    function setQty(qty) {
+        quantityInput.value = Math.max(moq, qty);
+        refreshTotal();
+    }
+
+    if (qtyMinus && qtyPlus && quantityInput) {
+        qtyMinus.addEventListener('click', function() { setQty(currentQty() - 1); });
+        qtyPlus.addEventListener('click', function() { setQty(currentQty() + 1); });
+        refreshTotal();
+    }
+
+    // Add to Quote
+    const addToQuoteBtn = document.getElementById('addToQuoteBtn');
+    if (addToQuoteBtn) {
+        addToQuoteBtn.addEventListener('click', function() {
+            setQty(currentQty());
+            addToQuoteBtn.disabled = true;
+            fetch('/cart/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                },
+                body: JSON.stringify({ product_id: {{ $product->id }}, quantity: currentQty() })
+            })
+            .then(function (response) { return response.json(); })
+            .then(function (data) {
+                const cartCount = document.getElementById('cartCount');
+                if (data.success && cartCount) cartCount.textContent = data.count;
+                showQuoteMessage(data.success ? 'Added to Quote!' : (data.message || 'Could not add to quote'), data.success);
+            })
+            .catch(function () { showQuoteMessage('Could not add to quote. Please try again.', false); })
+            .finally(function () { addToQuoteBtn.disabled = false; });
         });
+    }
+
+    function showQuoteMessage(message, ok) {
+        const note = document.createElement('div');
+        note.style.cssText = 'position:fixed;top:20px;right:20px;color:#fff;padding:12px 24px;border-radius:8px;z-index:2000;background:' + (ok ? '#22c55e' : '#dc2626');
+        note.textContent = message;
+        document.body.appendChild(note);
+        setTimeout(function () { note.remove(); }, 2500);
     }
 });
 </script>

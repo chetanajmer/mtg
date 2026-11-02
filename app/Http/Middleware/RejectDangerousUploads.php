@@ -10,11 +10,11 @@ class RejectDangerousUploads
 {
     /**
      * File extensions the site is allowed to receive (images, documents,
-     * videos and the Excel/CSV import files).
+     * customer design files, videos and the Excel/CSV import files).
      */
     protected $allowedExtensions = [
         'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico',
-        'pdf',
+        'pdf', 'ai', 'eps', 'zip',
         'mp4', 'webm', 'mov', 'm4v',
         'xlsx', 'xls', 'csv',
     ];

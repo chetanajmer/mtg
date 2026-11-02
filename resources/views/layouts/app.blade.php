@@ -228,7 +228,9 @@ figure figcaption {
                                     <a href="#" id="btn-fullscreen" class="waves-effect waves-light"><i class="icon-size-fullscreen"></i></a>
                                 </li>
                                 <li class="hidden-xs">
+                                @adminCan('cms-settings')
                                     <a href="{{url('cms-settings')}}" class="right-bar-toggle waves-effect waves-light"><i class="icon-settings"></i></a>
+                                @endadminCan
                                 </li>
                                 <li class="dropdown top-menu-item-xs">
                                     <a href="" class="dropdown-toggle profile waves-effect waves-light" data-toggle="dropdown" aria-expanded="true"><img src="/assets/images/users/admin.png" alt="user-img" class="img-circle"> </a>
@@ -333,21 +335,18 @@ figure figcaption {
                             </li>
  -->
                         
+                            @adminCan('listbrand')
                             <li>
                                 <a href="{{url('listbrand')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Supplier</span></a>  
                             </li>
+                            @endadminCan
 
+                            @adminCan('newbrand')
                             <li>
                                 <a href="{{route('newbrand.index')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Brand</span></a>
                             </li>
+                            @endadminCan
 
-                            <li>
-                                <a href="{{route('ordertracking.index')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Order Tracking</span></a>
-                            </li>
-
-                            <li>
-                                <a href="{{route('ordertracking.list')}}" class="waves-effect"><i class="ti-layout-grid2"></i><span>Order Tracking List</span></a>
-                            </li>
 
                             
                          
@@ -364,6 +363,7 @@ figure figcaption {
                             </li> -->
 
                             
+                             @adminCan('listcategory')
                              <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect"><i class="ti-layout-menu-v"></i><span>Categories </span> <span class="menu-arrow"></span></a>
                                 <ul class="list-unstyled">
@@ -375,8 +375,10 @@ figure figcaption {
                                         
                                 </ul>
                             </li>
+                             @endadminCan
                      
  
+                            @adminCan('listproduct')
                             <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect"><i class="ti-package"></i><span> Product </span> <span class="menu-arrow"></span></a>
                                 <ul class="list-unstyled">
@@ -405,25 +407,31 @@ figure figcaption {
 
                                 </ul>
                             </li>
+                            @endadminCan
 
                             <!-- <li>
                                 <a href="{{url('exhibition-events')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Exhibition Events</span></a>
 
                             </li> -->
+                            @adminCan('admin/orders')
                             <li>
                                 <a href="{{route('orders.index')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Store Enquiries</span></a>
                               
                             </li>
+                            @endadminCan
 
                           
+                            @adminCan('store-user')
                             <li>
                                 <a href="{{url('store-user')}}" class="waves-effect">
                                   <i class="ti-user"></i><span>Store Users</span>
                                 </a>
                               
                             </li>
+                            @endadminCan
 
                           
+                            @adminCan('list-slider')
                             <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect"><i class="ti-layout-slider"></i><span> Sliders </span> <span class="menu-arrow"></span></a>
                                 <ul class="list-unstyled">
@@ -433,17 +441,21 @@ figure figcaption {
 
                                 </ul>
                             </li>
+                            @endadminCan
                            
 
 
                             
+                             @adminCan('subscribers')
                              <li>
                                 <a href="{{url('subscribers')}}" class="waves-effect"><i class="ti-face-smile"></i><span> Subscribers</span></a>
                             </li>
+                             @endadminCan
                           
 
 
                             
+                            @adminCan('banners')
                             <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect"><i class="ti-layout-slider-alt"></i><span>Banners</span> <span class="menu-arrow"></span></a>
                                 <ul class="list-unstyled">
@@ -464,39 +476,50 @@ figure figcaption {
                                      @endif
                                 </ul>
                             </li>
+                            @endadminCan
                        
+                            @adminCan('instock-notifier')
                             <li>
                                 <a href="{{url('instock-notifier')}}" class="waves-effect"><i class="ti-comment-alt"></i><span> Instock Notifier</span></a>
                             </li>
+                            @endadminCan
 
+                              @adminCan('b2b-enquiry')
                               <li>
                                 <a href="{{url('b2b-enquiry')}}" class="waves-effect"><i class="ti-info-alt"></i><span> B2B Enquiry</span></a>
                               </li>
+                              @endadminCan
 
+                              @adminCan('reviews')
                               <li>
                                 <a href="{{url('reviews')}}" class="waves-effect"><i class="ti-comments-smiley"></i><span> Reviews</span></a>
                               </li>
+                              @endadminCan
 
-                             <li class="has_sub">
-                                <a href="javascript:void(0);" class="waves-effect"><i class="ti-book"></i><span> Reports </span> <span class="menu-arrow"></span></a>
-                                <ul class="list-unstyled">
-                                    <li><a href="{{url('date_report')}}">Date Reports</a></li>
-                                    <li><a href="{{url('user_report')}}">User Reports</a></li>
-                                    <li><a href="{{url('product_report')}}">Products Reports</a></li>
-                                </ul>
+                             @adminCan('admin/reports')
+                             <li>
+                                <a href="{{ route('reports.index') }}" class="waves-effect"><i class="ti-book"></i><span> Reports </span></a>
                             </li>
+                             @endadminCan
                             
+                             @adminCan('list-coupon')
                              <li><a href="{{url('list-coupon')}}" ><i class="ti-tag"></i>Coupon</a></li>
+                             @endadminCan
 
+                             @adminCan('abandoned_order')
                              <li>
                                 <a href="{{url('abandoned_order')}}" class="waves-effect"><i class="ti-shopping-cart-full"></i><span>Abandoned Order</span></a>
                             </li>
+                             @endadminCan
 
+                            @adminCan('flipbook')
                             <li>
                                 <a href="{{url('flipbook')}}" class="waves-effect"><i class="ti-book"></i><span>Flipbook</span></a>
                             </li>
+                            @endadminCan
 
 
+                            @adminCan('cms-settings')
                             <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect"><i class="ti-settings"></i><span> Setup & Config </span> <span class="menu-arrow"></span></a>
                                 <ul class="list-unstyled">
@@ -528,6 +551,7 @@ figure figcaption {
                                      @endif
                                 </ul>
                             </li>
+                            @endadminCan
                          
 
                             <!-- <li class="has_sub">
@@ -540,6 +564,7 @@ figure figcaption {
                                 </ul>
                             </li> -->
 
+                            @adminCan('weightshipping')
                             <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect"><i class="ti-truck"></i><span> Shippings </span> <span class="menu-arrow"></span></a>
                                 <ul class="list-unstyled">
@@ -548,12 +573,16 @@ figure figcaption {
                                    <li><a href="{{url('weightshipping')}}">Area & Weight Based </a></li>
                                 </ul>
                             </li>
+                            @endadminCan
 
+                            @adminCan('products')
                             <li>
                                 <a href="{{url('products')}}" class="waves-effect"><i class="ti-info-alt"></i><span>Supplier Products</span></a>
                               
                             </li>
+                            @endadminCan
 
+                            @adminCan('list-portfolio')
                             <li class="has_sub">
                               <a href="javascript:void(0);" class="waves-effect">
                                 <i class="ti-layout-media-center-alt"></i><span> Portfolio </span><span class="menu-arrow"></span></a>
@@ -564,6 +593,7 @@ figure figcaption {
                                   <li><a href="{{url('list-portfolio')}}">Portfolio </a></li>
                                 </ul>
                             </li>
+                            @endadminCan
 
                              <!-- <li >
                                 <a href="{{url('storecontactus')}}" class="waves-effect"><i class="ti-location-pin"></i><span>Contact us </span></a>
@@ -582,20 +612,6 @@ figure figcaption {
                             </li> 
                             @endif
                             
-                            @php 
-                               $rewardsettings=\App\Models\Product_setting::where('id','1')->first();
-                            @endphp
-
-                            @if($role!="superadmin")
-                            
-                            @if($rewardsettings['reward']=="on")
-                            <li>
-                                <a href="{{url('reward')}}" class="waves-effect">
-                                    <i class="ti-lock"></i><span>Reward</span>
-                                </a>
-                            </li>
-                            @endif
-                          @endif
                             <!-- <li class="has_sub">
                                 <a href="javascript:void(0);" class="waves-effect"><i class="ti-pencil-alt"></i><span>Store Settings </span> <span class="menu-arrow"></span></a>
                                 <ul class="list-unstyled">
@@ -793,7 +809,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-1.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-1.jpg" alt="">
                                 </div>
                                 <span class="name">Chadengle</span>
                                 <i class="fa fa-circle online"></i>
@@ -803,7 +819,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-2.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-2.jpg" alt="">
                                 </div>
                                 <span class="name">Tomaslau</span>
                                 <i class="fa fa-circle online"></i>
@@ -813,7 +829,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-3.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-3.jpg" alt="">
                                 </div>
                                 <span class="name">Stillnotdavid</span>
                                 <i class="fa fa-circle online"></i>
@@ -823,7 +839,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-4.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-4.jpg" alt="">
                                 </div>
                                 <span class="name">Kurafire</span>
                                 <i class="fa fa-circle online"></i>
@@ -833,7 +849,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-5.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-5.jpg" alt="">
                                 </div>
                                 <span class="name">Shahedk</span>
                                 <i class="fa fa-circle away"></i>
@@ -843,7 +859,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-6.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-6.jpg" alt="">
                                 </div>
                                 <span class="name">Adhamdannaway</span>
                                 <i class="fa fa-circle away"></i>
@@ -853,7 +869,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-7.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-7.jpg" alt="">
                                 </div>
                                 <span class="name">Ok</span>
                                 <i class="fa fa-circle away"></i>
@@ -863,7 +879,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-8.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-8.jpg" alt="">
                                 </div>
                                 <span class="name">Arashasghari</span>
                                 <i class="fa fa-circle offline"></i>
@@ -873,7 +889,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-9.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-9.jpg" alt="">
                                 </div>
                                 <span class="name">Joshaustin</span>
                                 <i class="fa fa-circle offline"></i>
@@ -883,7 +899,7 @@ figure figcaption {
                         <li class="list-group-item">
                             <a href="#">
                                 <div class="avatar">
-                                    <img src="assets/images/users/avatar-10.jpg" alt="">
+                                    <img src="/assets/images/users/avatar-10.jpg" alt="">
                                 </div>
                                 <span class="name">Sortino</span>
                                 <i class="fa fa-circle offline"></i>
@@ -983,8 +999,8 @@ figure figcaption {
         <script src="/assets/plugins/raphael/raphael-min.js"></script>
         <script src="/assets/pages/morris.init.js"></script>
          <!-- Chart JS -->
-        <script src="assets/plugins/chart.js/chart.min.js"></script>
-        <script src="assets/pages/jquery.chartjs.init.js"></script>
+        <script src="/assets/plugins/chart.js/chart.min.js"></script>
+        <script src="/assets/pages/jquery.chartjs.init.js"></script>
 
 <script type="text/javascript">
     $(document).ready(function () {
@@ -1483,28 +1499,6 @@ function deletechildsubcategory_banner($id)
     }
 
 
-   function delete_sku_image($str)
-    {
-       var price=$("#price").val();
-       var sku=$("#sku").val();
-       var qty=$("#qty").val();
-       var img=$("#myFile").val();
-
-       $.ajax({
-            type:"POST",
-            url:"{{ route('delete_sku_image') }}",
-            method:"POST",
-            data: {"_token": "{{ csrf_token() }}","price":price,"sku":sku,"qty":qty,"img":img
-            },
-            success:function (data)
-            {
-                $.Notification.notify('success','top right', 'Success ', "Image Delete Successfully !");
-                location.reload();
-            } 
-        });
-       
-
-    }
 </script>
 
         @stack('custom-scripts')

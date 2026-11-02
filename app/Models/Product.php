@@ -18,17 +18,18 @@ class Product extends Model
         public $timestamps=false;
 
     /**
-     * Unit price for a given order quantity. Uses the product's quantity
-     * slabs (product_tier_prices) when one matches, otherwise the sale price
-     * when it is lower, otherwise the normal price. This matches what the
-     * product page shows.
+     * Unit price for a given order quantity. When tier pricing is enabled,
+     * uses the matching quantity slab (product_tier_prices); otherwise the
+     * sale price when it is lower, otherwise the normal price. This matches
+     * what the product page shows.
      */
     public function priceForQuantity($quantity)
     {
         $quantity = max(1, (int) $quantity);
 
-        $tier = \DB::table('product_tier_prices')
+        $tier = $this->tier_pricing_enabled !== 'yes' ? null : \DB::table('product_tier_prices')
             ->where('product_id', $this->id)
+            ->where('price', '>', 0) // a tier without a real price never applies
             ->where('min_qty', '<=', $quantity)
             ->where(function ($query) use ($quantity) {
                 $query->whereNull('max_qty')->orWhere('max_qty', '>=', $quantity);
@@ -38,6 +39,50 @@ class Product extends Model
 
         if ($tier) {
             return (float) $tier->price;
+        }
+
+        return $this->displayPrice();
+    }
+
+    /**
+     * URL of the product's main image, or null when no image file exists.
+     * MidOcean products (brand 42) store full image URLs; others store file
+     * names under public/upload/product (same rules as the product page).
+     */
+    public function imageUrl()
+    {
+        $candidates = array_filter([$this->thumbnail, $this->image1, explode(',', (string) $this->bulk_image)[0] ?? null]);
+
+        foreach ($candidates as $file) {
+            if (preg_match('#^https?://#i', $file)) {
+                return $file;
+            }
+            foreach (['upload/product/thumbnail/', 'upload/product/'] as $folder) {
+                if (is_file(public_path($folder . $file))) {
+                    return asset($folder . rawurlencode($file));
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Smallest quantity a customer may order (at least 1).
+     */
+    public function minOrderQuantity()
+    {
+        return max(1, (int) $this->min_order_quantity);
+    }
+
+    /**
+     * Price shown to customers when no tier applies: the Base Price, or for
+     * products without one, the sale price when lower, else the price field.
+     */
+    public function displayPrice()
+    {
+        if (!empty($this->base_price) && $this->base_price > 0) {
+            return (float) $this->base_price;
         }
 
         if (!empty($this->sprice) && $this->sprice > 0 && $this->sprice < $this->price) {

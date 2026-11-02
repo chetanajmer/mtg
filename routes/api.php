@@ -1,9 +1,6 @@
 <?php
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -15,9 +12,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-
-//Route::post('addtocart', [ApiController::class, 'addtocart'])->name('addtocart');
+// The default /api/user route was removed: it needs an API login that this
+// site doesn't have, so it only ever crashed.

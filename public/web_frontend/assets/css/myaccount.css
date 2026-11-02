@@ -121,3 +121,35 @@
 .btn-primary:hover {
   background: #2d3035;
 }
+
+/* Dashboard cards: real secondary figures and links */
+.dashboard-wrapper .stat .muted { color: #687181; font-weight: 600; }
+.dashboard-wrapper .stat a { color: #8c5109; font-weight: 600; text-decoration: underline; }
+.dashboard-wrapper .stat.attention { border-color: #e9b46b; background: #fffaf2; }
+
+/* Dashboard Recent Orders: one row per order */
+a.outline { display: inline-flex; align-items: center; justify-content: center; color: #15171a; text-decoration: none; }
+.dashboard-wrapper .recent-thumb { position: relative; width: 56px; height: 47px; flex: 0 0 56px; border-radius: 4px; background: #faf7f1; color: #8c5109; display: grid; place-items: center; font-size: 20px; overflow: hidden; }
+.dashboard-wrapper .recent-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; }
+.dashboard-wrapper .order-row.attention { background: #fffaf2; }
+.dashboard-wrapper .recent-status { display: inline-block; margin-top: 5px; padding: 3px 8px; border-radius: 999px; font-size: 10px; font-weight: 600; background: #f5f6f8; color: #667080; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dashboard-wrapper .recent-status.done { background: #e4f4e8; color: #17752c; }
+.dashboard-wrapper .recent-status.in_progress { background: #e8effb; color: #2563c9; }
+.dashboard-wrapper .recent-status.waiting_customer { background: #fff1dc; color: #b45309; }
+.dashboard-wrapper .recent-status.changes_requested { background: #fdecea; color: #b42318; }
+
+/* Dashboard Quick Actions: tiles are links (same look as the old buttons) */
+.dashboard-wrapper .quick-grid a { height: 92px; min-width: 0; background: #fff; border: 1px solid #e2e6eb; border-radius: 6px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 12px; position: relative; color: #15171a; text-decoration: none; text-align: center; }
+.dashboard-wrapper .quick-grid a:hover { border-color: #c9a46a; background: #fffcf7; }
+.dashboard-wrapper .quick-grid a > i:first-child { font-size: 25px; }
+.dashboard-wrapper .quick-grid a > i:last-child { position: absolute; right: 14px; bottom: 20px; font-size: 12px; }
+.dashboard-wrapper .quick-grid a span { padding: 0 14px; }
+.dashboard-wrapper .quick-note { font-size: 10px; color: #687181; font-weight: 600; }
+.dashboard-wrapper .quick-note.wait { color: #b45309; }
+@media (max-width: 650px) { .dashboard-wrapper .quick-grid a > i:last-child { display: none; } }
+
+/* Dashboard Contact Us / Request a Quote links */
+a.dark { display: inline-flex; align-items: center; color: #fff; text-decoration: none; }
+.dashboard-wrapper .help a.full { justify-content: center; }
+.dashboard-wrapper .help-call { grid-column: 1 / -1; text-align: center; font-size: 10px; color: #687181; text-decoration: none; }
+.dashboard-wrapper .help-call:hover { color: #8c5109; }

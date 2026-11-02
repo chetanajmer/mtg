@@ -152,6 +152,11 @@ class AdminController extends Controller
 
     public function login(Request $request)
     {
+      // Already logged in: go straight to the dashboard
+      if(session()->has('admin_id'))
+      {
+        return Redirect::to('dashboard');
+      }
 
       return view('backend.dashboard.login');
     }

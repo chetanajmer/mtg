@@ -89,6 +89,14 @@ return [
     ],
 
     /*
+    | Staff inbox for new quote requests, contact-form messages and customer
+    | responses on orders. Read through config() so it still works after
+    | `php artisan config:cache`. Empty = the email in admin Header Settings.
+    */
+
+    'staff_address' => env('QUOTE_REQUEST_EMAIL'),
+
+    /*
     |--------------------------------------------------------------------------
     | Markdown Mail Settings
     |--------------------------------------------------------------------------

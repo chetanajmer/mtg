@@ -1081,7 +1081,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                         <div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control tier-input" value="{{$tier->max_qty}}" placeholder="Unlimited"></div>
 
-                                                        <div class="col-md-3"><input type="number" step="0.01" min="0" name="tier_price[]" class="form-control tier-input" value="{{max(0, $tier->price)}}" placeholder="e.g : 45"></div>
+                                                        <div class="col-md-3"><input type="number" step="0.01" min="0.01" name="tier_price[]" class="form-control tier-input" value="{{$tier->price}}" placeholder="e.g : 45">@if($tier->price <= 0)<small class="text-danger">Needs a price above 0</small>@endif</div>
 
                                                         <div class="col-md-3 tier-savings" style="padding-top:8px;">-</div>
 
@@ -3160,7 +3160,7 @@ function delete_variation_image($value)
         row.next('.spec-row').after(row);
     });
 
-    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control tier-input" placeholder="e.g : 50"></div><div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control tier-input" placeholder="Unlimited"></div><div class="col-md-3"><input type="number" step="0.01" min="0" name="tier_price[]" class="form-control tier-input" placeholder="e.g : 45"></div><div class="col-md-3 tier-savings" style="padding-top:8px;">-</div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
+    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control tier-input" placeholder="e.g : 50"></div><div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control tier-input" placeholder="Unlimited"></div><div class="col-md-3"><input type="number" step="0.01" min="0.01" name="tier_price[]" class="form-control tier-input" placeholder="e.g : 45"></div><div class="col-md-3 tier-savings" style="padding-top:8px;">-</div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
 
     function tierBasePrice(){
         var p = parseFloat($('input[name="price"]').val());

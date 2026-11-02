@@ -14,7 +14,7 @@ $subcategorydata=\App\Models\Subcategory::findorFail($subcatid);
        <li><a href="{{url('/')}}">Home</a></li>
        @php
           $breadcrumb_category=\App\Models\Category::where('id',$subcategorydata->catid)->first();
-          $breadcrumb_brand=\App\Models\Brand::where('id',$breadcrumb_category->brand_id)->first();
+          $breadcrumb_brand=\App\Models\Brand::where('id',optional($breadcrumb_category)->brand_id)->first();
        @endphp
        @if(!empty($breadcrumb_brand))
         <li><a href="{{url('brand/'.$breadcrumb_brand->slug)}}">{{$breadcrumb_brand->brandname}}</a></li>

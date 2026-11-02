@@ -9,13 +9,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/reset.css') }}">
   <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/style.css') }}">
   <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/wishlist.css') }}">
   <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/membership.css') }}">
   <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/corporate-gifting-planner.css') }}">
-  <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/font-awesome.css') }}">
-  <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/lightslider.css') }}">
-  <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/owl.carousel.min.css') }}">
-  <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/bootstrap.min.css') }}">
   @yield('styles')

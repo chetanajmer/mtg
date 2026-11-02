@@ -9,7 +9,7 @@ $footer_categories=\App\Models\Category::where('is_active','online')->where('fea
 <html>
 <head>  
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>::Welcome to Meem Industrial::</title>
+<title>More Than Giftz</title>
 <link rel="icon" type="image" href="{{asset('frontend/assets/images/favicon.png')}}">
 <link rel="stylesheet" type="text/css" href="/frontend/assets/css/bootstrap.min.css">
 <link rel="stylesheet" type="text/css" href="/frontend/assets/css/font-awesome.css">
@@ -313,7 +313,7 @@ $footer_categories=\App\Models\Category::where('is_active','online')->where('fea
 </section>
 <section class="default_section copyright_section">
   <div class="container">
-    <p>&copy; Copyright Meem Industrial <script>document.write(new Date().getFullYear())</script>. All Rights Reserved. Design & Develop by <a href="https://silverpixelz.com" target="_blank">SilverPixelz</a></p>
+    <p>&copy; Copyright More Than Giftz <script>document.write(new Date().getFullYear())</script>. All Rights Reserved. Design & Develop by <a href="https://silverpixelz.com" target="_blank">SilverPixelz</a></p>
   </div>
 </section>
 <div class="callsidecard" id="quotebox">
