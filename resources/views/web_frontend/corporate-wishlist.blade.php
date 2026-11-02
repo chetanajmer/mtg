@@ -19,7 +19,7 @@
     <a href="#collections"><i class="bi bi-bookmark"></i>Saved Collections</a>
     <a class="active" href="/corporate-portal/wishlist"><i class="bi bi-heart"></i>Wishlists</a>
     <a href="#employees"><i class="bi bi-people-fill"></i>Employees</a>
-    <a href="#reports"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
     <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
   </nav>
   <div class="help"><i class="bi bi-headset"></i><div><strong>Need Help?</strong><p>Your dedicated account manager is here.</p></div><button class="outline full" data-toast="Contact request started.">Contact Us <i class="bi bi-arrow-right"></i></button></div>

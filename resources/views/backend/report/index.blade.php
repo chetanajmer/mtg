@@ -19,7 +19,7 @@
   .rp-admin .rp-cards .card-box { margin: 0; padding: 16px; }
   .rp-admin .rp-cards small, .rp-admin .rp-cards span { display: block; color: #6b7280; font-size: 12px; }
   .rp-admin .rp-cards strong { display: block; font-size: 22px; color: #15171a; margin: 4px 0; }
-  .rp-admin .rp-quick a { margin: 0 6px 6px 0; }
+  .rp-admin .rp-quick a { margin: 0 6px 6px 0; background: #fff; color: #15171a; border: 1px solid #cfd5dc; }
   .rp-admin .rp-quick a.active { background: #15171a; color: #fff; border-color: #15171a; }
   .rp-admin .rp-bar { height: 10px; background: #eef0f3; border-radius: 5px; overflow: hidden; min-width: 80px; }
   .rp-admin .rp-bar span { display: block; height: 100%; background: #c9a46a; }
@@ -43,7 +43,7 @@
       <div class="card-box rp-filters">
         <div class="rp-quick">
           @foreach($quick as $label => $range)
-            <a href="{{ route('reports.index', array_merge($range, $keep)) }}" class="btn btn-default btn-sm {{ $from === $range['from'] && $to === $range['to'] ? 'active' : '' }}">{{ $label }}</a>
+            <a href="{{ route('reports.index', array_merge($range, $keep)) }}" class="btn btn-sm {{ $from === $range['from'] && $to === $range['to'] ? 'active' : '' }}" @if($from === $range['from'] && $to === $range['to']) aria-current="true" @endif>{{ $label }}</a>
           @endforeach
         </div>
         <form method="GET" action="{{ route('reports.index') }}" class="row" style="margin-top: 8px;">
@@ -72,10 +72,10 @@
             <select id="rp-step" name="step" class="form-control">
               <option value="">Any stage</option>
               <option value="waiting" {{ ($filters['step'] ?? '') === 'waiting' ? 'selected' : '' }}>Waiting for customer</option>
-              @foreach(config('order_steps') as $n => $s)
+              @foreach(\App\Services\OrderReports::openSteps() as $n => $s)
                 <option value="{{ $n }}" {{ (string) ($filters['step'] ?? '') === (string) $n ? 'selected' : '' }}>{{ $n }}. {{ $s['title'] }}</option>
               @endforeach
-              <option value="completed" {{ ($filters['step'] ?? '') === 'completed' ? 'selected' : '' }}>Completed</option>
+              <option value="completed" {{ ($filters['step'] ?? '') === 'completed' ? 'selected' : '' }}>Completed (incl. awaiting rating)</option>
             </select>
           </div>
           <div class="col-sm-12" style="margin-top: 10px;">

@@ -56,6 +56,7 @@ Most of the catalogue comes from **MidOcean** (European promo-products wholesale
 | S13a | Customer attaches their own design files to an answer, or shares a design / idea any time step 2 or 4 is open (JPG/PNG/WEBP/PDF/SVG/AI/EPS/ZIP, 5 × 10 MB; SVGs with scripts refused); staff see the files, a "rejected" banner and get an email | ✅ (1 Nov) |
 | S14 | Customer rating at step 10 | ✅ (phase 4) |
 | S15 | Public `/track-order`: order number + email → read-only progress (rate-limited) | ✅ (phase 4) |
+| S15b | Customer Reports `/corporate-reports` (sidebar on every portal page): this year / last year / all time / custom dates (by order date, end date inclusive); cards (orders, confirmed spend, pieces delivered, average order); spending by month; most ordered products; the orders with links; CSV downloads: order history (product lines), spending summary (per month + total), approval history (design/sample decisions); only the customer's own orders; dashboard "Download Reports" panel uses the same files | ✅ (2 Nov) |
 | S15a | Customer dashboard `/corporate-portal` cards from real orders: Total Orders (+ this year), Items Delivered (delivery step done), Pending Approvals (mockup/sample waiting, links to the order), Active Orders (+ completed), Total Spend this year (staff-confirmed orders, + amount awaiting confirmation); no invented trends | ✅ cards + Recent Orders + Quick Actions + Request a Quote / Contact Us (2 Nov: one row per order, image, step, Track/Respond link); rest of the dashboard is still demo: FX-38 |
 | S16 | Corporate wishlist page uses real data | ❌ static mock-up |
 | S17 | Annual corporate membership page captures leads | ❌ static page, no form |
@@ -110,6 +111,7 @@ The 10 steps are fixed (defined once in `config/order_steps.php`):
 | A10 | Bulk image upload by model number | ❌ removed (needed a table that never existed); rebuild only if wanted |
 | A11 | Reward/referral section | ❌ removed (tables never existed) |
 | A12 | Admin actions as POST forms instead of GET links | ❌ |
+| A13 | Admin Reports `/admin/reports` (Orders permission): one row per order by order date; filters date / customer / product / stage (steps 1–9, waiting for customer, completed); totals (orders, value, confirmed value, pieces, delivered); by month, where open orders are, top customers and products; CSV export of orders or product lines; replaces the old Date / User / Product reports (their URLs redirect) | ✅ (2 Nov) |
 
 ### 2.4 Platform, security, operations
 

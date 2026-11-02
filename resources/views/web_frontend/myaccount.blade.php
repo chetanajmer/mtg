@@ -36,7 +36,7 @@
     <a href="#branding"><i class="bi bi-image"></i>Branding Assets</a>
     <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
     <a href="#employees"><i class="bi bi-people-fill"></i>Employees</a>
-    <a href="#reports"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
     <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
     <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
   </nav>
@@ -93,7 +93,7 @@
     </article>
     <div class="right-stack">
       <article class="quote-card"><h3>Need a Custom Solution?</h3><p>Talk to your dedicated account manager for bulk pricing, custom branding and special requirements.</p><a class="dark" href="{{ route('cart.index') }}">Request a Quote{{ $cartCount ? ' (' . $cartCount . ' item' . ($cartCount == 1 ? '' : 's') . ')' : '' }} <i class="bi bi-arrow-right"></i></a><div class="quote-product">Your<br>Logo</div></article>
-      <article class="panel report" id="reports"><div class="panel-head"><div><i class="bi bi-file-earmark-text"></i><span><strong>Download Reports</strong><small>Get detailed reports for your records.</small></span></div></div><div class="report-actions"><select id="reportType"><option>Order History Report</option><option>Spending Summary</option><option>Recipient Report</option><option>Approval Report</option></select><button class="dark" id="download"><i class="bi bi-download"></i></button></div></article>
+      <article class="panel report" id="reports"><div class="panel-head"><div><i class="bi bi-file-earmark-text"></i><span><strong>Download Reports</strong><small>This year as CSV, or open your reports.</small></span></div><a class="outline" href="{{ route('corporate.reports') }}">Open <i class="bi bi-arrow-right"></i></a></div><div class="report-actions"><select aria-label="Report to download" onchange="document.getElementById('reportDownload').href = this.value"><option value="{{ route('corporate.reports.download', 'orders') }}">Order History Report</option><option value="{{ route('corporate.reports.download', 'spending') }}">Spending Summary</option><option value="{{ route('corporate.reports.download', 'approvals') }}">Approval Report</option></select><a class="dark" id="reportDownload" href="{{ route('corporate.reports.download', 'orders') }}" style="justify-content: center;" aria-label="Download report" title="Download"><i class="bi bi-download"></i></a></div></article>
     </div>
   </section>
   <section class="bottom">

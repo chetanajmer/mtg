@@ -109,7 +109,7 @@ class ReportController extends Controller
             $filters['product'] = (int) $request->query('product');
         }
         $step = (string) $request->query('step');
-        if (in_array($step, ['waiting', 'completed'], true) || (ctype_digit($step) && $step >= 1 && $step <= 10)) {
+        if (in_array($step, ['waiting', 'completed'], true) || (ctype_digit($step) && isset(OrderReports::openSteps()[(int) $step]))) {
             $filters['step'] = $step;
         }
         return $filters;

@@ -129,11 +129,17 @@ class OrderReports
         return $limit ? $rows->take($limit) : $rows;
     }
 
-    /** Open orders per current step (1-10) plus completed, in step order. */
+    /** Steps an open order can be at: 1-9 (at step 10, the rating, the project is already completed). */
+    public static function openSteps(): array
+    {
+        return array_filter(config('order_steps'), function ($n) { return $n <= 9; }, ARRAY_FILTER_USE_KEY);
+    }
+
+    /** Open orders per current step (1-9) plus completed, in step order. */
     public function byStep(Collection $orders): array
     {
         $counts = [];
-        foreach (config('order_steps') as $n => $step) {
+        foreach (self::openSteps() as $n => $step) {
             $counts[$n] = ['step' => $n, 'title' => $step['title'], 'orders' => 0, 'waiting' => 0];
         }
         $completed = 0;
