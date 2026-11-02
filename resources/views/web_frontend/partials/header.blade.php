@@ -2,7 +2,7 @@
   <header class="site-header">
     <div class="container-fluid px-4 px-xl-5">
       <div class="header-main">
-        <a href="#" class="brand" aria-label="More Than Giftz">
+        <a href="{{ url('/') }}" class="brand" aria-label="More Than Giftz">
           <span>more</span>
           <span>than</span>
           <span>giftz</span>
@@ -10,13 +10,13 @@
 
         <nav class="primary-nav">
           <a href="#">Best Sellers</a>
-          <a href="#">Premium Gifts Set</a>
-          <a href="#">Technology</a>
-          <a href="#">Office &amp; Business</a>
+          <a href="{{ url('category/customized-items') }}">Premium Gifts Set</a>
+          <a href="{{ url('category/technology-and-accessories') }}">Technology</a>
+          <a href="{{ url('category/office-stationery-and-writing') }}">Office &amp; Business</a>
           <a href="#">Sustainable</a>
-          <a href="#">Bags</a>
-          <a href="#">Drinkware</a>
-          <a href="#">Apparel</a>
+          <a href="{{ url('category/bags-and-travels') }}">Bags</a>
+          <a href="{{ url('category/drinkware-and-kitchenware') }}">Drinkware</a>
+          <a href="{{ url('category/apparel-and-accessories') }}">Apparel</a>
         </nav>
 
         <div class="header-actions">
@@ -47,17 +47,17 @@
       <div class="container-fluid px-4 px-xl-5">
         <nav class="secondary-nav">
           <div class="secondary-left">
-            <a href="#">About us</a>
+            <a href="{{ url('aboutus') }}">About us</a>
             <a href="#">Branding</a>
             <a href="/annual-corporate-membership" class="{{ request()->is('annual-corporate-membership') ? 'active' : '' }}">Annual Contract</a>
             <a href="/track-order" class="{{ request()->is('track-order') ? 'active' : '' }}">Track your Order</a>
           </div>
           <div class="secondary-right">
-            <a href="#">For Businesses</a>
+            <a href="{{ route('corporate.portal') }}">For Businesses</a>
             <span class="divider"></span>
-            <a href="#">Support</a>
+            <a href="{{ url('contactus') }}">Support</a>
             <span class="divider"></span>
-            <a href="#">Request a Quote</a>
+            <a href="{{ route('cart.index') }}">Request a Quote</a>
           </div>
         </nav>
       </div>

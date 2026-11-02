@@ -36,12 +36,11 @@ class UsersController extends Controller
 
       $email=$request->get('email');
       $password=$request->get('password');
-      $checkuser=DB::table('storeusers')->select('*')->where('email', $email)
-      ->where('password',$password)->first();
-      
-      if(!empty($checkuser))
+      $checkuser=DB::table('storeusers')->select('*')->where('email', $email)->first();
+
+      if(!empty($checkuser) && !empty($password) && $this->passwordMatches($checkuser, $password))
       {
-        //print_r($checkuser->id); die;  
+        $request->session()->regenerate();
         $userid=$checkuser->id; 
         $useremail=$checkuser->email;
         session()->put('userid',$userid);
@@ -97,7 +96,7 @@ class UsersController extends Controller
          	$user->email=$email;
          	$user->fname=$request->firstname;
          	$user->lname=$request->lastname;
-         	$user->password=$request->password;
+         	$user->password=Hash::make($request->password);
          	$user->offersopted=$request->offers;
          	$user->newsletteropted=$request->newsletter;
          	$user->save();
@@ -110,7 +109,7 @@ class UsersController extends Controller
 
          	$details = [
           	'email'=>$email,
-          	'password'=>$password,
+          	'password'=>null,
           	'$admin_email'=>$admin_email,
           	'mail_from'=>$mail_from,
         	 ];
@@ -160,29 +159,65 @@ class UsersController extends Controller
         // Get user details
         $user = DB::table('storeusers')->where('id', $userid)->first();
 
-        // Get total orders count for this user
-        $totalOrders = Cartorder::where('userid', $userid)->count();
-
-        // Get total spend (YTD) - from cart orders (using ordertotal column)
-        $totalSpend = Cartorder::where('userid', $userid)->sum('ordertotal') ?? 0;
-
-        // Get items delivered (orders with status 'Delivered')
-        $itemsDelivered = Cartorder::where('userid', $userid)->where('orderstatus', 'Delivered')->sum('quantity') ?? 0;
-
-        // Get pending approvals (orders with status 'Pending')
-        $pendingApprovals = Cartorder::where('userid', $userid)->where('orderstatus', 'Pending')->count();
-
-        // Get total recipients (this is a placeholder - you may need to adjust based on your actual data structure)
-        // For now, we'll use the number of unique addresses or assume it's the same as orders count
-        $totalRecipients = Cartorder::where('userid', $userid)->count();
-
-        // Get recent orders for this user
-        $recentOrders = Cartorder::where('userid', $userid)->orderbyDesc('id')->limit(5)->get();
+        // Cards and Recent Orders: one entry per order (not per product line), read from the order workflow
+        $orders = \App\Models\Order::where('storeuser_id', $userid)->with('stepStates', 'items')->orderByDesc('id')->get();
+        $stats = $this->dashboardStats($orders);
+        $recentOrders = $orders->take(5);
+        $cartCount = CartItem::where('user_id', $userid)->count(); // shown on the "View Quote Cart" quick action
 
         // Get collections for this user
         $collections = Collection::where('user_id', $userid)->withCount('items')->limit(5)->get();
 
-        return view('web_frontend.myaccount', compact('totalOrders', 'totalSpend', 'recentOrders', 'collections', 'user', 'itemsDelivered', 'pendingApprovals', 'totalRecipients'));
+        return view('web_frontend.myaccount', compact('stats', 'recentOrders', 'collections', 'user', 'cartCount'));
+    }
+
+    /**
+     * Figures for the five dashboard cards. An order is delivered when its
+     * Delivery step (8) is done and completed when Project Completed (9) is
+     * done; spend counts orders confirmed by staff (step 1 done) this year,
+     * at the same order value the order pages show.
+     */
+    private function dashboardStats($orders)
+    {
+        $isDone = function ($order, $step) {
+            return optional($order->state($step))->state === 'done';
+        };
+        $approvalSteps = array_keys(array_filter(config('order_steps'), function ($step) {
+            return $step['type'] === 'approval';
+        }));
+        $year = now()->year;
+
+        $waiting = $orders->filter(function ($order) use ($approvalSteps) {
+            return in_array((int) $order->current_step, $approvalSteps, true) && $order->step_state === 'waiting_customer';
+        });
+        $delivered = $orders->filter(function ($order) use ($isDone) {
+            return $isDone($order, 8);
+        });
+        $completed = $orders->filter(function ($order) use ($isDone) {
+            return $isDone($order, 9);
+        });
+        $thisYear = $orders->filter(function ($order) use ($year) {
+            return $order->created_at && $order->created_at->year === $year;
+        });
+        $confirmed = $thisYear->filter(function ($order) use ($isDone) {
+            return $isDone($order, 1);
+        });
+
+        return [
+            'orders' => $orders->count(),
+            'ordersThisYear' => $thisYear->count(),
+            'waiting' => $waiting->count(),
+            'waitingOrder' => optional($waiting->last())->orderid, // oldest first
+            'itemsDelivered' => (int) $delivered->sum(function ($order) {
+                return $order->items->sum('quantity');
+            }),
+            'ordersDelivered' => $delivered->count(),
+            'active' => $orders->count() - $completed->count(),
+            'completed' => $completed->count(),
+            'spend' => (float) $confirmed->sum('total'),
+            'confirmedOrders' => $confirmed->count(),
+            'awaitingConfirmation' => (float) $thisYear->diff($confirmed)->sum('total'),
+        ];
     }
 
     public function corporateLogin(Request $request)
@@ -208,23 +243,18 @@ class UsersController extends Controller
         $checkuser = DB::table('storeusers')->select('*')->where('email', $email)->first();
 
         if (!empty($checkuser)) {
-            // Check password - support both plain text (for existing users) and hashed passwords
-            if (Hash::check($password, $checkuser->password) || $checkuser->password === $password) {
-                // If password is plain text, hash it for future use
-                if ($checkuser->password === $password) {
-                    DB::table('storeusers')
-                        ->where('id', $checkuser->id)
-                        ->update(['password' => Hash::make($password)]);
-                }
+            if ($this->passwordMatches($checkuser, $password)) {
+                $guestSessionId = session()->getId();
+                $request->session()->regenerate();
 
                 session()->put('userid', $checkuser->id);
                 session()->put('username', $checkuser->email);
                 session()->put('fullname', $checkuser->fname . ' ' . $checkuser->lname);
 
-                $this->mergeSessionCart($checkuser->id);
+                $this->mergeSessionCart($checkuser->id, $guestSessionId);
 
                 $request->session()->flash('success', 'Login Successful!');
-                return redirect($request->input('redirect') ?: route('corporate.portal'));
+                return redirect($this->safeRedirect($request->input('redirect'), route('corporate.portal')));
             } else {
                 $request->session()->flash('error', 'Invalid Password');
                 if ($request->input('auth_modal')) {
@@ -239,6 +269,30 @@ class UsersController extends Controller
             }
             return redirect()->back()->withInput();
         }
+    }
+
+    /**
+     * Check a store user's password. Old accounts may still have a plain text
+     * password; those are upgraded to a hash the first time they log in.
+     */
+    private function passwordMatches($user, $password)
+    {
+        if (empty($user->password)) {
+            return false;
+        }
+
+        if (strpos($user->password, '$2y$') === 0) {
+            return Hash::check($password, $user->password);
+        }
+
+        if (hash_equals((string) $user->password, (string) $password)) {
+            DB::table('storeusers')
+                ->where('id', $user->id)
+                ->update(['password' => Hash::make($password)]);
+            return true;
+        }
+
+        return false;
     }
 
     public function corporateRegister(Request $request)
@@ -326,7 +380,7 @@ class UsersController extends Controller
         $this->mergeSessionCart($user->id);
 
         $request->session()->flash('success', 'Registered successfully!');
-        return redirect($request->input('redirect') ?: route('cart.index'));
+        return redirect($this->safeRedirect($request->input('redirect'), route('cart.index')));
     }
 
     public function accountSettings(Request $request)
@@ -386,17 +440,43 @@ class UsersController extends Controller
         return redirect()->route('corporate.account-settings');
     }
 
-    private function mergeSessionCart($userId)
+    private function mergeSessionCart($userId, $sessionId = null)
     {
-        CartItem::where('session_id', session()->getId())
+        CartItem::where('session_id', $sessionId ?: session()->getId())
             ->whereNull('user_id')
             ->update(['user_id' => $userId, 'session_id' => null]);
     }
 
+    /**
+     * Only follow redirects that stay on this site.
+     */
+    private function safeRedirect($target, $fallback)
+    {
+        if (is_string($target) && $target !== '') {
+            if (strpos($target, '/') === 0 && strpos($target, '//') !== 0 && strpos($target, '/\\') !== 0) {
+                return $target;
+            }
+            $home = url('/');
+            if ($target === $home || strpos($target, $home . '/') === 0) {
+                return $target;
+            }
+        }
+
+        return $fallback;
+    }
+
     public function redirectToGoogleCorporate(Request $request)
     {
+        // Without keys Google shows a raw "missing client_id" error page
+        if (empty(config('services.google.client_id')) || empty(config('services.google.client_secret'))) {
+            \Log::warning('Google login clicked but Google_client_id / Google_client_secret are not set in .env');
+            $request->session()->flash('error', 'Google sign-in is not available right now. Please login with your email and password.');
+            $request->session()->flash('auth_form', 'login');
+            return redirect()->back();
+        }
+
         if ($request->input('redirect')) {
-            session()->put('google_redirect', $request->input('redirect'));
+            session()->put('google_redirect', $this->safeRedirect($request->input('redirect'), route('corporate.portal')));
         }
 
         return Socialite::driver('google')
@@ -445,11 +525,14 @@ class UsersController extends Controller
             ]);
         }
 
+        $guestSessionId = session()->getId();
+        $request->session()->regenerate();
+
         session()->put('userid', $user->id);
         session()->put('username', $user->email);
         session()->put('fullname', trim($user->fname . ' ' . $user->lname));
 
-        $this->mergeSessionCart($user->id);
+        $this->mergeSessionCart($user->id, $guestSessionId);
 
         return redirect($redirectTo);
     }
@@ -622,22 +705,24 @@ class UsersController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
+        $name = trim($request->name);
+
         // Check if collection name already exists for this user
         $existingCollection = Collection::where('user_id', session()->get('userid'))
-            ->where('name', $request->name)
+            ->where('name', $name)
             ->first();
 
         if ($existingCollection) {
-            return response()->json(['success' => false, 'message' => 'Collection with this name already exists']);
+            return response()->json(['success' => false, 'message' => 'You already have a collection called "' . $name . '". Please choose another name.']);
         }
 
         $collection = new Collection();
-        $collection->name = $request->name;
+        $collection->name = $name;
         $collection->description = $request->description;
         $collection->user_id = session()->get('userid');
         $collection->save();
 
-        return response()->json(['success' => true, 'collection' => $collection]);
+        return response()->json(['success' => true, 'collection' => $collection, 'url' => route('collections.view', $collection->id)]);
     }
 
     public function viewCollection($id)
@@ -652,10 +737,74 @@ class UsersController extends Controller
             abort(404);
         }
 
-        // Get all products for adding to collection
-        $products = Product::where('is_active', 'online')->limit(50)->get();
+        // One row per saved product, priced like the cart: never below the MOQ, tier price for that quantity
+        $rows = $collection->items->map(function ($item) {
+            $product = $item->product;
+            if (!$product) {
+                return (object) ['item' => $item, 'product' => null];
+            }
+            $moq = $product->minOrderQuantity();
+            $quoted = max((int) $item->quantity, $moq);
+            $unit = $product->priceForQuantity($quoted);
+            return (object) [
+                'item' => $item, 'product' => $product, 'image' => $product->imageUrl(), 'moq' => $moq,
+                'quoted' => $quoted, 'unit' => $unit, 'total' => $unit * $quoted,
+                'available' => $product->is_active === 'online',
+            ];
+        });
+        $totals = [
+            'products' => $rows->count(),
+            'pieces' => $rows->sum(function ($row) { return $row->product ? $row->quoted : 0; }),
+            'value' => $rows->sum(function ($row) { return $row->product ? $row->total : 0; }),
+        ];
 
-        return view('web_frontend.collection-detail', compact('collection', 'products'));
+        return view('web_frontend.collection-detail', compact('collection', 'rows', 'totals'));
+    }
+
+    /**
+     * Product picker on the collection page: searches the whole online
+     * catalogue (name, model number, SKU), 20 at a time.
+     */
+    public function collectionProductSearch(Request $request)
+    {
+        if (!session()->has('userid')) {
+            return response()->json(['success' => false, 'message' => 'Please log in again.'], 401);
+        }
+
+        $search = trim((string) $request->query('q', ''));
+        $page = Product::where('is_active', 'online')
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%' . addcslashes($search, '%_\\') . '%';
+                $query->where(function ($q) use ($like) {
+                    $q->where('name', 'like', $like)->orWhere('modelno', 'like', $like)->orWhere('sku', 'like', $like);
+                });
+            })
+            ->orderBy('name')
+            ->paginate(20);
+
+        $inCollection = [];
+        if ($request->filled('collection')) {
+            $collection = Collection::where('id', $request->query('collection'))->where('user_id', session()->get('userid'))->first();
+            $inCollection = $collection ? $collection->items()->pluck('quantity', 'product_id')->all() : [];
+        }
+
+        return response()->json([
+            'success' => true,
+            'total' => $page->total(),
+            'nextPage' => $page->hasMorePages() ? $page->currentPage() + 1 : null,
+            'products' => collect($page->items())->map(function ($product) use ($inCollection) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'modelno' => $product->modelno,
+                    'image' => $product->imageUrl(),
+                    'price' => round($product->displayPrice(), 2),
+                    'moq' => $product->minOrderQuantity(),
+                    'url' => route('web.product', $product->slug),
+                    'inCollection' => (int) ($inCollection[$product->id] ?? 0),
+                ];
+            })->values(),
+        ]);
     }
 
     public function deleteCollection($id)
@@ -700,18 +849,87 @@ class UsersController extends Controller
         return response()->json(['success' => true, 'collection' => $collection]);
     }
 
-    public function allCollections()
+    public function allCollections(Request $request)
     {
         if (!session()->has('userid')) {
             return redirect()->route('corporate.login');
         }
 
-        $collections = Collection::where('user_id', session()->get('userid'))
+        $userid = session()->get('userid');
+        $search = trim((string) $request->query('search', ''));
+        $totalCollections = Collection::where('user_id', $userid)->count();
+
+        $collections = Collection::where('user_id', $userid)
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%' . addcslashes($search, '%_\\') . '%';
+                $query->where(function ($q) use ($like) {
+                    $q->where('name', 'like', $like)->orWhere('description', 'like', $like);
+                });
+            })
+            ->with('items.product')
             ->withCount('items')
             ->orderBy('updated_at', 'desc')
-            ->paginate(12);
+            ->paginate(12)
+            ->withQueryString();
 
-        return view('web_frontend.collections-list', compact('collections'));
+        // Card summary: up to 4 product images, pieces and an estimate priced like the cart (MOQ + tiers)
+        foreach ($collections as $collection) {
+            $items = $collection->items->filter(function ($item) {
+                return $item->product;
+            });
+            $collection->preview_images = $items->map(function ($item) {
+                return $item->product->imageUrl();
+            })->filter()->take(4)->values();
+            $collection->total_pieces = $items->sum('quantity');
+            $collection->estimated_value = $items->sum(function ($item) {
+                $quantity = max((int) $item->quantity, $item->product->minOrderQuantity());
+                return $quantity * $item->product->priceForQuantity($quantity);
+            });
+        }
+
+        return view('web_frontend.collections-list', compact('collections', 'search', 'totalCollections'));
+    }
+
+    /**
+     * Put every product of a saved collection into the quote cart, using the
+     * cart's own rules (MOQ, tier price). Offline or deleted products are skipped.
+     */
+    public function collectionToCart($id)
+    {
+        if (!session()->has('userid')) {
+            return response()->json(['success' => false, 'message' => 'Please log in again.'], 401);
+        }
+
+        $collection = Collection::with('items.product')->where('id', $id)->where('user_id', session()->get('userid'))->first();
+        if (!$collection) {
+            return response()->json(['success' => false, 'message' => 'Collection not found'], 404);
+        }
+
+        $cart = app(CartController::class);
+        $added = 0;
+        $skipped = [];
+        foreach ($collection->items as $item) {
+            if (!$item->product || $item->product->is_active !== 'online') {
+                $skipped[] = optional($item->product)->name ?: 'A product that no longer exists';
+                continue;
+            }
+            $cart->addProductToCart($item->product, $item->quantity);
+            $added++;
+        }
+
+        if (!$added) {
+            return response()->json(['success' => false, 'message' => $collection->items->count()
+                ? 'None of the products in this collection are available any more.'
+                : 'This collection has no products yet.', 'skipped' => $skipped], 422);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $added . ' product' . ($added == 1 ? '' : 's') . ' added to your quote cart.',
+            'skipped' => $skipped,
+            'count' => CartItem::where('user_id', session()->get('userid'))->count(), // same number the header cart badge shows
+            'cartUrl' => route('cart.index'),
+        ]);
     }
 
     public function addItemToCollection(Request $request, $id)
@@ -731,6 +949,10 @@ class UsersController extends Controller
             return response()->json(['success' => false, 'message' => 'Collection not found'], 404);
         }
 
+        if (Product::where('id', $request->product_id)->value('is_active') !== 'online') {
+            return response()->json(['success' => false, 'message' => 'This product is not available any more.'], 422);
+        }
+
         // Check if product already exists in collection
         $existingItem = CollectionItem::where('collection_id', $id)
             ->where('product_id', $request->product_id)
@@ -740,6 +962,7 @@ class UsersController extends Controller
             // Update quantity
             $existingItem->quantity += $request->quantity;
             $existingItem->save();
+            $item = $existingItem;
         } else {
             // Add new item
             $item = new CollectionItem();
@@ -749,7 +972,7 @@ class UsersController extends Controller
             $item->save();
         }
 
-        return response()->json(['success' => true, 'message' => 'Product added to collection']);
+        return response()->json(['success' => true, 'message' => 'Product added to collection', 'quantity' => (int) $item->quantity]);
     }
 
     public function removeItemFromCollection($id, $itemId)
@@ -830,39 +1053,74 @@ class UsersController extends Controller
 
         $checkuser = DB::table('storeusers')->select('*')->where('email', $email)->first();
 
+        // The password only changes when the owner opens the emailed link,
+        // so a stranger typing someone's email can't lock them out.
         if (!empty($checkuser)) {
-            // Generate a random password
-            $password = Str::random(10);
+            $token = Str::random(64);
+            DB::table('password_resets')->where('email', $checkuser->email)->delete();
+            DB::table('password_resets')->insert([
+                'email' => $checkuser->email,
+                'token' => hash('sha256', $token),
+                'created_at' => now(),
+            ]);
 
-            // Update password with hash
-            DB::table('storeusers')
-                ->where('email', $email)
-                ->update([
-                    'password' => Hash::make($password),
-                ]);
-
-            // Send email with new password (if mail is configured)
             try {
                 $data = [
-                    'email' => $email,
-                    'password' => $password,
+                    'resetUrl' => route('corporate.password.reset', $token) . '?email=' . urlencode($checkuser->email),
+                    'minutes' => self::RESET_LINK_MINUTES,
                 ];
-
-                Mail::send('emails.password_reset', $data, function($message) use ($email) {
-                    $message->to($email, 'User')->subject('Password Reset - More Than Giftz');
-                    $message->from('noreply@morethangiftz.com', 'More Than Giftz');
+                Mail::send('emails.password_reset_link', $data, function($message) use ($checkuser) {
+                    $message->to($checkuser->email)->subject('Reset your password - More Than Giftz');
                 });
             } catch (\Exception $e) {
-                // Log error but continue (email might not be configured)
                 \Log::error('Password reset email failed: ' . $e->getMessage());
             }
-
-            $request->session()->flash('success', 'A new password has been sent to your email address. Please check your inbox and spam folder.');
-            return redirect()->route('corporate.login');
-        } else {
-            $request->session()->flash('error', 'Email Not Registered, Please Sign Up');
-            return redirect()->back()->withInput();
         }
+
+        // Same message either way, so the form doesn't reveal who is registered
+        $request->session()->flash('success', 'If an account exists for that email, we have sent a link to reset your password. Please check your inbox and spam folder.');
+        return redirect()->route('corporate.login');
+    }
+
+    const RESET_LINK_MINUTES = 60;
+
+    private function validResetToken($email, $token)
+    {
+        $row = DB::table('password_resets')->where('email', $email)->first();
+        return $row
+            && hash_equals($row->token, hash('sha256', (string) $token))
+            && \Carbon\Carbon::parse($row->created_at)->addMinutes(self::RESET_LINK_MINUTES)->isFuture();
+    }
+
+    public function showResetPasswordForm(Request $request, $token)
+    {
+        $email = (string) $request->query('email');
+        if (!$this->validResetToken($email, $token)) {
+            $request->session()->flash('error', 'This password reset link is invalid or has expired. Please request a new one.');
+            return redirect()->route('corporate.forgot.password');
+        }
+
+        return view('web_frontend.auth.reset-password', compact('token', 'email'));
+    }
+
+    public function doResetPasswordWithToken(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+            'token' => 'required|string',
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        if (!$this->validResetToken($request->email, $request->token)) {
+            $request->session()->flash('error', 'This password reset link is invalid or has expired. Please request a new one.');
+            return redirect()->route('corporate.forgot.password');
+        }
+
+        DB::table('storeusers')->where('email', $request->email)->update(['password' => Hash::make($request->password)]);
+        DB::table('password_resets')->where('email', $request->email)->delete();
+
+        $request->session()->flash('success', 'Your password has been changed. You can log in now.');
+        return redirect()->route('corporate.login');
     }
 
     public function updateuserdetails(Request $request)

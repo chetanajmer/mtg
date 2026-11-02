@@ -97,19 +97,13 @@ window.location.href = "{{url('/admin')}}";
                     <div class="col-md-{{ $stepNum == 5 ? '12' : '2-4' }}">
                         <div class="card-box"
                              style="border: 2px solid {{
-                                 $step['completed'] ? '#81C868' :
-                                 (!$step['locked'] && !$step['completed']) ? '#4a76fd' :
-                                 '#e2e8f0'
+                                 $step['completed'] ? '#81C868' : ((!$step['locked'] && !$step['completed']) ? '#4a76fd' : '#e2e8f0')
                              }}; background-color: {{
-                                 $step['completed'] ? '#f0fdf4' :
-                                 (!$step['locked'] && !$step['completed']) ? '#eff6ff' :
-                                 '#f8fafc'
+                                 $step['completed'] ? '#f0fdf4' : ((!$step['locked'] && !$step['completed']) ? '#eff6ff' : '#f8fafc')
                              }};">
                             <div class="text-center">
                                 <div class="step-icon" style="font-size: 48px; color: {{
-                                    $step['completed'] ? '#81C868' :
-                                    (!$step['locked'] && !$step['completed']) ? '#4a76fd' :
-                                    '#94a3b8'
+                                    $step['completed'] ? '#81C868' : ((!$step['locked'] && !$step['completed']) ? '#4a76fd' : '#94a3b8')
                                 }};">
                                     @if($step['locked'])
                                         <i class="ti-lock"></i>
@@ -118,9 +112,7 @@ window.location.href = "{{url('/admin')}}";
                                     @endif
                                 </div>
                                 <h4 class="m-t-20" style="color: {{
-                                    $step['completed'] ? '#81C868' :
-                                    (!$step['locked'] && !$step['completed']) ? '#4a76fd' :
-                                    '#94a3b8'
+                                    $step['completed'] ? '#81C868' : ((!$step['locked'] && !$step['completed']) ? '#4a76fd' : '#94a3b8')
                                 }};">
                                     Step {{ $stepNum }}
                                 </h4>

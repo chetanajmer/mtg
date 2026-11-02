@@ -17,6 +17,10 @@ class StoreCategoryController extends Controller
     {
           
           $categorydata=Category::where('slug',$slug)->first();
+          if(!$categorydata)
+          {
+              abort(404);
+          }
           $catid=$categorydata->id;
           $brand=$categorydata->brand_id;
 
@@ -26,7 +30,7 @@ class StoreCategoryController extends Controller
           $catname=$categorydata->catname;
        
 
-          $products=DB::table('products')->where('is_active','online')->where('brand',$brand);
+          $products=DB::table('products')->where('is_active','online')->where('category',$catid);
 
 
           if(!empty($_GET['sort'])){
@@ -59,8 +63,8 @@ class StoreCategoryController extends Controller
           $contact=Contact::where('id','1')->first();
           $brands=Brand::where('is_active','online')->where('featured','online')->orderby('ranking')->get()->take(3);
 
-          $checkbox_brands=Brand::where('is_active','online')->where('id',$brand)->get();
-          $checkbox_categories=Category::where('is_active','online')->where('brand_id',$brand)->get();
+          $checkbox_brands=Brand::where('is_active','online')->get();
+          $checkbox_categories=Category::where('is_active','online')->get();
           return view('frontend.category',compact('brands','catslug','catid','catname','subcategories','footerlevel1','contact','checkbox_brands','checkbox_categories','products'));
     }
 
@@ -69,6 +73,10 @@ class StoreCategoryController extends Controller
     {
           
           $categorydata=Category::where('slug',$slug)->first();
+          if(!$categorydata)
+          {
+              abort(404);
+          }
           $catid=$categorydata->id;
           $brand=$categorydata->brand_id;
 
@@ -108,7 +116,7 @@ class StoreCategoryController extends Controller
           $contact=Contact::where('id','1')->first();
           $brands=Brand::where('is_active','online')->where('featured','online')->orderby('ranking')->get()->take(3);
           $checkbox_brands=Brand::where('is_active','online')->get();
-          $checkbox_categories=Category::where('is_active','online')->where('brand_id',$brand)->get();
+          $checkbox_categories=Category::where('is_active','online')->get();
           return view('frontend.categorylist',compact('catslug','catid','catname','subcategories','footerlevel1','contact','brands','checkbox_categories','checkbox_brands','products'));
     }
 
@@ -117,6 +125,10 @@ class StoreCategoryController extends Controller
     public function subcategory($slug)
     {
           $subcategorydata=SubCategory::where('slug',$slug)->first();
+          if(!$subcategorydata)
+          {
+              abort(404);
+          }
           $subcatid=$subcategorydata->id;
           $subcatslug=$slug;
 
@@ -158,6 +170,10 @@ class StoreCategoryController extends Controller
     public function subcategorylist($slug)
     {
           $subcategorydata=SubCategory::where('slug',$slug)->first();
+          if(!$subcategorydata)
+          {
+              abort(404);
+          }
           $subcatid=$subcategorydata->id;
           $subcatslug=$slug;
 

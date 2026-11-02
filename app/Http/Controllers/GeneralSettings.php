@@ -9,7 +9,6 @@ use App\Models\Header_setting;
 use App\Models\Footer_setting;
 use App\Models\Homepage_setting;
 use App\Models\Product_setting;
-use App\Models\Reward_setting;
 use App\Models\Footerlevel1;
 use App\Models\Myproduct;
 use App\Models\Product;
@@ -500,33 +499,6 @@ class GeneralSettings extends Controller
         return Redirect::back();  
     }
 
-
-    public function env_key_update(Request $request)
-    {
-
-        //echo"<pre>";print_r($_POST);die;
-        foreach ($request->types as $key => $type) {
-                $this->overWriteEnvFile($type, $request[$type]);
-        }
-
-        $request->session()->flash('success','Updated Successfully !');    
-        return Redirect::back(); 
-    }
-
-
-    
-
-    public function overWriteEnvFile($type, $val)
-    {
-        $path = base_path('.env');
-
-        if (file_exists($path)) {
-
-            file_put_contents($path, str_replace(
-                $type . '=' . env($type), $type . '=' . $val, file_get_contents($path)
-            ));
-        }
-    }
 
     /*public function overWriteEnvFile($type, $val)
     {

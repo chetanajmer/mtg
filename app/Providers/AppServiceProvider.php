@@ -49,5 +49,12 @@ class AppServiceProvider extends ServiceProvider
 
              $view->with('cartItemCount', $count ?: 0);
          });
+
+         // @adminCan('listproduct') ... @endadminCan: show a menu item only to
+         // admins who may open that page (same rules as AdminPermission).
+         \Illuminate\Support\Facades\Blade::if('adminCan', function ($path) {
+             $flag = \App\Http\Middleware\AdminPermission::flagFor($path);
+             return !$flag || \App\Http\Middleware\AdminPermission::allowed(session()->get('admin_id'), $flag);
+         });
     }
 }

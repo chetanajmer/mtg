@@ -148,18 +148,25 @@ window.location.href = "{{url('/admin')}}";
                 <!-- Header -->
                 <div class="order-workflow-header">
                     <h1>Order Workflow — #{{ $order->id ?? 'N/A' }}</h1>
-                    <a href="{{ route('ordertracking.index') }}" class="btn-back">← Back to Order List</a>
+                    <a href="{{ route('orders.index') }}" class="btn-back">← Back to Store Enquiries</a>
                 </div>
 
                 <!-- Product Details -->
                 <div class="product-details">
                     <div class="product-details-row">
+                        @php $productImage = $order->productImageUrl(); @endphp
+                        @if($productImage)
+                        <div class="product-thumb" style="background: #fff; border: 1px solid #e5e7eb; overflow: hidden;">
+                            <img src="{{ $productImage }}" alt="{{ $order->name }}" style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                        @else
                         <div class="product-thumb">📦</div>
+                        @endif
                         <div class="product-info">
                             <h2>{{ $order->name ?? 'N/A' }}</h2>
                             <div class="product-meta">
                                 <span>Order ID: <strong>{{ $order->orderid ?? $order->id ?? 'N/A' }}</strong></span>
-                                <span>Customer: <strong>{{ $order->username ?? 'N/A' }}</strong></span>
+                                <span>Customer: <strong>{{ $order->customer_name ?: 'N/A' }}</strong></span>
                                 <span>Order Date: <strong>{{ $order->created_at ? $order->created_at->format('d-M-Y H:i:s') : 'N/A' }}</strong></span>
                                 <span>Quantity: <strong>{{ $order->quantity ?? 'N/A' }}</strong></span>
                             </div>
@@ -1417,6 +1424,32 @@ function getStepNumberFromLi(li) {
     }
     return 2; // Default to step 2
 }
+
+// Show each step's real saved status (the markup above has placeholder statuses)
+(function () {
+    const statuses = @json($stepStatuses ?? []);
+    const labels = { completed: 'Completed', approved: 'Approved', delivered: 'Delivered', 'in-review': 'In Review', rejected: 'Rejected', pending: 'Pending', saved: 'Saved', '': 'Not Started' };
+    const done = s => ['completed', 'approved', 'delivered'].includes((s || '').toLowerCase());
+    let current = 1;
+    for (let n = 1; n <= 10; n++) { if (done(statuses[n])) current = Math.min(n + 1, 10); }
+
+    document.querySelectorAll('.workflow-progress li').forEach(function (li, i) {
+        const n = i + 1;
+        li.classList.remove('completed', 'current');
+        if (done(statuses[n])) li.classList.add('completed');
+        else if (n === current) li.classList.add('current');
+    });
+    document.querySelectorAll('.workflow-steps li').forEach(function (li) {
+        const n = getStepNumberFromLi(li);
+        const s = (statuses[n] || '').toLowerCase();
+        li.classList.toggle('completed', done(s));
+        const badge = li.querySelector('.step-status');
+        if (badge) {
+            badge.className = 'step-status ' + (done(s) ? 'completed' : (s === '' ? 'not-started' : (s === 'in-review' ? 'in-review' : 'pending')));
+            badge.textContent = labels[s] || (s.charAt(0).toUpperCase() + s.slice(1));
+        }
+    });
+})();
 
 function updateStepStatus(stepNumber, newStatus) {
     const cartorderId = document.querySelector('input[name="cartorder_id"]')?.value;

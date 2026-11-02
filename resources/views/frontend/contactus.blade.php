@@ -52,12 +52,18 @@
         @if(Session::has('success'))
          <div class="alert alert-success" id="msg" role="alert"> {{ Session::get('success') }}</div>
         @endif
+        @if(Session::has('error'))
+         <div class="alert alert-danger" role="alert"> {{ Session::get('error') }}</div>
+        @endif
+        @if($errors->any())
+         <div class="alert alert-danger" role="alert">@foreach($errors->all() as $error){{ $error }}<br>@endforeach</div>
+        @endif
          <form action="{{route('contactform')}}" method="post">
            {{ csrf_field() }}
-           <input type="text" name="contact-name" placeholder="Name" class="mb-2" required="">
-           <input type="email" name="contact-email" placeholder="Email" class="mb-2" required="">
-           <input type="text" name="contact-phone" placeholder="Phone number" class="mb-2" required="">
-           <textarea rows="3" cols="3" placeholder="Message" class="mb-2" required="" name="message"></textarea>
+           <input type="text" name="contact-name" placeholder="Name" class="mb-2" required="" maxlength="100" value="{{ old('contact-name') }}">
+           <input type="email" name="contact-email" placeholder="Email" class="mb-2" required="" maxlength="150" value="{{ old('contact-email') }}">
+           <input type="text" name="contact-phone" placeholder="Phone number" class="mb-2" required="" maxlength="30" value="{{ old('contact-phone') }}">
+           <textarea rows="3" cols="3" placeholder="Message" class="mb-2" required="" maxlength="5000" name="message">{{ old('message') }}</textarea>
            <button type="submit" class="cart_btn">Send </button>
          </form>
        </div>

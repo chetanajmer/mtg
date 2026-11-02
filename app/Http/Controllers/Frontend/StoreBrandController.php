@@ -16,6 +16,10 @@ class StoreBrandController extends Controller
     public function brand($slug)
     {     
          $branddata=Brand::where('slug',$slug)->first();
+         if(!$branddata)
+         {
+             abort(404);
+         }
          $brandid=$branddata->id;
         
 
@@ -56,6 +60,10 @@ class StoreBrandController extends Controller
     {
           
           $branddata=Brand::where('slug',$slug)->first();
+         if(!$branddata)
+         {
+             abort(404);
+         }
          $brandid=$branddata->id;
         
 

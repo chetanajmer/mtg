@@ -326,5 +326,5 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('web_frontend/assets/js/budget-planner.js') }}"></script>
+<script src="{{ asset('web_frontend/assets/js/corporate-gifting-planner.js') }}"></script>
 @endsection

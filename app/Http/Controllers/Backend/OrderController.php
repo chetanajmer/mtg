@@ -30,57 +30,99 @@ class OrderController extends Controller
 
     public function index(Request $request)
     {
-        $items_array=Cartorder::orderBy('created_at','desc')->get()->unique('orderid');
-        return view('backend.orders.list',compact('items_array'));
+        // One row per order number; old orders without a number stay separate
+        $orders=Cartorder::orderBy('created_at','desc')->orderBy('id','desc')->get();
+        $itemCounts=$orders->whereNotNull('orderid')->countBy('orderid')->all();
+        $grouped=$orders->unique(function ($order) {
+          return $order->orderid ?: 'id-'.$order->id;
+        })->values();
+
+        $perPage=25;
+        $page=\Illuminate\Pagination\Paginator::resolveCurrentPage();
+        $items_array=new \Illuminate\Pagination\LengthAwarePaginator(
+          $grouped->forPage($page,$perPage)->values(), $grouped->count(), $perPage, $page,
+          ['path'=>$request->url(), 'query'=>$request->query()]
+        );
+        return view('backend.orders.list',compact('items_array','itemCounts'));
     }
 
-    public function orderWorkflow($id)
-    {
-        // Order Workflow page
-        $order = Cartorder::where('id', $id)->first();
-        return view('backend.orders.order-workflow', compact('order'));
-    }
-
+    /**
+     * Carts (current cart_items) with no activity for 24 hours: one row per
+     * customer, or per guest browser session.
+     */
     public function abandoned_order(Request $request)
     {
-      $items_array=Tmporder::whereNull('ordercomplete')->orderbyDesc('id')->get();
+      $cutoff=now()->subDay();
+      $carts=\App\Models\CartItem::orderBy('updated_at','desc')->get()
+        ->groupBy(function ($item) {
+          return $item->user_id ? 'u'.$item->user_id : 's'.$item->session_id;
+        })
+        ->filter(function ($items) use ($cutoff) {
+          return $items->max('updated_at') < $cutoff;
+        });
+
+      $users=Storeuser::whereIn('id',$carts->flatten()->pluck('user_id')->filter()->unique())->get()->keyBy('id');
+      $items_array=$carts->map(function ($items) use ($users) {
+        $first=$items->first();
+        $user=$first->user_id ? $users->get($first->user_id) : null;
+        return (object) [
+          'key'=>$first->id,
+          'customer'=>$user ? trim($user->fname.' '.$user->lname) : 'Guest',
+          'email'=>$user->email ?? null,
+          'userid'=>$user->id ?? null,
+          'products'=>$items->count(),
+          'quantity'=>$items->sum('quantity'),
+          'value'=>$items->sum(function ($i) { return $i->price*$i->quantity; }),
+          'last_activity'=>$items->max('updated_at'),
+        ];
+      })->values();
+
       return view('backend.orders.abandoned_list',compact('items_array'));
     }
 
+    /**
+     * $id is any cart_items id from the abandoned cart.
+     */
     public function abandoned_orderdetails($id)
     {
-      $orders=Tmporder::where('id',$id)->get();
-      return view('backend.orders.abandoned_orderdetails',compact('orders'));
+      $item=\App\Models\CartItem::findOrFail($id);
+      $orders=\App\Models\CartItem::when($item->user_id, function ($q) use ($item) {
+          return $q->where('user_id',$item->user_id);
+        }, function ($q) use ($item) {
+          return $q->whereNull('user_id')->where('session_id',$item->session_id);
+        })->orderBy('id')->get();
+      $customer=$item->user_id ? Storeuser::find($item->user_id) : null;
 
+      return view('backend.orders.abandoned_orderdetails',compact('orders','customer'));
     }
 
+    /**
+     * Email the customer a reminder about their abandoned cart.
+     * $request->id is any cart_items id from that cart.
+     */
     public function send_abandoned_mail(Request $request)
     {
-    	$userid=$request->id;
-    	$getusermail=Storeuser::where('id',$userid)->first();
-    	$useremail=$getusermail->email;
+      $item=\App\Models\CartItem::find($request->id);
+      $customer=$item && $item->user_id ? Storeuser::find($item->user_id) : null;
+      if(!$customer || empty($customer->email))
+      {
+        return response()->json(['success'=>false,'message'=>'This cart has no customer email (guest cart).'],422);
+      }
 
-    	$details = array(
-          'email'=>$useremail,
-      );
+      $items=\App\Models\CartItem::where('user_id',$customer->id)->orderBy('id')->get();
+      try
+      {
+        Mail::send('mail.abandoned_cart_reminder',['customer'=>$customer,'items'=>$items],function ($message) use ($customer) {
+          $message->to($customer->email)->subject('You left items in your quote cart - More Than Giftz');
+        });
+      }
+      catch(\Throwable $e)
+      {
+        \Log::error('Abandoned cart email to '.$customer->email.' failed: '.$e->getMessage());
+        return response()->json(['success'=>false,'message'=>'Email could not be sent. Check the mail settings.'],500);
+      }
 
-        // $user['to']=$useremail;
-        // $user['from']="richa@silverpixelz.com";
-        // Mail::send('mail/abandoned_cart_mail', $data, function($message) use ($user) {
-        
-        //  $message->to($user['to'], 'Seven Wonder')->subject
-        //     ('Abandoned Cart');
-        //  $message->from($user['from'],'Seven Wonder');
-        //  });
-
-			if(Mail::to('richa@silverpixelz.com')->send(new \App\Mail\Abandonedcartmail($details)))
-			{
-				echo "email sent";
-			}
-			else
-			{
-				echo "email error";
-			}	   
+      return response()->json(['success'=>true,'message'=>'Reminder sent to '.$customer->email]);
     }
 
 }

@@ -56,7 +56,6 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                 <h4 class="page-title">Add Product</h4>
 
-                                 <a href="{{route('add_image')}}"><button type="button" class="btn w-sm btn-default waves-effect waves-light" style="float: right;">Upload Image</button></a><br>
 
                                 <ol class="breadcrumb">
 

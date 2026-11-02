@@ -11,6 +11,9 @@ class CollectionItem extends Model
 
     protected $fillable = ['collection_id', 'product_id', 'quantity'];
 
+    /** Adding, changing or removing a product updates the collection's "updated" date. */
+    protected $touches = ['collection'];
+
     public function collection()
     {
         return $this->belongsTo(Collection::class);

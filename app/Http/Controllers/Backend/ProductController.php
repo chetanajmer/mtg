@@ -681,6 +681,11 @@ class ProductController extends Controller
 
         // echo"<pre>"; print_r($_POST);die;
 
+        if($error=$this->invalidTierPrices($request))
+        {
+            return Redirect::back()->withInput()->with('error',$error);
+        }
+
         $settings=General_setting::findOrFail(1);
 
         $sitename=$settings->site_name;
@@ -1639,7 +1644,7 @@ class ProductController extends Controller
 
         $request->session()->flash('success','Saved Successfully!');
 
-        $username=session()->get('username');
+        $username=session()->get('admin_email');
         
         return Redirect::to('listproduct');
         
@@ -2941,8 +2946,34 @@ class ProductController extends Controller
         return $names;
     }
 
+    /**
+     * Message when tier pricing is on and a tier has no price above 0, else null.
+     */
+    private function invalidTierPrices($request)
+    {
+        if(!$request->tier_pricing_enabled || empty($request->tier_min))
+        {
+            return null;
+        }
+        foreach($request->tier_min as $i=>$min)
+        {
+            if((int)$min>0 && (float)($request->tier_price[$i] ?? 0)<=0)
+            {
+                return 'Tier pricing: every quantity tier needs a price above 0 (tier starting at '.(int)$min.' pcs). Nothing was saved.';
+            }
+        }
+        return null;
+    }
+
     private function syncTierPrices($request,$product_id)
     {
+        // With the toggle off the tier inputs are disabled and not sent, so
+        // keep the saved rows as they are; they come back when it's re-enabled.
+        if(!$request->tier_pricing_enabled)
+        {
+            return;
+        }
+
         DB::table('product_tier_prices')->where('product_id',$product_id)->delete();
         if(empty($request->tier_min))
         {
@@ -2962,10 +2993,10 @@ class ProductController extends Controller
                 continue;
             }
 
-            // Validate price - must be non-negative
-            if($price < 0)
+            // A tier needs a real price (invalidTierPrices() stops the form before this)
+            if($price <= 0)
             {
-                $price = 0;
+                continue;
             }
 
             DB::table('product_tier_prices')->insert(array(
@@ -2983,6 +3014,11 @@ class ProductController extends Controller
     public function single_product_add(Request $request)
     {
        // echo "<pre>";print_r($_POST);die;
+
+       if($error=$this->invalidTierPrices($request))
+       {
+           return Redirect::back()->withInput()->with('error',$error);
+       }
 
        $settings=General_setting::findOrFail(1);
 

@@ -4,9 +4,9 @@ return [
     ####################################
     //  merchant Information
     ####################################
-    "merchant_email" => 'sales@sevenwonder.ae',//env('merchant_email'),
+    "merchant_email" => env('PAYTABS_MERCHANT_EMAIL'),
 
-    "merchant_secretKey" =>'S6JNL9KMBN-JDLHWMB9KM-RHTNT9LTTB',// env('merchant_secretKey'),
+    "merchant_secretKey" =>env('PAYTABS_MERCHANT_SECRET_KEY'),
 
     ####################################
     //  Website Information
@@ -18,7 +18,7 @@ return [
     "msg_lang" => "en",
     //Language of the PayPage to be created. Invalid or blank entries will default to English.(Englsh/Arabic)
 
-    "site_url" => 'https://beta.sevenwonder.ae/',//env('APP_URL'), //should be like that in local => 'http://localhost:8000'
+    "site_url" => env('APP_URL'), //should be like that in local => 'http://localhost:8000'
     //The requesting website be exactly the same as the website/URL associated with your PayTabs Merchant Account
 
     'return_url' => env('APP_URL') . "/paytabs_response", //should be like that in local => 'http://localhost:8000/paytabs_response'

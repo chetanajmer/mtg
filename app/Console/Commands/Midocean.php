@@ -48,12 +48,12 @@ class Midocean extends Command
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
+        CURLOPT_TIMEOUT => 300,
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'GET',
         CURLOPT_HTTPHEADER => array(
-            'x-Gateway-APIKey: 9c471204-9eb9-4d1e-99d8-b13db507e22d'
+            'x-Gateway-APIKey: '.config('services.midocean.api_key')
           ),
         ));
         

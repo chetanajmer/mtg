@@ -54,6 +54,11 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    /*
+    | Tax added to cart and enquiry totals (0.05 = 5% UAE VAT).
+    */
+    'cart_tax_rate' => env('CART_TAX_RATE', 0.05),
+
     'asset_url' => env('ASSET_URL', null),
 
     /*
@@ -162,7 +167,7 @@ return [
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
          Laravel\Socialite\SocialiteServiceProvider::class,
-         Basel\Paytabs\PaytabsServiceProvider::class,
+         // Basel PayTabs provider removed: it only registered a public /paytabs_payment test page
         
 
         /*
@@ -234,7 +239,6 @@ return [
         'Image' => Intervention\Image\Facades\Image::class,
         'Input' => Illuminate\Support\Facades\Input::class,
         'Socialite' => Laravel\Socialite\Facades\Socialite::class,
-        'Paytabs' => Basel\Paytabs\Facades\PaytabsFacade::class,
 
 
     ],

@@ -21,7 +21,6 @@ class VerifyCsrfToken extends Middleware
         'getproductdetails',
         'getbrandproducts',
         'searchproduct',
-        'search_or_update',
         'paytab_returnurl',
         'return_url',
         'callback',
@@ -37,8 +36,6 @@ class VerifyCsrfToken extends Middleware
         'addtocompare',
         'getcomparelist',
         'abandancart',
-        'enquiry',
-        'contact',
         'headerfilter',
         'gethomedata'
         //

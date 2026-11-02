@@ -28,7 +28,6 @@ use App\Models\Color;
 use App\Models\Subscribe;
 use App\Models\Footerlevel1;
 use App\Models\Corporatepage;
-use App\Models\User_reward;
 use App\Models\General_setting;
 use App\Models\Instock_notifier;
 use App\Models\B2enquiry;
@@ -39,6 +38,7 @@ use Illuminate\Support\Facades\Schema;
 //use App\Models\Header_setting;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 use DB;
 use Mail;
 use Illuminate\Support\Facades\File;
@@ -936,36 +936,26 @@ class ApiController extends Controller
 			$order_details=Tmporder::where('orderid',$orderid)->first();
 			$order_amount=$order_details->subtotal;     
 
-			 $orderdata= <<<DATA
-				{
-					"profile_id": 48334,
-					"tran_type": "sale",
-					"tran_class": "ecom" ,
-					"cart_id":"$orderid",
-					"cart_description": "$cust_email",
-					"cart_currency": "AED",
-					"cart_amount": "$order_amount",
-					"customer_details": {
-					  "name": "$cust_name",
-					  "email": "$cust_email",
-					  "street1": "$cust_address",
-					  "city": "$cust_city",
-					  "country": "$cust_country",
-					  "ip": "94.204.129.89"
-					  
-					},
-					"shipping_details": {
-					  "name": "$cust_name",
-					  "email": "$cust_email",
-					  "street1": "$cust_address",
-					  "city": "$cust_city",
-					  "country": "$cust_country",
-					  "ip": "94.204.129.89"
-					},
-					"callback": "https://beta.sevenwonder.ae/callback",
-					"return": "https://beta.sevenwonder.ae/paytab_returnurl"
-				}
-				DATA;
+			 $customer=array(
+					"name" => $cust_name,
+					"email" => $cust_email,
+					"street1" => $cust_address,
+					"city" => $cust_city,
+					"country" => $cust_country,
+					"ip" => $request->ip(),
+				);
+			 $orderdata=array(
+					"tran_type" => "sale",
+					"tran_class" => "ecom",
+					"cart_id" => (string)$orderid,
+					"cart_description" => (string)$cust_email,
+					"cart_currency" => "AED",
+					"cart_amount" => (float)$order_amount,
+					"customer_details" => $customer,
+					"shipping_details" => $customer,
+					"callback" => route('callback'),
+					"return" => route('paytab_returnurl'),
+				);
 
 				return $payment_url=paytabs($orderdata);
 			}
@@ -1032,88 +1022,23 @@ class ApiController extends Controller
 			return json_encode(['products' => $products,'searchdata' => $searchdata]);
 	}
 
-	public function search_or_update(Request $request)
-	{
-		$orderid=$request->item; 
-		 
-		$order_details=Tmporder::where('orderid',$orderid)->first();
-
-		if(!empty($order_details))
-		{
-			if($order_details->ordercomplete=="Yes")
-			{
-				return json_encode(['orderid' => $request->item,'status' =>"Already Completed"]);
-			}
-			else
-			{
-				DB::table('tmporders')->where('orderid',$orderid)
-				->update(['ordercomplete' =>'Yes']);
-
-				Tmporder::query()
-				->where('orderid',$orderid)
-				->each(function ($oldPost) {
-				$newPost = $oldPost->replicate();
-				$newPost->setTable('cartorders');
-				$newPost->save(); });
-
-				$order_email_details=Tmporder::where('orderid',$orderid)->first();
-
-				$details = [
-				'orderid'=>$orderid,
-				'orderdate'=>date('d-m-Y'),
-				'customer_name' =>$order_email_details->customer_name,
-				'customer_company' =>$order_email_details->customer_company,
-				'customer_email' =>$order_email_details->customer_email,
-				'customer_phone' => $order_email_details->customer_phone,
-				'additional_info'=> $order_email_details->additional_info,
-				'customer_address'=> $order_email_details->customer_address,
-				'customer_city'=>$order_email_details->customer_city, 
-				'customer_country'=>$order_email_details->customer_country,
-				'customer_pincode'=>$order_email_details->customer_pincode,
-				 'payment_mode'=>$order_email_details->payment_mode,
-				];
-
-				$headersettings= Header_setting::where('id','1')->first();
-				$admin_email="richa@silverpixelz.com";
-				// $admin_email="silverpixelz.advertising@gmail.com";
-				// $admin_email=$headersettings->headeremail;
-				$customer_email=$request->userinfo['email_address'];
-
-				sendmail_to_admin($details,$admin_email);
-				sendmail_to_customer($details,$customer_email,$admin_email);
-
-				return json_encode(['orderid' => $orderid,'status' =>"Order Completed"]);
-			}
-
-			//return json_encode(['orderid' => $orderid,'status' =>"Order Completed"]);    
-		}
-		else
-		{
-			return json_encode(['orderid' => $orderid,'status' =>"Invalid"]);
-		}    
-
-	}
-
 	public function paytab_returnurl(Request $request)
-	{   
+	{
+	   // Never trust the status the browser posts back; ask PayTabs directly
+	   $orderid=$request->cartId;
+	   $frontend=rtrim(config('services.paytabs.frontend_url'),'/');
+	   $result=$request->tranRef ? paytabs_query($request->tranRef) : null;
 
-		//echo url('/');die ;
-	   // echo $request->respStatus;
-		//print_r($_POST);
-	   $orderid=$request->cartId; 
-	   if($request->respStatus=="D")
+	   $approved=$result
+		   && (string)($result['cart_id'] ?? '')===(string)$orderid
+		   && ($result['payment_result']['response_status'] ?? null)==='A';
+
+	   if($approved)
 	   {
-		  return   Redirect::to('http://localhost:4200/failed/'.$orderid);
+			return Redirect::to($frontend.'/thankyou/'.urlencode($orderid));
 	   }
-	   else if ($request->respStatus=="A") 
-	   {
-		   // echo "die";
-			return  Redirect::to('http://localhost:4200/thankyou/'.$orderid);
-	   } 
-	   else
-	   {
 
-	   } 
+	   return Redirect::to($frontend.'/failed/'.urlencode($orderid));
 	}
 
 
@@ -1148,7 +1073,7 @@ class ApiController extends Controller
 			'email' => $email,
 			'fname' => $request->userinfo['first_name'],
 			'lname' => $request->userinfo['last_name'],
-			'password' =>$password
+			'password' =>Hash::make($password)
 			]);
 
 
@@ -1271,10 +1196,14 @@ class ApiController extends Controller
 
 	  $email=$request->userinfo['email_address'];
 	  $password=$request->userinfo['password'];
-	  $checkuser=DB::table('storeusers')->select('*')->where('email', $email)
-	  ->where('password',$password)->first();
-	  
-	  if(!empty($checkuser))
+	  $checkuser=DB::table('storeusers')->select('*')->where('email', $email)->first();
+
+	  $valid=!empty($checkuser) && !empty($checkuser->password) && !empty($password)
+		  && (strpos($checkuser->password, '$2y$')===0
+			  ? Hash::check($password, $checkuser->password)
+			  : hash_equals((string)$checkuser->password, (string)$password));
+
+	  if($valid)
 	  {
 		  
 		$userid=$checkuser->id; 
@@ -1517,79 +1446,6 @@ class ApiController extends Controller
 
 		return "Added";
 
-	}
-
-	public function enquiry(Request $request)
-	{
-		$products=$request->productsinfo;
-		$orderid=rand(1111,9999);
-		foreach($products as $item)
-		{   
-			$cartorder=new Cartorder;
-			$cartorder->color=json_encode($item['colors']);
-			$cartorder->productid=$item['product_id'];
-			$cartorder->thumbnail=$item['product_image'];
-			$cartorder->modelno=$item['product_modelno'];
-			$cartorder->name=$item['product_name'];
-			$cartorder->slug=$item['product_slug'];
-			$cartorder->quantity=$item['totalquantity']; 
-			$cartorder->customer_email=$request->userinfo['Email'];  
-			$cartorder->customer_phone=$request->userinfo['Phone'];
-			$cartorder->customer_company=$request->userinfo['Company'];
-			$cartorder->customer_name=$request->userinfo['Name'];
-			$cartorder->orderid=$orderid;
-			$cartorder->save();
-		}    
-		
-		$details = [
-            'customer_name' => $request->userinfo['Name'],
-            'customer_email' => $request->userinfo['Email'],
-            'customer_phone' => $request->userinfo['Phone'],
-            'customer_company' =>$request->userinfo['Company'],
-            'orderid' =>$orderid,
-             ];
-  
-     $user['to']=$request->userinfo['Email'];
-     $headersettings= Header_setting::where('id','1')->first();
-     $user['from']=$headersettings->headeremail;
-     // User Mail
-     Mail::send('mail/enquiry_user_email',  $details, function($message) use ($user) {
-        $message->to($user['to'], 'SilverGiftz')->subject('Enquiry Information');
-        $message->from($user['from'],'SilverGiftz');
-      });
-
-     // Admin Mail to enquiry
-      Mail::send('mail/enquiry_admin_email',  $details, function($message) use ($user) {
-          $message->to($user['from'], 'SilverGiftz')->subject('Enquiry Information');
-          $message->from($user['from'],'SilverGiftz');
-        });
-
-     // Admin Mail to Gmail
-      Mail::send('mail/enquiry_admin_email',  $details, function($message) use ($user) {
-          $message->to("Murtaza.silverpixelz@gmail.com", 'SilverGiftz')->subject('Enquiry Information');
-          $message->from($user['from'],'SilverGiftz');
-        });
-
-		// // $email=$request->userinfo['Email'];
-		// // $cartorder=new Cartorder;
-		// // $cartorder->customer_email=$request->userinfo['Email'];
-		// // $cartorder->customer_phone=$request->userinfo['Phone'];
-		// // $cartorder->customer_company=$request->userinfo['Company'];
-		// // $cartorder->customer_name=$request->userinfo['Name'];
-		// // $cartorder->save();
-      
-		 return json_encode([
-			'status' =>'Success',
-		   
-		]);
-	}
-
-	 public function contact(Request $request)
-	{
-		return json_encode([
-			'status' =>'Success',
-		   
-		]);  
 	}
 
 	public function mytest(Request $request)

@@ -11,6 +11,7 @@ use App\Models\Searchproduct;
 use DB;
 use Illuminate\Support\Facades\Redirect;
 use Session;
+use Illuminate\Support\Facades\Hash;
 use Carbon\Carbon;
 use AkkiIo\LaravelGoogleAnalytics\Facades\LaravelGoogleAnalytics;
 use AkkiIo\LaravelGoogleAnalytics\Period;
@@ -36,7 +37,7 @@ class AdminController extends Controller
         $item=new Admin;
        $item->name=$request->name;
        $item->email=$request->email;
-       $item->password=$request->password;
+       $item->password=Hash::make($request->password);
        $item->role=$request->role;
        $item->brand_status=$request->brand_status;
        $item->parentcategory_status=$request->parentcategory_status;
@@ -69,7 +70,7 @@ class AdminController extends Controller
     	$items=Admin::where('id',$request->id)->first();
        
        //$msg="Successfully Added !";
-       return $items;
+       return $items ? $items->makeHidden('password') : $items;
 
         //$request->session()->flash('success','Saved Successfully !');
         //return Redirect::back();
@@ -82,10 +83,7 @@ class AdminController extends Controller
         // echo "<pre>";print_r($_POST);die;
         $id=(int)$request->id;
 
-        DB::table('admins')
-        ->where('id',$id)
-        ->update(['name' => $request->name,
-                    'password' => $request->password,
+        $data=['name' => $request->name,
                     'email' => $request->email,
                     'role' => $request->role,
                     'brand_status' =>$request->brand_status,
@@ -97,7 +95,16 @@ class AdminController extends Controller
                     'subscriber_status' =>$request->subscriber_status,
                     'banner_status' =>$request->banner_status,
                     'config_status' =>$request->config_status
-                             ]);  
+                             ];
+        // Only change the password when a new one was entered
+        if(!empty($request->password))
+        {
+          $data['password']=Hash::make($request->password);
+        }
+
+        DB::table('admins')
+        ->where('id',$id)
+        ->update($data);
 
        $msg="Updated Successfully !";
        return $msg;                    
@@ -117,10 +124,10 @@ class AdminController extends Controller
 
     public function dashboard(Request $request)
     {
-      $user=LaravelGoogleAnalytics::getTotalUsersByDate(Period::days(7));
-      $country=LaravelGoogleAnalytics::getTotalUsersByCountry(Period::days(7));
-      $newandreturningusers=LaravelGoogleAnalytics::getTotalNewAndReturningUsers(Period::days(7));
-      $most_views_page=LaravelGoogleAnalytics::getMostViewsByPage(Period::days(7), $count =20);
+      $user=ga_safe(function () { return LaravelGoogleAnalytics::getTotalUsersByDate(Period::days(7)); });
+      $country=ga_safe(function () { return LaravelGoogleAnalytics::getTotalUsersByCountry(Period::days(7)); });
+      $newandreturningusers=ga_safe(function () { return LaravelGoogleAnalytics::getTotalNewAndReturningUsers(Period::days(7)); });
+      $most_views_page=ga_safe(function () { return LaravelGoogleAnalytics::getMostViewsByPage(Period::days(7), 20); });
       
       if(!empty( $newandreturningusers[0]['totalUsers']))
       {
@@ -145,18 +152,23 @@ class AdminController extends Controller
 
     public function login(Request $request)
     {
+      // Already logged in: go straight to the dashboard
+      if(session()->has('admin_id'))
+      {
+        return Redirect::to('dashboard');
+      }
 
       return view('backend.dashboard.login');
     }
 
     public function doadminlogin(Request $request)
     {
-      $admins=Admin::where('email',$request->email)->where('password',$request->password)->first();
-      if(!empty($admins))
+      $admins=Admin::where('email',$request->email)->first();
+      if(!empty($admins) && !empty($request->password) && Hash::check($request->password, $admins->password))
       {
-
-            Session::put('username', $admins->email);
-            Session::put('userid', $admins->id);
+            $request->session()->regenerate();
+            Session::put('admin_email', $admins->email);
+            Session::put('admin_id', $admins->id);
             Session::put('role', $admins->role);
             Session::put('pcat', $admins->parentcategory);
             return Redirect::to('dashboard');
@@ -171,9 +183,10 @@ class AdminController extends Controller
 
     public function adminlogout(Request $request)
     {
-         session()->forget('username');
-          session()->forget('userid');
+         session()->forget('admin_email');
+          session()->forget('admin_id');
            session()->forget('role');
+           session()->forget('pcat');
            $request->session()->flash('success','Logged Out  !'); 
            return Redirect::to('admin');
     }

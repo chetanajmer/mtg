@@ -14,7 +14,7 @@ class AnalyticsController extends Controller
 {
   public function visited_page(Request $request)
   {
-    $visitedpages = LaravelGoogleAnalytics::getMostViewsByPage(Period::months(12));
+    $visitedpages = ga_safe(function () { return LaravelGoogleAnalytics::getMostViewsByPage(Period::months(12)); });
     $options='';
     return view('backend.analytics.visited-pages',compact('visitedpages','options')); 
   }
@@ -26,7 +26,7 @@ class AnalyticsController extends Controller
       $start_date=date('Ymd',strtotime($request->start_date));
       $end_date=date('Ymd',strtotime($request->end_date));
 
-      $items =LaravelGoogleAnalytics::getTotalUsersByDate(Period::years(1));
+      $items =ga_safe(function () { return LaravelGoogleAnalytics::getTotalUsersByDate(Period::years(1)); });
       if(!empty($items))
       {
         foreach($items as $val)
@@ -50,7 +50,7 @@ class AnalyticsController extends Controller
     }
     else
     {
-      $users =LaravelGoogleAnalytics::getTotalUsersByDate(Period::months(1));
+      $users =ga_safe(function () { return LaravelGoogleAnalytics::getTotalUsersByDate(Period::months(1)); });
     }
    
     return view('backend.analytics.users_by_date',compact('users')); 
@@ -69,19 +69,14 @@ class AnalyticsController extends Controller
     {
       
       $options = '';
-      $visitedpages = LaravelGoogleAnalytics::getTotalUsersByDate(Period::months(8));  
-      foreach($visitedpages as $item)
-      {
-        if ($item['date'] >= '20230820'  &&  
-        $item['date'] <= '20230822')
-            $newarray[] = $item;
-      }
-
-      echo "<pre>";print_r($newarray);die;
+      // Most viewed pages inside the chosen date range
+      $visitedpages = ga_safe(function () use ($start_date, $end_date) {
+        return LaravelGoogleAnalytics::getMostViewsByPage(Period::create($start_date, $end_date));
+      });
     }
     else
     {   
-      $visitedpages = LaravelGoogleAnalytics::getMostViewsByPage(Period::days(30));
+      $visitedpages = ga_safe(function () { return LaravelGoogleAnalytics::getMostViewsByPage(Period::days(30)); });
       // echo "<pre>"; print_r($visitedpages);die;
     }
      return view('backend.analytics.visited-pages',compact('visitedpages','options','start_date')); 

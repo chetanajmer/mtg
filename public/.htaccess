@@ -5,6 +5,9 @@
 
     RewriteEngine On
 
+    # Never run scripts from the upload folders
+    RewriteRule ^(upload|uploads|storage)/.*\.(php\d*|phtml|phar|pht|phps|cgi|pl|py|sh)(/|$) - [F,NC,L]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

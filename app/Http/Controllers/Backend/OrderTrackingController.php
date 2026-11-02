@@ -13,15 +13,8 @@ class OrderTrackingController extends Controller
 {
     public function index()
     {
-        $order = Cartorder::with('workflowSteps')->first();
-        if (!$order) {
-            // Try to get any cartorder
-            $order = Cartorder::first();
-        }
-        if (!$order) {
-            return redirect()->route('ordertracking.list')->with('error', 'No orders found. Please create an order first.');
-        }
-        return view('backend.ordertracking.index', compact('order'));
+        // Order tracking is opened per order from the Store Enquiries page
+        return redirect()->route('orders.index');
     }
 
     public function list(Request $request)
@@ -43,11 +36,16 @@ class OrderTrackingController extends Controller
 
     public function show($id)
     {
-        $order = Cartorder::with(['orderProcessingWorkflow', 'workflowSteps'])->find($id);
+        $order = Cartorder::with('workflowSteps')->find($id);
         if (!$order) {
             abort(404, 'Order not found');
         }
-        return view('backend.ordertracking.index', compact('order'));
+        // Order tracking now lives on the order page; old links land there
+        if ($order->order_id) {
+            return redirect()->route('orders.show', $order->order_id);
+        }
+        $stepStatuses = self::stepStatuses($order->id);
+        return view('backend.ordertracking.index', compact('order', 'stepStatuses'));
     }
 
     public function saveStep(Request $request, $step)
@@ -111,80 +109,66 @@ class OrderTrackingController extends Controller
         }
 
         $cartorderId = $request->cartorder_id;
-
-        // Handle file uploads
-        $uploadedFiles = [];
-        if ($request->hasFile('mockup_files')) {
-            foreach ($request->file('mockup_files') as $file) {
-                $path = $file->store('order-workflow-mockups', 'public');
-                $uploadedFiles[] = $path;
-            }
+        $order = Cartorder::find($cartorderId);
+        if (!$order) {
+            return response()->json(['success' => false, 'message' => 'Order not found'], 404);
         }
 
-        // Handle Step 8 specific file uploads
-        $deliveryProof = [];
-        if ($request->hasFile('delivery_proof')) {
-            foreach ($request->file('delivery_proof') as $file) {
-                $path = $file->store('order-workflow-mockups', 'public');
-                $deliveryProof[] = $path;
+        $store = function ($field) use ($request) {
+            $paths = [];
+            if ($request->hasFile($field)) {
+                foreach ($request->file($field) as $file) {
+                    $paths[] = $file->store('order-workflow-mockups', 'public');
+                }
             }
-        }
+            return $paths;
+        };
+        $newMockups = $store('mockup_files');
+        $newDelivery = $store('delivery_proof');
+        $newDispatch = $store('dispatch_proof');
 
-        $dispatchProof = [];
-        if ($request->hasFile('dispatch_proof')) {
-            foreach ($request->file('dispatch_proof') as $file) {
-                $path = $file->store('order-workflow-mockups', 'public');
-                $dispatchProof[] = $path;
-            }
-        }
-
-        // Prepare data
-        $stepData = [
-            'cartorder_id' => $cartorderId,
-            'step_number' => $step,
-            'mockup_files' => $uploadedFiles,
-            'customer_message' => $request->customer_message,
-            'approval_status' => $request->approval_status,
-            'approved_date' => $request->approved_date ?: null,
-            'send_notification' => $request->has('send_notification') ? 1 : 0,
-        ];
-
-        // Add Step 8 specific fields
+        // Only change the fields the form actually sent. The status dropdown
+        // sends just approval_status; it must not erase the rest of the step.
+        $fields = ['customer_message', 'approval_status', 'approved_date'];
         if ($step == 8) {
-            $stepData['delivery_type'] = $request->delivery_type;
-            $stepData['delivery_date'] = $request->delivery_date;
-            $stepData['delivered_to'] = $request->delivered_to;
-            $stepData['delivery_address'] = $request->delivery_address;
-            $stepData['delivery_proof'] = $deliveryProof;
-            $stepData['tracking_type'] = $request->tracking_type;
-            // Store tracking number based on type (awb_number field is used for all tracking types)
-            $stepData['awb_number'] = $request->awb_number;
-            $stepData['courier_partner'] = $request->courier_partner;
-            $stepData['dispatch_date'] = $request->dispatch_date;
-            $stepData['dispatch_proof'] = $dispatchProof;
-            $stepData['internal_remarks'] = $request->internal_remarks;
+            $fields = array_merge($fields, ['delivery_type', 'delivery_date', 'delivered_to', 'delivery_address',
+                'tracking_type', 'awb_number', 'courier_partner', 'dispatch_date', 'internal_remarks']);
         }
-
-        // Add Step 10 specific fields
         if ($step == 10) {
-            $stepData['rating'] = $request->rating;
+            $fields[] = 'rating';
+        }
+        $stepData = [];
+        foreach ($fields as $field) {
+            if ($request->has($field)) {
+                $value = $request->input($field);
+                $stepData[$field] = ($value === '' && in_array($field, ['approved_date', 'delivery_date', 'dispatch_date'], true)) ? null : $value;
+            }
+        }
+        $statusOnly = array_keys($stepData) === ['approval_status'] && !$newMockups && !$newDelivery && !$newDispatch;
+        if (!$statusOnly) {
+            $stepData['send_notification'] = $request->has('send_notification') ? 1 : 0;
         }
 
-        // For Step 2 and Step 4, always create new entry (multiple entries support)
-        if (in_array($step, [2, 4])) {
-            $workflowStep = OrderWorkflowStep::create($stepData);
-        } else {
-            // For other steps, use updateOrCreate
-            $workflowStep = OrderWorkflowStep::updateOrCreate(
-                [
-                    'cartorder_id' => $cartorderId,
-                    'step_number' => $step,
-                ],
-                $stepData
-            );
+        $existing = in_array($step, [2, 4])
+            // Steps 2 and 4 keep a history of rounds; a status change updates the latest round
+            ? ($statusOnly ? OrderWorkflowStep::where('cartorder_id', $cartorderId)->where('step_number', $step)->latest('id')->first() : null)
+            : OrderWorkflowStep::where('cartorder_id', $cartorderId)->where('step_number', $step)->first();
+
+        $workflowStep = $existing ?: new OrderWorkflowStep(['cartorder_id' => $cartorderId, 'step_number' => $step]);
+        $workflowStep->fill($stepData);
+        // New uploads are added to the files already saved, never replace them
+        foreach (['mockup_files' => $newMockups, 'delivery_proof' => $newDelivery, 'dispatch_proof' => $newDispatch] as $field => $paths) {
+            if ($paths || !$workflowStep->exists) {
+                $workflowStep->{$field} = array_values(array_merge((array) ($workflowStep->{$field} ?? []), $paths));
+            }
+        }
+        $workflowStep->save();
+
+        $this->syncOrderStatus($order);
+        if (!$statusOnly && $request->has('send_notification')) {
+            $this->notifyCustomer($order, (int) $step, $request->customer_message);
         }
 
-        // Load fresh data with cartorder relationship
         $workflowStep->load('cartorder');
 
         return response()->json([
@@ -192,5 +176,61 @@ class OrderTrackingController extends Controller
             'message' => 'Step ' . $step . ' saved successfully',
             'data' => $workflowStep,
         ]);
+    }
+
+    public const STEP_TITLES = [
+        1 => 'Enquiry Received', 2 => 'Mockup Approval', 3 => 'Advance Payment', 4 => 'Sample Approval',
+        5 => 'Mass Production', 6 => 'Quality Check & Packing', 7 => 'Balance Payment', 8 => 'Delivered',
+        9 => 'Completed', 10 => 'Completed',
+    ];
+
+    /**
+     * Latest status of each of the 10 steps for an order ('' when not started).
+     */
+    public static function stepStatuses($cartorderId)
+    {
+        $statuses = array_fill(1, 10, '');
+        OrderWorkflowStep::where('cartorder_id', $cartorderId)->orderBy('id')->get()
+            ->each(function ($row) use (&$statuses) {
+                if (isset($statuses[$row->step_number])) {
+                    $statuses[$row->step_number] = (string) ($row->approval_status ?: 'saved');
+                }
+            });
+        return $statuses;
+    }
+
+    /**
+     * Store Enquiries / "My Orders" status = the furthest step marked done.
+     * Applied to every row of the same order number.
+     */
+    private function syncOrderStatus(Cartorder $order)
+    {
+        $done = collect(self::stepStatuses($order->id))->filter(function ($status) {
+            return in_array(strtolower($status), ['completed', 'approved', 'delivered'], true);
+        })->keys()->max();
+        if (!$done) {
+            return;
+        }
+        $label = self::STEP_TITLES[$done];
+        $rows = $order->orderid ? Cartorder::where('orderid', $order->orderid) : Cartorder::where('id', $order->id);
+        $rows->update(['orderstatus' => $label]);
+    }
+
+    private function notifyCustomer(Cartorder $order, $step, $message)
+    {
+        if (empty($order->customer_email)) {
+            return;
+        }
+        try {
+            \Mail::send('mail.order_tracking_update', [
+                'order' => $order,
+                'stepTitle' => self::STEP_TITLES[$step] ?? ('Step ' . $step),
+                'note' => $message,
+            ], function ($mail) use ($order) {
+                $mail->to($order->customer_email)->subject('Update on your order #' . ($order->orderid ?: $order->id) . ' - More Than Giftz');
+            });
+        } catch (\Throwable $e) {
+            \Log::error('Order tracking email failed for order ' . $order->id . ': ' . $e->getMessage());
+        }
     }
 }
