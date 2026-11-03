@@ -230,3 +230,7 @@
   .opl-status { grid-column: 1 / -1; order: 4; }
   .opl-total { text-align: right; }
 }
+
+/* Advance payment invoice link on the step list */
+.op-invoice { display: inline-flex; align-items: center; gap: 6px; margin-top: 6px; padding: 5px 10px; border: 1px solid var(--op-line, #e3e7ec); border-radius: 999px; color: var(--op-ink, #16181c); font-size: 13px; font-weight: 600; text-decoration: none; background: #fff; }
+.op-invoice:hover { border-color: #c9a46a; background: #fffcf7; }

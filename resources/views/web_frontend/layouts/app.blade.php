@@ -18,6 +18,8 @@
 
 @yield('scripts')
 
+@include('web_frontend.partials.welcome-modal')
+
 </body>
 
 </html>

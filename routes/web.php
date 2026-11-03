@@ -46,6 +46,7 @@ use App\Http\Controllers\Frontend\UsersController;
 use App\Http\Controllers\Frontend\CartController;
 use App\Http\Controllers\Frontend\CustomerOrderController;
 use App\Http\Controllers\Frontend\CustomerReportController;
+use App\Http\Controllers\Frontend\CorporateEmployeeController;
 use App\Http\Controllers\Frontend\StoreCategoryController;
 use App\Http\Controllers\Frontend\StoreBrandController;
 use App\Http\Controllers\Frontend\FiltersController;
@@ -86,6 +87,8 @@ Route::redirect('guestcheckout', '/cart');
 // Logged-in customer's own orders (the admin list is /admin/orders)
 Route::any('orders', [HomepageController::class, 'orders']);
 Route::get('orders/{orderid}', [CustomerOrderController::class, 'show'])->name('customer.orders.show')->where('orderid', '[0-9]+');
+Route::get('orders/{orderid}/invoices/{number}', [CustomerOrderController::class, 'invoice'])->name('customer.orders.invoice')
+    ->where(['orderid' => '[0-9]+', 'number' => '[A-Z0-9-]+']);
 Route::post('orders/{orderid}/steps/{step}/{action}', [CustomerOrderController::class, 'act'])->name('customer.orders.act')
     ->where(['orderid' => '[0-9]+', 'step' => '[0-9]+', 'action' => '[a-z]+'])->middleware('throttle:order-answer');
 // Signed link from order emails: approve / request changes / rate without logging in
@@ -128,6 +131,24 @@ Route::get('/corporate-reports/download/{type}', [CustomerReportController::clas
     ->name('corporate.reports.download')
     ->where('type', 'orders|spending|approvals')
     ->middleware('corporate.auth');
+
+// Customer's employees (gift recipients) and team logins; roles are enforced by CorporateTeamSession
+Route::middleware('corporate.auth')->group(function () {
+    Route::get('/corporate-employees', [CorporateEmployeeController::class, 'index'])->name('corporate.employees');
+    Route::post('/corporate-employees', [CorporateEmployeeController::class, 'store'])->name('corporate.employees.store');
+    Route::put('/corporate-employees/{id}', [CorporateEmployeeController::class, 'update'])->name('corporate.employees.update')->where('id', '[0-9]+');
+    Route::delete('/corporate-employees/{id}', [CorporateEmployeeController::class, 'destroy'])->name('corporate.employees.destroy')->where('id', '[0-9]+');
+    Route::post('/corporate-employees/import', [CorporateEmployeeController::class, 'import'])->name('corporate.employees.import');
+    Route::get('/corporate-employees/export', [CorporateEmployeeController::class, 'export'])->name('corporate.employees.export');
+    Route::get('/corporate-employees/template', [CorporateEmployeeController::class, 'template'])->name('corporate.employees.template');
+    Route::post('/corporate-employees/team', [CorporateEmployeeController::class, 'invite'])->name('team.invite')->middleware('throttle:20,1');
+    Route::post('/corporate-employees/team/{id}/resend', [CorporateEmployeeController::class, 'resend'])->name('team.resend')->where('id', '[0-9]+')->middleware('throttle:20,1');
+    Route::post('/corporate-employees/team/{id}/role', [CorporateEmployeeController::class, 'updateRole'])->name('team.role')->where('id', '[0-9]+');
+    Route::post('/corporate-employees/team/{id}/remove', [CorporateEmployeeController::class, 'remove'])->name('team.remove')->where('id', '[0-9]+');
+});
+// Invitation link (no login): the invited person sets their name and password
+Route::get('/corporate-team/accept/{token}', [CorporateEmployeeController::class, 'acceptForm'])->name('team.accept')->where('token', '[A-Za-z0-9]+');
+Route::post('/corporate-team/accept/{token}', [CorporateEmployeeController::class, 'accept'])->name('team.accept.submit')->where('token', '[A-Za-z0-9]+')->middleware('throttle:10,1');
 
 Route::get('/corporate/login', [UsersController::class, 'corporateLogin'])
     ->name('corporate.login');
@@ -614,6 +635,10 @@ Route::any('product_report', [ReportController::class, 'product_report'])->name(
 /*Orders - Backend Store Enquiries */
 Route::any('admin/orders', [OrderController::class, 'index'])->name('orders.index');
 Route::get('admin/orders/{order}', [OrderWorkflowController::class, 'show'])->name('orders.show')->where('order', '[0-9]+');
+Route::post('admin/orders/{order}/invoices/{type}', [OrderWorkflowController::class, 'issueInvoice'])->name('orders.invoice.issue')
+    ->where(['order' => '[0-9]+', 'type' => 'advance|balance']);
+Route::get('admin/orders/{order}/invoices/{invoice}', [OrderWorkflowController::class, 'showInvoice'])->name('orders.invoice.show')
+    ->where(['order' => '[0-9]+', 'invoice' => '[0-9]+']);
 Route::post('admin/orders/{order}/steps/{step}/{action}', [OrderWorkflowController::class, 'act'])->name('orders.act')
     ->where(['order' => '[0-9]+', 'step' => '[0-9]+', 'action' => '[a-z]+']);
 Route::any('abandoned_order', [OrderController::class, 'abandoned_order'])->name('abandoned_order');

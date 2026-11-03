@@ -28,6 +28,11 @@ class Order extends Model
         return $this->hasMany(OrderEvent::class)->orderByDesc('created_at')->orderByDesc('id');
     }
 
+    public function invoices()
+    {
+        return $this->hasMany(OrderInvoice::class)->orderBy('id');
+    }
+
     public function state($step)
     {
         return $this->stepStates->firstWhere('step', (int) $step);

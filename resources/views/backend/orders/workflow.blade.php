@@ -75,6 +75,11 @@
 .ow-btn { border: 0; border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer; font: inherit; font-weight: 600; }
 .ow-btn.primary { background: var(--ow-ink); color: #fff; }
 .ow-btn.good { background: var(--ow-done); color: #fff; }
+a.ow-btn { display: inline-block; text-decoration: none; }
+.ow-invoice { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 14px 0; padding: 12px 14px; border: 1px solid #cfe6d5; background: #f2faf4; border-radius: 10px; }
+.ow-invoice b, .ow-invoice small { display: block; }
+.ow-invoice small { color: #4b5563; margin-top: 2px; }
+.ow-invoice form { margin: 0; }
 .ow-btn.warn { background: #fff; color: var(--ow-bad); border: 1px solid var(--ow-bad); }
 .ow-btn:focus-visible, .ow a:focus-visible { outline: 2px solid var(--ow-accent); outline-offset: 2px; }
 .ow-alert { border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
@@ -179,6 +184,23 @@
                 @php $ideas = $type === 'approval' ? $stepEvents->where('type', 'idea')->count() : 0; @endphp
                 @if($ideas)
                     <div class="ow-alert info">The customer shared {{ $ideas }} design idea{{ $ideas > 1 ? 's' : '' }} / file set{{ $ideas > 1 ? 's' : '' }} on this step. See the timeline below.</div>
+                @endif
+
+                {{-- Steps 3 and 7: payment invoice, issued once the payment is recorded --}}
+                @php $invoiceType = \App\Services\OrderInvoices::typeForStep($selected); @endphp
+                @if($invoiceType && $current->state === 'done')
+                    @php $stepInvoice = $order->invoices->firstWhere('type', $invoiceType); $invoiceLabel = \App\Services\OrderInvoices::TYPES[$invoiceType]['label']; @endphp
+                    <div class="ow-invoice">
+                        @if($stepInvoice)
+                            <div><b>Invoice {{ $stepInvoice->number }}</b><small>Issued {{ optional($stepInvoice->issued_at)->format('d M Y, H:i') }}{{ $stepInvoice->issued_by ? ' by ' . $stepInvoice->issued_by : '' }} · AED {{ number_format($stepInvoice->amount, 2) }} received · visible to the customer</small></div>
+                            <a class="ow-btn primary" href="{{ route('orders.invoice.show', [$order->id, $stepInvoice->id]) }}" target="_blank" rel="noopener">View / print invoice</a>
+                        @else
+                            <div><b>{{ ucfirst($invoiceLabel) }} invoice</b><small>Issue the invoice confirming the AED {{ number_format($data['amount'] ?? 0, 2) }} {{ $invoiceType }} was received. The customer will see it on their order page and get an email.</small></div>
+                            <form method="POST" action="{{ route('orders.invoice.issue', [$order->id, $invoiceType]) }}" onsubmit="return confirm('Issue the {{ $invoiceLabel }} invoice now? It gets a permanent number and is shown to the customer.');">@csrf
+                                <button class="ow-btn good">Generate invoice</button>
+                            </form>
+                        @endif
+                    </div>
                 @endif
 
                 @if($blocked && $current->state !== 'done')

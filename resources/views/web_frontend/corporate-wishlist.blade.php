@@ -18,7 +18,7 @@
     <a href="#branding"><i class="bi bi-image"></i>Branding Assets</a>
     <a href="#collections"><i class="bi bi-bookmark"></i>Saved Collections</a>
     <a class="active" href="/corporate-portal/wishlist"><i class="bi bi-heart"></i>Wishlists</a>
-    <a href="#employees"><i class="bi bi-people-fill"></i>Employees</a>
+    <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
     <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
     <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
   </nav>

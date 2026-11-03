@@ -40,11 +40,10 @@
         @foreach($items as $item)
         <div class="cart-item">
           <div class="item-image">
-            @if($item->image)
-              <img src="{{ asset('upload/product/' . $item->image) }}" alt="{{ $item->name }}">
-            @else
-              <img src="{{ asset('web_frontend/assets/images/product-main.jpg') }}" alt="{{ $item->name }}">
+            @if($item->image_url)
+              <img src="{{ $item->image_url }}" alt="{{ $item->name }}" onerror="this.remove()">
             @endif
+            <i class="bi bi-gift" aria-hidden="true"></i>
           </div>
           <div class="item-details">
             <h4>{{ $item->name }}</h4>

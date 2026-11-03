@@ -475,6 +475,13 @@ input {
   color: #454b53;
 }
 
+/* Product page quantity: only the outer border of .quantity-box (the generic .qty-btn/.qty-input rules further down add their own) */
+.quantity-box .qty-btn,
+.quantity-box .qty-input {
+  border: 0;
+  height: 100%;
+}
+
 .pricing-wrapper {
   flex: 1;
   margin-top: 30px;
@@ -1104,17 +1111,30 @@ input {
 }
 
 .item-image {
+  position: relative;
   width: 100px;
   height: 100px;
   border-radius: 6px;
   overflow: hidden;
   background: #f5f5f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* The product's own photo covers the gift icon; the icon shows only when there is no photo */
 .item-image img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #fff;
+}
+
+.item-image .bi {
+  font-size: 32px;
+  color: #9ca3af;
 }
 
 .item-details h4 {

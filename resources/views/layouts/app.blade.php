@@ -600,10 +600,11 @@ figure figcaption {
                               
                             </li>-->
 
-                            <!--  <li>
-                                <a href="{{url('storeaboutus')}}" class="waves-effect"><i class="ti-info-alt"></i><span>About us</span></a>
-                              
-                            </li> -->
+                            @adminCan('storeaboutus')
+                            <li>
+                                <a href="{{url('storeaboutus')}}" class="waves-effect"><i class="ti-info-alt"></i><span>About Us page</span></a>
+                            </li>
+                            @endadminCan
 
                             @if($role=="superadmin")
                              <li>

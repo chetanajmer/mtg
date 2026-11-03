@@ -340,6 +340,7 @@ class UsersController extends Controller
             session()->put('fullname', $user->fname . ' ' . $user->lname);
 
             $request->session()->flash('success', 'Registered successfully!');
+            $request->session()->flash('account_created', ['name' => $user->fname]); // welcome pop-up
             return redirect()->route('corporate.portal');
         }
     }
@@ -380,6 +381,7 @@ class UsersController extends Controller
         $this->mergeSessionCart($user->id);
 
         $request->session()->flash('success', 'Registered successfully!');
+        $request->session()->flash('account_created', ['name' => $user->fname]); // welcome pop-up
         return redirect($this->safeRedirect($request->input('redirect'), route('cart.index')));
     }
 
@@ -508,6 +510,7 @@ class UsersController extends Controller
             ->orWhere('email', $googleUser->email)
             ->first();
 
+        $isNewAccount = !$user;
         if (!$user) {
             $user = new Storeuser();
             $user->fname = $googleUser->name ?? $googleUser->email;
@@ -534,6 +537,9 @@ class UsersController extends Controller
 
         $this->mergeSessionCart($user->id, $guestSessionId);
 
+        if ($isNewAccount) {
+            $request->session()->flash('account_created', ['name' => strtok((string) $user->fname, ' ')]); // welcome pop-up
+        }
         return redirect($redirectTo);
     }
 

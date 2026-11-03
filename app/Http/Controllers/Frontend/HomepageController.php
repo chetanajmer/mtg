@@ -434,11 +434,13 @@ class HomepageController extends Controller
 
 	}
 
+	/** About Us page (new storefront design): live categories and the real order steps. */
 	public function aboutus(Request $request)
 	{
-		$items=About::where('id','1')->first();
-		$brands=Brand::where('is_active','online')->where('featured','online')->orderby('ranking')->get()->take(3);
-		return view('frontend.aboutus',compact('items','brands'));
+		$categories=Category::where('is_active','online')->orderBy('ranking')->orderBy('id')->get();
+		$steps=config('order_steps');
+		$content=About::pageContent(); // wording edited in the admin About editor
+		return view('web_frontend.about',compact('categories','steps','content'));
 	}
 
 	public function contactus(Request $request)

@@ -250,6 +250,9 @@
                 @if($detail || $when)
                   <p>{{ $detail }}@if($detail && $when) &middot; @endif<span class="op-when">{{ $when }}</span></p>
                 @endif
+                @if($mode === 'account' && ($stepInvoiceType = \App\Services\OrderInvoices::typeForStep($n)) && ($stepInvoice = $order->invoices->firstWhere('type', $stepInvoiceType)))
+                  <a class="op-invoice" href="{{ route('customer.orders.invoice', [$order->orderid, $stepInvoice->number]) }}"><i class="bi bi-receipt"></i> View invoice {{ $stepInvoice->number }}</a>
+                @endif
               </div>
             </li>
           @endforeach

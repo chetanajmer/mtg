@@ -33,6 +33,8 @@ class CartController extends Controller
 
         foreach ($items as $item) {
             $product = $products->get($item->product_id);
+            // The product's own main image (thumbnail / image1 / bulk image / MidOcean URL), or null if it has none
+            $item->image_url = $product ? $product->imageUrl() : null;
             if (!$product) {
                 continue;
             }

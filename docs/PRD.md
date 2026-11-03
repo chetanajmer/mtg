@@ -58,6 +58,7 @@ Most of the catalogue comes from **MidOcean** (European promo-products wholesale
 | S15 | Public `/track-order`: order number + email → read-only progress (rate-limited) | ✅ (phase 4) |
 | S15b | Customer Reports `/corporate-reports` (sidebar on every portal page): this year / last year / all time / custom dates (by order date, end date inclusive); cards (orders, confirmed spend, pieces delivered, average order); spending by month; most ordered products; the orders with links; CSV downloads: order history (product lines), spending summary (per month + total), approval history (design/sample decisions); only the customer's own orders; dashboard "Download Reports" panel uses the same files | ✅ (2 Nov) |
 | S15a | Customer dashboard `/corporate-portal` cards from real orders: Total Orders (+ this year), Items Delivered (delivery step done), Pending Approvals (mockup/sample waiting, links to the order), Active Orders (+ completed), Total Spend this year (staff-confirmed orders, + amount awaiting confirmation); no invented trends | ✅ cards + Recent Orders + Quick Actions + Request a Quote / Contact Us (2 Nov: one row per order, image, step, Track/Respond link); rest of the dashboard is still demo: FX-38 |
+| S15b | Employees page `/corporate-employees`: gift recipients (add/edit/delete, search, department filter, CSV import/export + template, birthdays and work anniversaries in the next 30 days) and team logins (owner/admin invite by email as Admin / Buyer / Viewer, 7-day link, invitee sets own password, shared company account, roles enforced on the server, removal ends access on the next click) | ✅ (3 Nov) |
 | S16 | Corporate wishlist page uses real data | ❌ static mock-up |
 | S17 | Annual corporate membership page captures leads | ❌ static page, no form |
 | S18 | Budget planner works | ✅ script fixed (static recommendations) |
@@ -91,6 +92,8 @@ The 10 steps are fixed (defined once in `config/order_steps.php`):
 | W6 | Order status shown everywhere = current step + state, synced to `cartorders.orderstatus` | ✅ |
 | W7 | Staff order page `/admin/orders/{id}`: header, progress strip, step list, step-specific screen, notes, timeline, products, print invoice | ✅ |
 | W8 | Existing orders converted (11 orders; legacy statuses mapped) | ✅ |
+| W8a | Advance payment invoice: after step 3 is recorded, staff click "Generate invoice"; numbered MTG-ADV-<year>-<0001>, frozen copy (lines, VAT, total, advance received, balance), timeline entry + customer email; customer opens it from the advance payment step (print / save as PDF) | ✅ (2 Nov); company address + TRN from owner (FX-45) |
+| W8b | Balance payment invoice after step 7, same way: MTG-BAL-<year>-<0001>, shows the advance (step 3) and the balance received, 'PAID IN FULL' when nothing is outstanding, otherwise the amount still outstanding | ✅ (2 Nov) |
 | W9 | Due dates / SLA per step, overdue filter on Store Enquiries | ❌ |
 | W10 | Store Enquiries filters ("waiting for customer", "payment pending", "overdue") and search | ❌ |
 | W11 | Remove legacy 5-step "Order Processing" and old `order_workflow_steps` tables/pages after sign-off | ❌ (hidden, kept) |

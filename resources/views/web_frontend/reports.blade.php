@@ -29,7 +29,7 @@
     <a href="/corporate-addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
     <a href="#branding"><i class="bi bi-image"></i>Branding Assets</a>
     <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
-    <a href="#employees"><i class="bi bi-people-fill"></i>Employees</a>
+    <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
     <a class="active" href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
     <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
     <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
