@@ -1,329 +1,114 @@
 @extends('web_frontend.layouts.app')
 
 @section('title', 'Annual Corporate Membership | More Than Giftz')
-@section('meta')
-  <meta name="description" content="Join our annual corporate membership program for exclusive pricing, premium benefits and seamless corporate gifting experience.">
-@endsection
 
 @section('content')
-<!-- HERO SECTION -->
-<section class="membership-hero">
-  <div class="container-fluid px-4 px-xl-5">
-    <div class="hero-content">
-      <div class="hero-left">
-        <span class="hero-eyebrow">MORE VALUE. STRONGER RELATIONSHIPS.</span>
-        <h1>Annual Corporate Membership</h1>
-        <h2 class="hero-subheading">A smarter way to gift. Greater savings. Bigger impact.</h2>
-        <p class="hero-description">Join our annual membership program and unlock exclusive pricing, premium benefits and a seamless corporate gifting experience all year round.</p>
-        
-        <div class="hero-ctas">
-          <button class="btn-primary btn-choose-plan">Choose Your Plan <i class="bi bi-arrow-right"></i></button>
-          <button class="btn-secondary btn-talk-team">Talk to Our Team</button>
-        </div>
-        
-        <div class="hero-stats">
-          <div class="stat-item">
-            <span class="stat-number">500+</span>
-            <span class="stat-label">Corporate Clients</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-number">50,000+</span>
-            <span class="stat-label">Gifts Delivered</span>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <span class="stat-number">4.9/5</span>
-            <span class="stat-label">Client Satisfaction</span>
-          </div>
-        </div>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/annual-corporate-membership.css') }}">
+
+<div class="membership-wrapper">
+  <section class="hero">
+    <div class="hero-in">
+      <div class="eyebrow">MORE VALUE. STRONGER RELATIONSHIPS.</div>
+      <h1>Annual Corporate<br>Membership</h1>
+      <p class="lead">A smarter way to gift. Greater savings. Bigger impact.</p>
+      <p class="copy">Join our annual membership program and unlock exclusive pricing, premium benefits and a seamless corporate gifting experience all year round.</p>
+      <div class="btns">
+        <a href="#plans" class="btn dark">Choose Your Plan <span>&rarr;</span></a>
+        <a href="#" class="btn light">Talk to Our Team</a>
       </div>
-      
-      <div class="hero-right">
-        <div class="hero-image">
-          <img src="{{ asset('web_frontend/assets/images/Thoughtful-Gifts.png') }}" alt="Corporate Gifting">
-        </div>
-        <div class="hero-vertical-text">
-          <span>GIFTS</span>
-          <span>THAT</span>
-          <span>BUILD</span>
-          <span>BUSINESS</span>
-        </div>
+      <div class="stats">
+        <div><b>500+</b><span>Corporate Clients</span></div>
+        <div><b>50,000+</b><span>Gifts Delivered</span></div>
+        <div><b>4.9/5</b><span>Client Satisfaction</span></div>
       </div>
     </div>
-  </div>
-</section>
+    <div class="tag">GIFTS THAT BUILD BUSINESS</div>
+  </section>
 
-<!-- MEMBERSHIP PLANS -->
-<section class="membership-plans">
-  <div class="container-fluid px-4 px-xl-5">
-    <div class="plans-header">
-      <span class="plans-eyebrow">MEMBERSHIP PLANS</span>
-      <h2>Choose the Right Plan for Your Business</h2>
-      <p class="plans-subtitle">More gifting. More savings. More possibilities.</p>
+  <main class="wrap plans" id="plans">
+    <span class="eyebrow">MEMBERSHIP PLANS</span>
+    <h2>Choose the Right Plan for Your Business</h2>
+    <p class="sub2">More gifting. More savings. More possibilities.</p>
+
+    <div class="grid">
+      <article class="plan">
+        <div class="head">
+          <div class="medal silver"><i></i><u></u></div>
+          <div><h3>Silver</h3><p>For Growing Teams</p><small>Essential benefits to get you started.</small></div>
+        </div>
+        <div class="rows">
+          <div>Annual Spend<b>₹2,00,000 / year</b></div>
+          <div>Estimated Savings<b>₹20,000 (10%)</b></div>
+          <div>Free Customization<b>Up to 5 products</b></div>
+          <div>Priority Dispatch<b>Standard</b></div>
+          <div>Dedicated Account Manager<b>–</b></div>
+          <div>Unused Budget Rollover<b>–</b></div>
+        </div>
+        <div class="foot"><span class="price">₹2,00,000 / <small>year</small></span><button class="sel">Select Plan</button></div>
+      </article>
+
+      <article class="plan gold">
+        <span class="badge">MOST POPULAR</span>
+        <div class="head">
+          <div class="medal goldm"><i></i><u></u></div>
+          <div><h3>Gold</h3><p style="text-decoration:underline;text-decoration-color:#c9ad7a;text-underline-offset:3px">For Established Businesses</p><small>Maximum value with premium benefits.</small></div>
+        </div>
+        <div class="rows">
+          <div>Annual Spend<b>₹5,00,000 / year</b></div>
+          <div>Estimated Savings<b>₹75,000 (15%)</b></div>
+          <div>Free Customization<b>Up to 10 products</b></div>
+          <div>Priority Dispatch<b>Priority (3–5 days)</b></div>
+          <div>Dedicated Account Manager<b>✓</b></div>
+          <div>Unused Budget Rollover<b>Up to 25%</b></div>
+        </div>
+        <div class="foot"><span class="price">₹5,00,000 / <small>year</small></span><button class="sel">Select Plan</button></div>
+      </article>
+
+      <article class="plan">
+        <div class="head">
+          <div class="medal plat"><i></i><u></u></div>
+          <div><h3>Platinum</h3><p>For Large Enterprises</p><small>The complete corporate gifting solution.</small></div>
+        </div>
+        <div class="rows">
+          <div>Annual Spend<b>₹10,00,000 / year</b></div>
+          <div>Estimated Savings<b>₹2,00,000 (20%)</b></div>
+          <div>Free Customization<b>Unlimited</b></div>
+          <div>Priority Dispatch<b>Express (1–3 days)</b></div>
+          <div>Dedicated Account Manager<b>✓</b></div>
+          <div>Unused Budget Rollover<b>Up to 50%</b></div>
+        </div>
+        <div class="foot"><span class="price">₹10,00,000 / <small>year</small></span><button class="sel">Select Plan</button></div>
+      </article>
     </div>
-    
-    <div class="plans-grid">
-      <!-- Silver Plan -->
-      <div class="plan-card silver">
-        <div class="plan-icon">
-          <i class="bi bi-star"></i>
-        </div>
-        <h3>Silver</h3>
-        <span class="plan-audience">For Growing Teams</span>
-        <p class="plan-description">Essential benefits to get you started.</p>
-        
-        <div class="plan-details">
-          <div class="detail-row">
-            <span class="detail-label">Annual Spend</span>
-            <span class="detail-value">₹2,00,000 / year</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Estimated Savings</span>
-            <span class="detail-value savings">₹20,000 (10%)</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Free Customization</span>
-            <span class="detail-value">Up to 5 products</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Priority Dispatch</span>
-            <span class="detail-value">Standard</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Dedicated Account Manager</span>
-            <span class="detail-value">—</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Unused Budget Rollover</span>
-            <span class="detail-value">—</span>
-          </div>
-        </div>
-        
-        <div class="plan-price">
-          <span class="price">₹2,00,000</span>
-          <span class="period">/ year</span>
-        </div>
-        
-        <button class="btn-select-plan" data-plan="silver">Select Plan</button>
+
+    <div class="strip">
+      <div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><rect x="3" y="9" width="18" height="12"/><path d="M12 9v12M3 9h18V6H3zM12 6c-3-4-6-1-4 0M12 6c3-4 6-1 4 0"/></svg>Exclusive<br>Member Pricing</div>
+      <div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>Free<br>Customization</div>
+      <div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><path d="M2 6h12v10H2zM14 9h4l4 3v4h-8"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>Priority<br>Dispatch</div>
+      <div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><path d="M4 21V12h4v9M10 21V4h4v17M16 21v-6h4v6M2 21h20"/></svg>Dedicated<br>Account Manager</div>
+      <div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><ellipse cx="9" cy="6" rx="6" ry="3"/><path d="M3 6v10c0 2 3 3 6 3M3 11c0 2 3 3 6 3"/><circle cx="17" cy="16" r="5"/><path d="M17 13.5v5"/></svg>Credit<br>Rollover</div>
+      <div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><path d="m12 3 2.7 5.8 6.3.7-4.7 4.3 1.3 6.2L12 17l-5.6 3 1.3-6.2L3 9.5l6.3-.7z"/></svg>Early Access<br>to New Products</div>
+    </div>
+
+    <div class="two">
+      <div class="info">
+        <div class="circ"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#a47624" stroke-width="1.8"><path d="M20 8a8 8 0 0 0-14-2M4 4v3h3M4 16a8 8 0 0 0 14 2m2 2v-3h-3"/></svg></div>
+        <div><h4>Auto-Renewal</h4><p>Keep enjoying uninterrupted benefits. Your membership auto-renews annually, so you never miss out on savings.</p></div>
+        <div class="toggle" role="switch" aria-checked="true">ON</div>
       </div>
-      
-      <!-- Gold Plan (Featured) -->
-      <div class="plan-card gold featured">
-        <div class="featured-badge">MOST POPULAR</div>
-        <div class="plan-icon">
-          <i class="bi bi-star-fill"></i>
-        </div>
-        <h3>Gold</h3>
-        <span class="plan-audience">For Established Businesses</span>
-        <p class="plan-description">Maximum value with premium benefits.</p>
-        
-        <div class="plan-details">
-          <div class="detail-row">
-            <span class="detail-label">Annual Spend</span>
-            <span class="detail-value">₹5,00,000 / year</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Estimated Savings</span>
-            <span class="detail-value savings">₹75,000 (15%)</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Free Customization</span>
-            <span class="detail-value">Up to 10 products</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Priority Dispatch</span>
-            <span class="detail-value">Priority (3–5 days)</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Dedicated Account Manager</span>
-            <span class="detail-value"><i class="bi bi-check-circle-fill"></i></span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Unused Budget Rollover</span>
-            <span class="detail-value">Up to 25%</span>
-          </div>
-        </div>
-        
-        <div class="plan-price">
-          <span class="price">₹5,00,000</span>
-          <span class="period">/ year</span>
-        </div>
-        
-        <button class="btn-select-plan btn-gold" data-plan="gold">Select Plan</button>
-      </div>
-      
-      <!-- Platinum Plan -->
-      <div class="plan-card platinum">
-        <div class="plan-icon">
-          <i class="bi bi-star-half"></i>
-        </div>
-        <h3>Platinum</h3>
-        <span class="plan-audience">For Large Enterprises</span>
-        <p class="plan-description">The complete corporate gifting solution.</p>
-        
-        <div class="plan-details">
-          <div class="detail-row">
-            <span class="detail-label">Annual Spend</span>
-            <span class="detail-value">₹10,00,000 / year</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Estimated Savings</span>
-            <span class="detail-value savings">₹2,00,000 (20%)</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Free Customization</span>
-            <span class="detail-value">Unlimited</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Priority Dispatch</span>
-            <span class="detail-value">Express (1–3 days)</span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Dedicated Account Manager</span>
-            <span class="detail-value"><i class="bi bi-check-circle-fill"></i></span>
-          </div>
-          <div class="detail-row">
-            <span class="detail-label">Unused Budget Rollover</span>
-            <span class="detail-value">Up to 50%</span>
-          </div>
-        </div>
-        
-        <div class="plan-price">
-          <span class="price">₹10,00,000</span>
-          <span class="period">/ year</span>
-        </div>
-        
-        <button class="btn-select-plan" data-plan="platinum">Select Plan</button>
+      <div class="info">
+        <div class="circ" style="background:#f3f1ee"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v4c0 2 3.5 3 8 3s8-1 8-3V6M4 10v4c0 2 3.5 3 8 3s8-1 8-3v-4M4 14v4c0 2 3.5 3 8 3s8-1 8-3v-4"/></svg></div>
+        <div><h4>Credit Rollover</h4><p>Unused annual budget rolls over to the next year (As per your plan benefits). No value goes to waste.</p></div>
+        <div class="cal"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#a47624" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M12 13v5M9.5 15.5h5"/></svg></div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- BENEFITS STRIP -->
-<section class="benefits-strip">
-  <div class="container-fluid px-4 px-xl-5">
-    <div class="benefits-grid">
-      <div class="benefit-item">
-        <i class="bi bi-gift"></i>
-        <span>Exclusive Member Pricing</span>
-      </div>
-      <div class="benefit-divider"></div>
-      <div class="benefit-item">
-        <i class="bi bi-gear"></i>
-        <span>Free Customization</span>
-      </div>
-      <div class="benefit-divider"></div>
-      <div class="benefit-item">
-        <i class="bi bi-truck"></i>
-        <span>Priority Dispatch</span>
-      </div>
-      <div class="benefit-divider"></div>
-      <div class="benefit-item">
-        <i class="bi bi-bar-chart"></i>
-        <span>Dedicated Account Manager</span>
-      </div>
-      <div class="benefit-divider"></div>
-      <div class="benefit-item">
-        <i class="bi bi-currency-rupee"></i>
-        <span>Credit Rollover</span>
-      </div>
-      <div class="benefit-divider"></div>
-      <div class="benefit-item">
-        <i class="bi bi-star"></i>
-        <span>Early Access to New Products</span>
-      </div>
+    <div class="cta">
+      <a href="#" class="btn">Get Started Today &nbsp;&rarr;</a>
+      <p>Have questions? Contact our corporate gifting experts.</p>
     </div>
-  </div>
-</section>
-
-<!-- INFO CARDS -->
-<section class="info-cards">
-  <div class="container-fluid px-4 px-xl-5">
-    <div class="info-cards-grid">
-      <!-- Auto-Renewal Card -->
-      <div class="info-card">
-        <div class="card-icon-wrapper">
-          <div class="card-icon">
-            <i class="bi bi-arrow-repeat"></i>
-          </div>
-        </div>
-        <div class="card-content">
-          <h3>Auto-Renewal</h3>
-          <p>Keep enjoying uninterrupted benefits. Your membership auto-renews annually, so you never miss out on savings.</p>
-        </div>
-        <div class="card-toggle">
-          <label class="toggle-switch">
-            <input type="checkbox" id="autoRenewal" checked>
-            <span class="toggle-slider"></span>
-          </label>
-        </div>
-      </div>
-      
-      <!-- Credit Rollover Card -->
-      <div class="info-card">
-        <div class="card-icon-wrapper">
-          <div class="card-icon">
-            <i class="bi bi-currency-rupee"></i>
-          </div>
-        </div>
-        <div class="card-content">
-          <h3>Credit Rollover</h3>
-          <p>Unused annual budget rolls over to the next year (As per your plan benefits). No value goes to waste.</p>
-        </div>
-        <div class="card-calendar-icon">
-          <i class="bi bi-calendar-check"></i>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- BOTTOM CTA -->
-<section class="bottom-cta">
-  <div class="container-fluid px-4 px-xl-5">
-    <button class="btn-get-started">Get Started Today <i class="bi bi-arrow-right"></i></button>
-    <p class="cta-subtext">Have questions? Contact our corporate gifting experts.</p>
-  </div>
-</section>
-@endsection
-
-@section('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Choose Your Plan button - scroll to plans
-  document.querySelector('.btn-choose-plan').addEventListener('click', function() {
-    document.querySelector('.membership-plans').scrollIntoView({ behavior: 'smooth' });
-  });
-
-  // Talk to Our Team button
-  document.querySelector('.btn-talk-team').addEventListener('click', function() {
-    // Navigate to contact or enquiry page
-    window.location.href = '/corporate-portal';
-  });
-
-  // Select Plan buttons
-  document.querySelectorAll('.btn-select-plan').forEach(btn => {
-    btn.addEventListener('click', function() {
-      const plan = this.dataset.plan;
-      alert(`You selected the ${plan.charAt(0).toUpperCase() + plan.slice(1)} plan. Proceeding to registration...`);
-      // Here you would navigate to the registration/checkout flow
-    });
-  });
-
-  // Auto-Renewal toggle
-  const autoRenewalToggle = document.getElementById('autoRenewal');
-  autoRenewalToggle.addEventListener('change', function() {
-    const isEnabled = this.checked;
-    alert(`Auto-renewal is now ${isEnabled ? 'enabled' : 'disabled'}. This setting will be saved to your account.`);
-    // Here you would make an API call to save the setting
-  });
-
-  // Get Started Today button
-  document.querySelector('.btn-get-started').addEventListener('click', function() {
-    // Navigate to registration or enquiry
-    window.location.href = '/corporate-portal';
-  });
-});
-</script>
+  </main>
+</div>
 @endsection

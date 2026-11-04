@@ -549,105 +549,197 @@ class UsersController extends Controller
         // Get user details including location
         $user = DB::table('storeusers')->where('id', $userid)->first();
 
-        // Get saved addresses for this user
-        $addresses = StoreuserAddress::where('user_id', $userid)
-            ->orderBy('id')
-            ->get();
+        // Get saved addresses for this user (primary first)
+        $addresses = $this->userAddresses($userid);
+
+        if ($request->wantsJson()) {
+            return response()->json(['success' => true, 'addresses' => $addresses]);
+        }
 
         return view('web_frontend.addresses', compact('user', 'addresses'));
     }
 
     public function storeCorporateAddress(Request $request)
     {
-        // If not authenticated, redirect to login
-        if (!session()->has('userid')) {
-            return redirect()->route('corporate.login');
+        if ($redirect = $this->requireCorporateUser($request)) {
+            return $redirect;
         }
 
         $userid = session()->get('userid');
+        $data = $this->validateAddress($request);
 
-        $request->validate([
-            'label' => 'required|string|max:100',
-            'name' => 'nullable|string|max:255',
-            'mobile' => 'nullable|string|max:30',
-            'location' => 'required|string|max:255',
-            'address' => 'nullable|string|max:500',
-            'city' => 'nullable|string|max:100',
-            'country' => 'nullable|string|max:100',
-            'is_default' => 'nullable|boolean',
-        ]);
-
-        // First address is always default, or when checkbox is ticked
+        // First address is always primary, or when checkbox is ticked
         $isDefault = $request->boolean('is_default')
             || !StoreuserAddress::where('user_id', $userid)->exists();
 
-        if ($isDefault) {
-            StoreuserAddress::where('user_id', $userid)->update(['is_default' => false]);
+        $address = DB::transaction(function () use ($userid, $data, $isDefault) {
+            if ($isDefault) {
+                StoreuserAddress::where('user_id', $userid)->update(['is_default' => false]);
+            }
+
+            $address = StoreuserAddress::create($data + [
+                'user_id' => $userid,
+                'is_default' => $isDefault,
+            ]);
+
+            if ($isDefault) {
+                $this->syncDefaultAddressToUser($userid, $address);
+            }
+
+            return $address;
+        });
+
+        return $this->addressResponse($request, $userid, 'Address added successfully!', $address);
+    }
+
+    public function updateSingleCorporateAddress(Request $request, $id)
+    {
+        if ($redirect = $this->requireCorporateUser($request)) {
+            return $redirect;
         }
 
-        $address = StoreuserAddress::create([
-            'user_id' => $userid,
-            'label' => $request->label,
-            'name' => $request->name,
-            'mobile' => $request->mobile,
-            'location' => $request->location,
-            'address' => $request->address,
-            'city' => $request->city,
-            'country' => $request->country,
-            'is_default' => $isDefault,
-        ]);
+        $userid = session()->get('userid');
+        $address = StoreuserAddress::where('user_id', $userid)->where('id', $id)->firstOrFail();
+        $data = $this->validateAddress($request);
 
-        if ($isDefault) {
-            $this->syncDefaultAddressToUser($userid, $address);
-        }
+        // A primary address stays primary; the checkbox can promote a non-primary one
+        $makeDefault = $address->is_default || $request->boolean('is_default');
 
-        $request->session()->flash('success', 'Address added successfully!');
-        return redirect()->route('corporate.addresses');
+        DB::transaction(function () use ($userid, $address, $data, $makeDefault) {
+            if ($makeDefault) {
+                StoreuserAddress::where('user_id', $userid)
+                    ->where('id', '!=', $address->id)
+                    ->update(['is_default' => false]);
+            }
+
+            $address->update($data + ['is_default' => $makeDefault]);
+
+            if ($makeDefault) {
+                $this->syncDefaultAddressToUser($userid, $address);
+            }
+        });
+
+        return $this->addressResponse($request, $userid, 'Address updated successfully!', $address->fresh());
     }
 
     public function selectCorporateAddress(Request $request, $id)
     {
-        // If not authenticated, redirect to login
-        if (!session()->has('userid')) {
-            return redirect()->route('corporate.login');
+        if ($redirect = $this->requireCorporateUser($request)) {
+            return $redirect;
         }
 
         $userid = session()->get('userid');
 
         $address = StoreuserAddress::where('user_id', $userid)->where('id', $id)->firstOrFail();
 
-        StoreuserAddress::where('user_id', $userid)->update(['is_default' => false]);
-        $address->update(['is_default' => true]);
+        DB::transaction(function () use ($userid, $address) {
+            StoreuserAddress::where('user_id', $userid)->update(['is_default' => false]);
+            $address->update(['is_default' => true]);
+            $this->syncDefaultAddressToUser($userid, $address);
+        });
 
-        $this->syncDefaultAddressToUser($userid, $address);
+        $addresses = $this->userAddresses($userid);
 
-        $request->session()->flash('success', 'Address selected as default!');
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Primary address updated!',
+                'address' => $address->fresh(),
+                'addresses' => $addresses,
+            ]);
+        }
+
+        $request->session()->flash('success', 'Primary address updated!');
         return redirect()->route('corporate.addresses');
     }
 
     public function deleteCorporateAddress(Request $request, $id)
     {
-        // If not authenticated, redirect to login
-        if (!session()->has('userid')) {
-            return redirect()->route('corporate.login');
+        if ($redirect = $this->requireCorporateUser($request)) {
+            return $redirect;
         }
 
         $userid = session()->get('userid');
 
         $address = StoreuserAddress::where('user_id', $userid)->where('id', $id)->firstOrFail();
         $wasDefault = $address->is_default;
-        $address->delete();
 
-        // Promote the newest remaining address to default if the deleted one was default
-        if ($wasDefault) {
-            $next = StoreuserAddress::where('user_id', $userid)->orderByDesc('id')->first();
-            if ($next) {
-                $next->update(['is_default' => true]);
-                $this->syncDefaultAddressToUser($userid, $next);
+        DB::transaction(function () use ($userid, $address, $wasDefault) {
+            $address->delete();
+
+            // Promote the newest remaining address to primary if the deleted one was primary
+            if ($wasDefault) {
+                $next = StoreuserAddress::where('user_id', $userid)->orderByDesc('id')->first();
+                if ($next) {
+                    $next->update(['is_default' => true]);
+                    $this->syncDefaultAddressToUser($userid, $next);
+                }
             }
+        });
+
+        return $this->addressResponse($request, $userid, 'Address deleted successfully!');
+    }
+
+    private function requireCorporateUser(Request $request)
+    {
+        if (session()->has('userid')) {
+            return null;
         }
 
-        $request->session()->flash('success', 'Address deleted successfully!');
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['success' => false, 'message' => 'Please login to continue.'], 401);
+        }
+
+        return redirect()->route('corporate.login');
+    }
+
+    private function validateAddress(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'mobile' => ['required', 'string', 'max:20', 'regex:/^[0-9+\-\s()]{7,20}$/'],
+            'label' => 'required|string|in:Home,Office,Other',
+            'address' => 'required|string|max:500',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'pincode' => ['required', 'string', 'max:20', 'regex:/^[A-Za-z0-9\-\s]{3,20}$/'],
+            'country' => 'nullable|string|max:100',
+            'is_default' => 'nullable|boolean',
+        ], [
+            'label.required' => 'Please select an address type.',
+            'label.in' => 'Address type must be Home, Office or Other.',
+            'mobile.regex' => 'Please enter a valid mobile number.',
+            'pincode.regex' => 'Please enter a valid pincode.',
+        ]);
+
+        unset($data['is_default']);
+
+        // Keep the legacy "location" column populated for other parts of the site
+        $data['location'] = trim($data['city'] . ', ' . $data['state'], ', ');
+
+        return $data;
+    }
+
+    private function userAddresses($userid)
+    {
+        return StoreuserAddress::where('user_id', $userid)
+            ->orderByDesc('is_default')
+            ->orderBy('id')
+            ->get();
+    }
+
+    private function addressResponse(Request $request, $userid, $message, $address = null)
+    {
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'address' => $address,
+                'addresses' => $this->userAddresses($userid),
+            ]);
+        }
+
+        $request->session()->flash('success', $message);
         return redirect()->route('corporate.addresses');
     }
 
@@ -659,6 +751,8 @@ class UsersController extends Controller
                 'location' => $address->location,
                 'address' => $address->address,
                 'city' => $address->city,
+                'region' => $address->state,
+                'pincode' => $address->pincode,
                 'country' => $address->country,
             ]);
     }

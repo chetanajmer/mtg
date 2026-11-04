@@ -85,6 +85,8 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                     <th>Option Name</th>
 
+                                                    <th>Image</th>
+
                                                     <th style="min-width: 80px;">Action</th>
 
                                                 </tr>
@@ -101,9 +103,17 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                 <tr>
 
-                                                   
+
 
                                                     <td>{{$items->name}}</td>
+
+                                                    <td>
+                                                        @if($items->image)
+                                                            <img src="{{ asset('upload/branding_options/' . $items->image) }}" alt="{{$items->name}}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+                                                        @else
+                                                            <span style="color: #999;">No image</span>
+                                                        @endif
+                                                    </td>
 
                                                      <td>
 
@@ -160,21 +170,33 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                 </div> 
 
-                                                <div class="modal-body"> 
+                                                <div class="modal-body">
 
-                                                    <div class="row"> 
+                                                    <div class="row">
 
-                                                        <div class="col-md-12"> 
+                                                        <div class="col-md-12">
 
-                                                            <div class="form-group"> 
+                                                            <div class="form-group">
 
-                                                                <label for="field-1"  class="control-label">Option Name</label> 
+                                                                <label for="field-1"  class="control-label">Option Name</label>
 
-                                                                <input type="text" id="name" class="form-control" id="field-1" placeholder="e.g : Laser Engraving"> 
+                                                                <input type="text" id="name" class="form-control" id="field-1" placeholder="e.g : Laser Engraving">
 
-                                                            </div> 
+                                                            </div>
 
-                                                        </div> 
+                                                        </div>
+
+                                                        <div class="col-md-12">
+
+                                                            <div class="form-group">
+
+                                                                <label for="field-2"  class="control-label">Option Image</label>
+
+                                                                <input type="file" id="image" class="form-control" accept="image/*">
+
+                                                            </div>
+
+                                                        </div>
 
                                                     </div> 
 
@@ -211,23 +233,37 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                 </div> 
 
-                                                <div class="modal-body"> 
+                                                <div class="modal-body">
 
-                                                    <div class="row"> 
+                                                    <div class="row">
 
                                                         <input type="hidden" name="editid" id="editid">
 
-                                                        <div class="col-md-12"> 
+                                                        <div class="col-md-12">
 
-                                                            <div class="form-group"> 
+                                                            <div class="form-group">
 
-                                                                <label for="field-1"  class="control-label">Option Name</label> 
+                                                                <label for="field-1"  class="control-label">Option Name</label>
 
-                                                                <input type="text" id="updatename" class="form-control" id="field-1" placeholder=""> 
+                                                                <input type="text" id="updatename" class="form-control" id="field-1" placeholder="">
 
-                                                            </div> 
+                                                            </div>
 
-                                                        </div> 
+                                                        </div>
+
+                                                        <div class="col-md-12">
+
+                                                            <div class="form-group">
+
+                                                                <label for="field-2"  class="control-label">Option Image</label>
+
+                                                                <input type="file" id="updateimage" class="form-control" accept="image/*">
+
+                                                                <input type="hidden" id="existing_image" value="">
+
+                                                            </div>
+
+                                                        </div>
 
                                                     </div> 
 
@@ -264,13 +300,21 @@ window.location.href = "{{url('/admin')}}";</script>
 $('#saveshipping').on('click',function(e) {
 
         var name=$("#name").val();
+        var formData = new FormData();
+        formData.append('_token', "{{ csrf_token() }}");
+        formData.append('name', name);
+
+        if($('#image')[0].files.length > 0){
+            formData.append('image', $('#image')[0].files[0]);
+        }
 
         $.ajax({
 
             url:"{{ route('addbrandingoption') }}",
                 method:"POST",
-
-                data: {"_token": "{{ csrf_token() }}","name":name},
+                data: formData,
+                contentType: false,
+                processData: false,
 
                 success:function (data) 
 
@@ -303,7 +347,7 @@ $(document).on('click', '.editbutton', function() {
 
                 data: {"_token": "{{ csrf_token() }}","id": id},
 
-                success:function (data) 
+                success:function (data)
 
                 {
 
@@ -312,7 +356,9 @@ $(document).on('click', '.editbutton', function() {
                 $("#updatename").val(data['name']);
 
                 $('#editid').val(data['id']);
-               
+
+                $('#existing_image').val(data['image']);
+
                 }
 
             })
@@ -327,21 +373,31 @@ $(document).on('click', '.updateshipping', function() {
 
     var id=$('#editid').val();
 
+    var formData = new FormData();
+    formData.append('_token', "{{ csrf_token() }}");
+    formData.append('id', id);
+    formData.append('name', name);
+
+    if($('#updateimage')[0].files.length > 0){
+        formData.append('image', $('#updateimage')[0].files[0]);
+    }
+
         $.ajax({
 
             url:"{{ route('updatebrandingoption') }}",
                 method:"POST",
+                data: formData,
+                contentType: false,
+                processData: false,
 
-                data: {"_token": "{{ csrf_token() }}","id": id,"name": name},
-
-                success:function (data) 
+                success:function (data)
 
                 {
 
                 console.log(data);
 
                 swal("success",'Updated Successfully !');
-               
+
                 $('#edit-close-modal').modal('hide');
 
                 location.reload();

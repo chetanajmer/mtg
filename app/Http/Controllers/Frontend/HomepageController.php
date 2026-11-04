@@ -69,6 +69,11 @@ class HomepageController extends Controller
 		return view('web_frontend.product',compact('product','tier_prices'));
 	}
 
+	public function compareProducts()
+	{
+		return view('web_frontend.compare-products');
+	}
+
 	 public function myaccount()
 	{
 		$footerlevel1=Footerlevel1::findorFail(1);	

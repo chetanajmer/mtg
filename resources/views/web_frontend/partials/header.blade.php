@@ -51,6 +51,7 @@
             <a href="#">Branding</a>
             <a href="/annual-corporate-membership" class="{{ request()->is('annual-corporate-membership') ? 'active' : '' }}">Annual Contract</a>
             <a href="/track-order" class="{{ request()->is('track-order') ? 'active' : '' }}">Track your Order</a>
+            <a href="{{ url('compare-products') }}" class="{{ request()->is('compare-products') ? 'active' : '' }}">Compare Gifts</a>
           </div>
           <div class="secondary-right">
             <a href="{{ route('corporate.portal') }}">For Businesses</a>

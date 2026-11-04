@@ -33,7 +33,7 @@ input {
 }
 
 .site-header {
-  background: #fff;
+  background: #000000;
 }
 
 .header-main {
@@ -48,7 +48,7 @@ input {
   flex: 0 0 82px;
   display: flex;
   flex-direction: column;
-  color: #050505;
+  color: #ffffff;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 24px;
   font-weight: 900;
@@ -64,10 +64,14 @@ input {
   flex: 1;
 }
 
-.primary-nav a,
+.primary-nav a {
+  font-size: 13px;
+  color: #ffffff;
+}
+
 .secondary-nav a {
   font-size: 13px;
-  color: #101114;
+  color: #333333;
 }
 
 .secondary-nav a.active {
@@ -85,12 +89,13 @@ input {
 .search-box {
   width: 240px;
   height: 37px;
-  border: 1px solid #cfd5dc;
+  border: 1px solid #444444;
   border-radius: 6px;
   display: flex;
   align-items: center;
   padding: 0 11px;
-  color: #5c6572;
+  color: #ffffff;
+  background: #222222;
 }
 
 .search-box i {
@@ -103,14 +108,15 @@ input {
   width: 100%;
   margin-left: 9px;
   font-size: 12px;
-  color: #222;
+  color: #ffffff;
+  background: transparent;
 }
 
 .icon-button {
   background: transparent;
   border: 0;
   padding: 0;
-  color: #101114;
+  color: #ffffff;
   font-size: 22px;
   position: relative;
 }
@@ -150,8 +156,9 @@ input {
 }
 
 .secondary-bar {
-  background: #f0f1f3;
-  min-height: 48px;
+  background: #f5f5f5;
+  min-height: 44px;
+  border-bottom: 1px solid #e0e0e0;
 }
 
 .secondary-nav {

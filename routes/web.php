@@ -22,6 +22,7 @@ use App\Http\Controllers\Backend\PreferenceController;
 use App\Http\Controllers\Backend\ExhibitionEventController;
 use App\Http\Controllers\Backend\CouponController;
 use App\Http\Controllers\Backend\FilterController;
+use App\Http\Controllers\Frontend\BrandingAssetController;
 use App\Http\Controllers\GeneralSettings;
 use App\Http\Controllers\Backend\HomepagesettingController;
 use App\Http\Controllers\Backend\ApiController;
@@ -72,6 +73,7 @@ Route::any('/', [HomepageController::class, 'index']);
 Route::get('product/{slug}', [HomepageController::class, 'webProduct'])->name('web.product');
 Route::any('product/{product_slug}/{slug}', [HomepageController::class, 'variationproduct'])->name('variationproduct');
 Route::any('variant_price', [HomepageController::class, 'variant_price'])->name('variant_price');
+Route::get('compare-products', [HomepageController::class, 'compareProducts'])->name('compare.products');
 
 Route::any('incrementquantity', [HomepageController::class, 'incrementquantity'])->name('incrementquantity');
 Route::any('decrementquantity', [HomepageController::class, 'decrementquantity'])->name('decrementquantity');
@@ -169,6 +171,10 @@ Route::post('/corporate-addresses', [UsersController::class, 'storeCorporateAddr
 Route::post('/corporate-addresses/{id}/select', [UsersController::class, 'selectCorporateAddress'])
     ->name('corporate.addresses.select');
 
+Route::match(['put', 'post'], '/corporate-addresses/{id}', [UsersController::class, 'updateSingleCorporateAddress'])
+    ->where('id', '[0-9]+')
+    ->name('corporate.addresses.update-single');
+
 Route::delete('/corporate-addresses/{id}', [UsersController::class, 'deleteCorporateAddress'])
     ->name('corporate.addresses.delete');
 
@@ -177,6 +183,26 @@ Route::get('/corporate-account-settings', [UsersController::class, 'accountSetti
 
 Route::post('/corporate-account-settings', [UsersController::class, 'updateAccountSettings'])
     ->name('corporate.account-settings.update');
+
+// Branding Assets Routes
+Route::get('/branding-assets', [BrandingAssetController::class, 'index'])
+    ->name('branding-assets.index')
+    ->middleware('corporate.auth');
+Route::post('/branding-assets', [BrandingAssetController::class, 'store'])
+    ->name('branding-assets.store')
+    ->middleware('corporate.auth');
+Route::get('/branding-assets/{id}', [BrandingAssetController::class, 'show'])
+    ->name('branding-assets.show')
+    ->middleware('corporate.auth');
+Route::put('/branding-assets/{id}', [BrandingAssetController::class, 'update'])
+    ->name('branding-assets.update')
+    ->middleware('corporate.auth');
+Route::delete('/branding-assets/{id}', [BrandingAssetController::class, 'destroy'])
+    ->name('branding-assets.destroy')
+    ->middleware('corporate.auth');
+Route::get('/branding-assets/{id}/download', [BrandingAssetController::class, 'download'])
+    ->name('branding-assets.download')
+    ->middleware('corporate.auth');
 
 Route::match(['get', 'post'], '/corporate/logout', [UsersController::class, 'dostorelogout'])
     ->name('corporate.logout');
