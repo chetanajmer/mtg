@@ -19,7 +19,13 @@ class StoreuserAddress extends Model
         'location',
         'address',
         'city',
+        'state',
+        'pincode',
         'country',
         'is_default',
+    ];
+
+    protected $casts = [
+        'is_default' => 'boolean',
     ];
 }

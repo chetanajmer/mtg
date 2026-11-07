@@ -25,7 +25,7 @@
     <a href="{{ route('corporate.portal') }}"><i class="bi bi-gift"></i>Dashboard</a>
     <a href="/orders"><i class="bi bi-cart3"></i>Orders</a>
     <a href="/corporate-addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
-    <a href="{{ route('corporate.portal') }}#branding"><i class="bi bi-image"></i>Branding Assets</a>
+    <a href="{{ route('branding-assets.index') }}"><i class="bi bi-image"></i>Branding Assets</a>
     <a class="active" href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
     <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
     <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>

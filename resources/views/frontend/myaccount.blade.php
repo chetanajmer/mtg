@@ -14,6 +14,11 @@ window.location.href = "{{url('/store/login')}}";</script>
 @endif
 
 @extends('layouts.frontapp')
+
+@section('styles')
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/myaccount-sidebar.css') }}">
+@endsection
+
 @section('content')
 
 <div class="container">
@@ -41,15 +46,26 @@ window.location.href = "{{url('/store/login')}}";</script>
 
             <div class="col-lg-3 col-12 mb-20">
 
-                <div class="myaccount-tab-menu nav" role="tablist">
-                    <ul class="list-none text-uppercase font-bold" role="tablist">
-                        <li><a href="#dashboad" data-toggle="tab"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-                        <li><a href="#orders" data-toggle="tab"><i class="fa fa-cart-arrow-down"></i>  Orders</a></li>
-                        <li class="active"><a href="#account-info" data-toggle="tab" class=""><i class="fa fa-user"></i> Account Details</a></li>
-                        <li><a href="#rewards" data-toggle="tab"><i class="fa fa-cart-arrow-down"></i>  Reward Points</a></li>
-                        <li><a href="{{url('/store/dologout')}}"><i class="fa fa-sign-out"></i> Logout</a></li>
-                    </ul>
-
+                <div class="myaccount-sidebar">
+                    <div class="myaccount-tab-menu nav" role="tablist">
+                        <div class="myaccount-header">
+                            <h3>My Account</h3>
+                            <p class="user-name">{{ $userdetails->fname }} {{ $userdetails->lname }}</p>
+                        </div>
+                        <ul class="list-none text-uppercase font-bold" role="tablist">
+                            <li class="active"><a href="#dashboad" data-toggle="tab"><i class="bi bi-box-seam"></i> Dashboard</a></li>
+                            <li><a href="#orders" data-toggle="tab"><i class="bi bi-cart3"></i> Orders</a></li>
+                            <li><a href="#" data-toggle="tab"><i class="bi bi-check-circle"></i> Approvals</a></li>
+                            <li><a href="#" data-toggle="tab"><i class="bi bi-person-badge"></i> Recipients</a></li>
+                            <li><a href="#" data-toggle="tab"><i class="bi bi-geo-alt-fill"></i> Addresses</a></li>
+                            <li><a href="#" data-toggle="tab"><i class="bi bi-image"></i> Branding Assets</a></li>
+                            <li><a href="#" data-toggle="tab"><i class="bi bi-bookmark"></i> Saved Collections</a></li>
+                            <li><a href="#" data-toggle="tab"><i class="bi bi-people-fill"></i> Employees</a></li>
+                            <li><a href="#" data-toggle="tab"><i class="bi bi-bar-chart-line"></i> Reports</a></li>
+                            <li><a href="#account-info" data-toggle="tab"><i class="bi bi-gear"></i> Account Settings</a></li>
+                            <li><a href="{{url('/store/dologout')}}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        </ul>
+                    </div>
                 </div>
 
             </div>

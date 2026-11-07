@@ -9,4 +9,5 @@ class Branding_option extends Model
 {
     use HasFactory;
     public $timestamps=false;
+    protected $fillable = ['name', 'image'];
 }

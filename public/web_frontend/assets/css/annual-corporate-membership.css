@@ -1,0 +1,84 @@
+/* Annual Corporate Membership Page - Downloaded Design Styles */
+.membership-wrapper{font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif;color:#141414;background:#fff;font-size:14px;line-height:1.5}
+.membership-wrapper *{box-sizing:border-box;margin:0;padding:0}
+.membership-wrapper a{color:inherit;text-decoration:none}
+.membership-wrapper button{font-family:inherit;cursor:pointer}
+.membership-wrapper :focus-visible{outline:2px solid #8a5f1a;outline-offset:2px}
+.membership-wrapper .wrap{max-width:1207px;margin:0 auto;padding:0 26px}
+
+/* hero */
+.membership-wrapper .hero{position:relative;height:450px;overflow:hidden;background:url('/web_frontend/assets/images/membership-hero.png') #f1e6d8;background-size:cover;background-position:center;min-height:430px}
+.membership-wrapper .hero-in{z-index:2;position:relative;max-width:1207px;margin:0 auto;padding:36px 36px 0}
+.membership-wrapper .eyebrow{font-size:9.5px;font-weight:700;letter-spacing:2.6px}
+.membership-wrapper .hero h1{font-size:51px;line-height:.98;font-weight:800;letter-spacing:-1.2px;margin:16px 0 14px}
+.membership-wrapper .hero .lead{font-size:20px;font-weight:500;margin-bottom:12px}
+.membership-wrapper .hero .copy{font-size:14.5px;line-height:1.45;color:#5d5d5d;max-width:470px}
+.membership-wrapper .btns{display:flex;gap:21px;margin:22px 0 28px}
+.membership-wrapper .btn{height:37px;padding:0 26px;border-radius:5px;font-size:12.5px;font-weight:500;border:1px solid #141414;display:inline-flex;align-items:center;gap:14px}
+.membership-wrapper .btn.dark{background:#141414;color:#fff}
+.membership-wrapper .btn.light{background:transparent;color:#141414;border-color:#8c8c8c}
+.membership-wrapper .stats{display:flex}
+.membership-wrapper .stats div{padding:0 28px;border-left:1px solid #c9c2b8}
+.membership-wrapper .stats div:first-child{padding-left:5px;border:0}
+.membership-wrapper .stats b{display:block;font-size:19px;font-weight:700;margin-bottom:3px}
+.membership-wrapper .stats span{font-size:12px;color:#555}
+.membership-wrapper .tag{z-index:2;position:absolute;right:26px;top:36px;font-size:9.5px;letter-spacing:5px;color:#444;font-weight:700;line-height:2.3;width:100px}
+
+/* plans */
+.membership-wrapper .plans{text-align:center;padding:20px 0 0}
+.membership-wrapper .plans .eyebrow{display:block;margin-top:18px;letter-spacing:3.4px;color:#555;font-weight:500;font-size:9.5px}
+.membership-wrapper .plans h2{font-size:28px;font-weight:800;letter-spacing:-.4px;margin:12px 0 6px}
+.membership-wrapper .plans .sub2{color:#777;font-size:15px;margin-bottom:24px}
+.membership-wrapper .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;text-align:left}
+.membership-wrapper .plan{position:relative;border:1px solid #e6e3de;border-radius:8px;padding:12px 15px 18px;background:#fff}
+.membership-wrapper .plan.gold{border:2px solid #8a5f1a;background:#fbf6ec}
+.membership-wrapper .badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#8a5f1a;color:#fff;font-size:8.5px;font-weight:700;letter-spacing:1.4px;padding:4px 16px;border-radius:10px;white-space:nowrap}
+.membership-wrapper .head{display:flex;gap:18px;align-items:center;margin-bottom:17px;min-height:96px}
+.membership-wrapper .medal{position:relative;flex:none;width:72px;height:92px}
+.membership-wrapper .medal i{position:absolute;left:4px;top:0;width:64px;height:64px;border-radius:50%;display:block}
+.membership-wrapper .medal i::after{content:"★";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-style:normal;font-size:26px;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.membership-wrapper .medal u{position:absolute;left:18px;top:52px;width:36px;height:34px;clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)}
+.membership-wrapper .silver i{background:radial-gradient(circle at 35% 30%,#f2f2f2,#a5a5a5 70%);box-shadow:0 0 0 3px #d0d0d0}.membership-wrapper .silver u{background:linear-gradient(#b8b8b8,#8e8e8e)}
+.membership-wrapper .goldm i{background:radial-gradient(circle at 35% 30%,#f9de8a,#b98a22 70%);box-shadow:0 0 0 3px #e0b955}.membership-wrapper .goldm u{background:linear-gradient(#d3a43a,#a47818)}
+.membership-wrapper .plat i{background:radial-gradient(circle at 35% 30%,#555,#111 70%);box-shadow:0 0 0 3px #666}.membership-wrapper .plat i::after{color:#ddd}.membership-wrapper .plat u{background:linear-gradient(#444,#111)}
+.membership-wrapper .head h3{font-size:25px;font-weight:700;margin-bottom:2px}
+.membership-wrapper .head p{font-size:13.5px;color:#444;font-weight:500}
+.membership-wrapper .head small{display:block;font-size:12px;color:#8a8a8a;margin-top:5px}
+.membership-wrapper .rows div{display:flex;justify-content:space-between;align-items:center;height:26.5px;padding:0 6px;font-size:12px;color:#555}
+.membership-wrapper .rows div:nth-child(odd){background:#f5f4f2}
+.membership-wrapper .gold .rows div:nth-child(odd){background:#f8f0de}
+.membership-wrapper .rows b{color:#141414;font-weight:700;font-size:12.5px}
+.membership-wrapper .foot{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
+.membership-wrapper .price{font-size:19px;font-weight:700}
+.membership-wrapper .price small{font-size:14px;font-weight:600}
+.membership-wrapper .sel{height:38px;width:165px;border:0;border-radius:5px;background:#141414;color:#fff;font-size:13px;font-weight:500}
+.membership-wrapper .gold .sel{background:#8a5f1a}
+
+/* benefits strip */
+.membership-wrapper .strip{display:grid;grid-template-columns:repeat(6,1fr);background:#f6f5f3;border-radius:8px;margin-top:24px;padding:14px 0}
+.membership-wrapper .strip div{display:flex;align-items:center;gap:15px;padding:0 20px;border-left:1px solid #dcd9d4;font-size:12.5px;line-height:1.3;color:#333}
+.membership-wrapper .strip div:first-child{border:0}
+.membership-wrapper svg{flex:none}
+
+/* info cards */
+.membership-wrapper .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}
+.membership-wrapper .info{display:flex;align-items:center;gap:20px;background:#f6f5f3;border-radius:8px;padding:12px 28px;min-height:103px}
+.membership-wrapper .circ{flex:none;width:68px;height:68px;border-radius:50%;background:#f5ebd9;display:grid;place-items:center}
+.membership-wrapper .info h4{font-size:15px;font-weight:700;margin-bottom:6px}
+.membership-wrapper .info p{font-size:12px;line-height:1.5;color:#777}
+.membership-wrapper .toggle{flex:none;width:68px;height:34px;border-radius:17px;background:#a47624;position:relative;color:#fff;font-size:10px;font-weight:700;padding:11px 0 0 14px}
+.membership-wrapper .toggle::after{content:"";position:absolute;right:3px;top:3px;width:28px;height:28px;border-radius:50%;background:#fff}
+.membership-wrapper .cal{flex:none;width:68px;height:68px;border-radius:50%;background:#f5ebd9;display:grid;place-items:center;margin-left:auto}
+.membership-wrapper .cta{text-align:center;padding:12px 0 34px}
+.membership-wrapper .cta .btn{height:32px;padding:0 36px;font-size:12px;background:#141414;color:#fff;border-radius:4px}
+.membership-wrapper .cta p{color:#888;font-size:12px;margin-top:20px}
+
+/* responsive */
+@media(max-width:1000px){
+  .membership-wrapper .grid,.membership-wrapper .two{grid-template-columns:1fr}
+  .membership-wrapper .strip{grid-template-columns:repeat(2,1fr);row-gap:16px}
+  .membership-wrapper .tag{display:none}
+  .membership-wrapper .hero{height:auto;padding-bottom:30px}
+  .membership-wrapper .hero h1{font-size:38px}
+  .membership-wrapper .stats{flex-wrap:wrap;row-gap:12px}
+}
