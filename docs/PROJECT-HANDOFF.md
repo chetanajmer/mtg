@@ -12,7 +12,7 @@ Last updated: 2 Nov 2026.
 |---|---|
 | Project folder | `C:\Users\2473d\mgdinfotech\mtg\mtg` (git repo, origin `chetanajmer/mtg`) |
 | Branch | `dev-ekansh` (work continues here; it is on GitHub as `origin/dev-ekansh`, pushed by the user). Commits on top of `main` (a139b85): `4943540` security lock-down, `ffb8bba` dashboard/order tracking/collections and other fixes, `f53db96` Reports. `security-fixes` points at the same commit. |
-| Uncommitted | Everything after `f53db96` (from 2 Nov 16:01: the advance payment invoice). **Do not commit unless the user asks.** |
+| Uncommitted | Nothing as of 3 Nov: all work is in commit `a6014e6`, pushed to `origin/dev-ekansh` at the user's request. **Do not commit unless the user asks.** |
 | Pushed? | The user pushes `dev-ekansh` themselves. **Claude never pushes and never opens PRs.** Pushing `main` auto-deploys to the live beta site via cPanel. |
 | Live site | https://beta.morethangiftz.com — still runs the OLD code, open admin, debug pages, broken cart. Nothing from this work is deployed. |
 | Backup (before any change) | `C:\Users\2473d\mgdinfotech\mtg\mtg-backup-2026-10-31_1547` (full copy + `database-mtg-backup.sql`) |

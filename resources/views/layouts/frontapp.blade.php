@@ -17,305 +17,23 @@ $footer_categories=\App\Models\Category::where('is_active','online')->where('fea
 <link rel="stylesheet" type="text/css" href="/frontend/assets/css/reset.css">
 <link rel="stylesheet" type="text/css" href="/frontend/assets/css/style.css">
 <link rel="stylesheet" type="text/css" href="/frontend/assets/css/lightslider.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+@include('web_frontend.partials.site-chrome-head')
 </head>
 <body>
+@include('web_frontend.partials.site-loader')
 
 <div id="loading" style="display: none">
   <img src="/assets/images/preloader.gif" id="loading-image">
 </div>
 
-<section class="default_section topbar_section">
-  <div class="container">
-    <div class="default_row topbar_row">
-       <div class="mobilemenu">
-        <a href="JavaScript:void(0)" class="quote menuicon"><i class="fa fa-bars" aria-hidden="true"></i></a>
-      </div>
-      <span class="welcome_text text-uppercase">Welcome to meem store!</span>
-      <div class="topbar_right">
-          <!-- <div class="dropdown_item">
-            <div class="dropdown">
-              <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-expanded="false">
-                Aed
-              </a>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <a class="dropdown-item" href="#">Aed</a>
-                <a class="dropdown-item" href="#">Aed</a>
-                <a class="dropdown-item" href="#">Aed</a>
-              </div>
-            </div>
-            <div class="dropdown">
-              <a class="dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-expanded="false">
-                Eng
-              </a>
-              <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                <a class="dropdown-item" href="#">Eng</a>
-                <a class="dropdown-item" href="#">Eng</a>
-                <a class="dropdown-item" href="#">Eng</a>
-              </div>
-            </div>
-          </div> -->
-          <div class="account_info">
-           <ul>
-              <li><a href="tel:+971585351786"><i class="fa fa-whatsapp" aria-hidden="true"></i> +971 58 535 1786</a></li>
-              <li><a href="mailto:order@meem.com"><i class="fa fa-envelope-o" aria-hidden="true"></i> order@meemindustrial.com</a></li>
-            </ul>
-          </div>
-      </div>
-    </div>
-  </div>
-</section>
-<section class="default_section banner_section">
-  <img src="/frontend/assets/images/banner.jpg" alt="" class="desktop_banner">
-  <img src="/frontend/assets/images/mobile-banner.jpg" alt="" class="mobile_banner">
-  <div class="container">
-    <div class="default_row logoinnerdiv">
-    <a href="{{url('/')}}" class="logo"><img src="/frontend/assets/images/logo.png" alt="meem"></a>
-    <form class="header_search" action="{{ route('search_bar') }}" method="post">
-         {{ csrf_field() }}
-        <input type="text" name="search_val" placeholder="Search Item" id="search" required="" value="">
-        <button id="search_items" type="submit"><i class="fa fa-search" aria-hidden="true"></i></button>
-      <div class="default_div searchbar" style="display: none" id="searchbar">
-          <div class="searchbar_inner default_row" id="searchlist">
-            
-             
-
-               
-              
-             
-          </div>
-         <!--  <div class="searchbar_inner default_row">
-            <span class="product_name">Search Suggestions</span>
-              <ul class="default_div suggestion_name mt-1">
-                <li><a href="#">Suggestion Name </a></li>
-              </ul>
-          </div> -->
-        </div> 
-      </form>
-  </div>
-  </div>
-</section>
-<section class="default_section nav_section">
-  <div class="container">
-    <div class="default_row">
-        <div class="nav_row">
-          <div class="category_menu">
-             <div class="category_menu_inner">
-             <span class="menuquote menubar_icon" id="menudropdown"> Shop By Brands <i class="fa fa-bars" aria-hidden="true"></i></span>
-             </div>
-             <ul class="dropdown_submenu">
-              @php
-                 $main_brand=\App\Models\Brand::where('is_active','online')->get();
-              @endphp
-
-               @foreach($main_brand as $brand)
-
-               @php $categories=\App\Models\Category::where('brand_id',$brand->id)->get();  @endphp
-
-              @if(count($categories)>0)
-              <li class="has_arrow">
-              @else
-               <li>
-              @endif
-                <a href="{{url('brand/'.$brand->slug)}}">{{$brand->brandname}}</a>
-                @if(count($categories)>0)
-                <div class="subcategory_menu">
-                  <div class="row">
-                  @foreach($categories as $cat)
-                  <div class="col-md-4">
-                    <a href="{{url('category/'.$cat->slug)}}" class="product_name">{{$cat->catname}}</a>
-                    @php $subcategories=\App\Models\Subcategory::where('catid',$cat->id)->get();  @endphp
-                    
-                    @foreach($subcategories as $subcat)
-                    <ul class="">
-                      <li><a href="{{url('subcategory/'.$subcat->slug)}}">{{$subcat->catname}}</a></li>
-                    </ul>
-                    @endforeach
-                  </div>
-                  @endforeach
-                  </div>
-                </div>
-                @endif
-              </li>
-              @endforeach
-             </ul>
-          </div>
-          <div class="navication">
-            <nav class="navbar navbar-expand-lg navbar-light">
-              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-              </button>
-              <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
-                <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-                  <li class="nav-item active">
-                    <a class="nav-link" href="{{url('/')}}">Home</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{url('aboutus')}}">About Us</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{{url('brands')}}">Brands</a>
-                  </li>
-                  <!-- <li class="nav-item">
-                     <a class="nav-link" href="#">B2B Enquires</a>
-                  </li>
-                  <li class="nav-item">
-                     <a class="nav-link" href="#">Vendors</a>
-                  </li> -->
-                  <li class="nav-item">
-                     <a class="nav-link" href="{{url('contactus')}}">Contact us</a>
-                  </li>
-                </ul>
-              </div>
-            </nav>
-          </div>
-        </div>
-        <div class="cart_icon position-relative" >
-          <a href="{{url('cart')}}"  id="cart_count">
-           <i class="minicart-icon"></i>
-           @if(count($tmporders)>0)
-           <span class="cart-count">{{count($tmporders)}}</span>
-           @else
-            <span class="cart-count">0</span>
-           @endif
-           </a>
-        </div>
-    </div>
-  </div>
-</section>
-      
+@include('web_frontend.partials.home-header')
 
     @yield('content')
 
 
 
-<section class="default_section newsletter_section">
-  <div class="container">
-    <div class="default_row newsletter_row">
-      <div class="col-md-12 col-lg-5 subscribe_div">
-        <h4>Subscribe to our newsletter</h4>
-        <p>Get all the latest information on products and offers</p>
-      </div>
-      <div class="col-md-12 col-lg-7">
-         <form class="default_row newsletter_form">
-           <input type="text" name="" placeholder="Enter Email"  id="subscribername">
-           <!-- <input type="button" name="" value="Subscribe" class="btn btn-secondary subscribe_btn "> -->
-           <button type="button" class="btn btn-secondary subscribe_btn " >Subscribe</button>
-         </form>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="default_section footer_section">
-  <div class="container">
-    <div class="default_row footer_row">
-      <div class="col-12 col-md-4 col-lg-3">
-        <a href="{{url('/')}}" class="footer_logo"><img src="/frontend/assets/images/footer_logo.png" alt=""></a>
-      </div>
-      <div class="col-6 col-md-4 col-lg-2 mt-3">
-        <ul class="default_div footer_menu">
-          <li><a href="{{url('aboutus')}}">About Us</a></li>
-           <li><a href="{{url('brands')}}">Brands</a></li>
-          <!-- <li><a href="#">B2B Enquires</a></li>
-          <li><a href="#">Vendors</a></li> -->
-          <li><a href="{{url('contactus')}}">Contact Us</a></li>
-        </ul>
-      </div>
-     <!-- <div class="col-6 col-md-4 col-lg-2 mt-3">
-        <ul class="default_div footer_menu">
-          <li><a href="#">Track Order</a></li>
-          <li><a href="#">Cart</a></li>
-          <li><a href="#">Sign in</a></li>
-          <li><a href="#">Help</a></li>
-          <li><a href="#">Wishlist</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-        </ul>
-      </div> -->
-      <div class="col-6 col-md-4  col-lg-2 mt-3">
-        <ul class="default_div footer_menu">
-          <li><a href="#">Terms & Conditions</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Return Policy</a></li>
-          <!-- <li><a href="#">Money-back</a></li>
-          <li><a href="#">Support</a></li>
-          <li><a href="#">Shipping</a></li> -->
-        </ul>
-      </div>
-      <div class="col-12 col-md-6 col-lg-4 mt-3">
-        <div class="default_row footercall_info">
-          <span class="call_icon"><img src="/frontend/assets/images/call_icon.png" alt=""></span>
-          <span class="call_detail">
-            <strong>Call Us</strong>
-            <a href="tel:{{$headersettings->headerphone}}">{{$headersettings->headerphone}}</a>
-          </span>
-        </div>
-        <div class="default_row footercall_info">
-          <span class="call_icon"><img src="/frontend/assets/images/mail_icon.png" alt=""></span>
-          <span class="call_detail">
-            <strong>Mail Us</strong>
-            <a href="mailto:{{$headersettings->headeremail}}">{{$headersettings->headeremail}}</a>
-          </span>
-        </div>
-       <!--  <ul class="default_div footer_menu">
-          <li><a href="mailto:{{$headersettings->headeremail}}">{{$headersettings->headeremail}}</a></li>
-        </ul> -->
-        <ul class="default_row social_icon">
-          @if(!empty($footersettings->facebook))
-          <li><a href="{{$footersettings->facebook}}" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a></li>
-          @endif
-
-          @if(!empty($footersettings->linkedin))
-          <li><a href="{{$footersettings->linkedin}}" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a></li>
-          @endif
-
-           @if(!empty($footersettings->instagram))
-          <li><a href="{{$footersettings->instagram}}" target="_blank"><i class="fa fa-instagram" aria-hidden="true"></i></a></li>
-          @endif
-
-          @if(!empty($footersettings->twitter))
-          <li><a href="{{$footersettings->twitter}}" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a></li>
-          @endif
-
-          @if(!empty($footersettings->youtube))
-          <li><a href="{{$footersettings->youtube}}" target="_blank"><i class="fa fa-youtube" aria-hidden="true"></i></a></li>
-          @endif
-        </ul>
-      </div>
-    </div>
-
-    <div class="default_row footer_catmenu">
-      <strong>Trending Categories</strong>
-      <ul class="default_row footer_catlink">
-        @foreach($footer_categories as $cat)
-         <li><a href="{{url('category/'.$cat->slug)}}">{{$cat->catname}}</a></li>
-        @endforeach
-       <!--  <li><a href="#">Tools & Equipment</a></li>
-        <li><a href="#">Hardware Tools</a></li>
-        <li><a href="#">Lawn & Garden</a></li>
-        <li><a href="#">Painting</a></li>
-        <li><a href="#">Plumbing & Sanitary</a></li> -->      
-      </ul>
-    </div>
- 
-    <!-- <div class="default_row footer_catmenu">
-      <strong>IT and Electronics</strong>
-      <ul class="default_row footer_catlink">
-        <li><a href="#">Network Camera</a></li>
-        <li><a href="#">Routers</a></li>
-        <li><a href="#">Media Converters</a></li>
-        <li><a href="#">Unified Storage</a></li>
-        <li><a href="#">Fiber Products</a></li>
-        <li><a href="#">Copper Products</a></li>
-        <li><a href="#">Accessories</a></li>
-      </ul>
-    </div> -->
-  </div>
-</section>
-<section class="default_section copyright_section">
-  <div class="container">
-    <p>&copy; Copyright More Than Giftz <script>document.write(new Date().getFullYear())</script>. All Rights Reserved. Design & Develop by <a href="https://silverpixelz.com" target="_blank">SilverPixelz</a></p>
-  </div>
-</section>
+@include('web_frontend.partials.home-footer')
 <div class="callsidecard" id="quotebox">
   <div class="close shadowpt"></div>
   <a href="javascript:void(0);" class="close btnsclose">x</a>
@@ -385,6 +103,7 @@ $footer_categories=\App\Models\Category::where('is_active','online')->where('fea
 <script src="/frontend/assets/js/jquery.min.js"></script>
 <script src="/frontend/assets/js/bootstrap.bundle.min.js"></script>
 <script src="/frontend/assets/js/custom.js"></script>
+<script src="{{ asset('web_frontend/assets/js/home.js') }}?v={{ filemtime(public_path('web_frontend/assets/js/home.js')) }}"></script>
 <script src="/frontend/assets/js/owl.carousel.js"></script>
 <script src="/frontend/assets/js/lightslider.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mouse0270-bootstrap-notify/3.1.5/bootstrap-notify.min.js"></script>

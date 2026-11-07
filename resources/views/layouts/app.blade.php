@@ -501,6 +501,12 @@ figure figcaption {
                                 <a href="{{ route('reports.index') }}" class="waves-effect"><i class="ti-book"></i><span> Reports </span></a>
                             </li>
                              @endadminCan
+
+                             @adminCan('admin/planner-logs')
+                             <li>
+                                <a href="{{ route('planner-logs.index') }}" class="waves-effect"><i class="ti-gift"></i><span> Planner Log </span></a>
+                            </li>
+                             @endadminCan
                             
                              @adminCan('list-coupon')
                              <li><a href="{{url('list-coupon')}}" ><i class="ti-tag"></i>Coupon</a></li>
@@ -526,6 +532,10 @@ figure figcaption {
                                     <li><a href="{{url('cms-settings')}}" >CMS Settings</a></li>
                                     <li><a href="{{url('seo-settings')}}" >SEO Settings</a></li>
                                     <li><a href="{{url('header-settings')}}" >Header Settings</a></li>
+                                    <li><a href="{{url('supply-countries')}}" >Supplies To</a></li>
+                                    <li><a href="{{url('filter-settings')}}" >Category Page Filters</a></li>
+                                    <li><a href="{{url('home-logos')}}" >Brands &amp; Clients</a></li>
+                                    <li><a href="{{ route('email-templates.index') }}" >Email Templates</a></li>
                                     <li><a href="{{url('footerlevel1')}}" >Footer L1 Settings </a></li>
                                     <li class="has_sub">
                                         <a href="javascript:void(0);"class="waves-effect"><span>Footer L2 Settings</span>  <span class="menu-arrow"></span></a>

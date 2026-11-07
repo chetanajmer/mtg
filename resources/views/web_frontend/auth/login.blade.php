@@ -35,6 +35,7 @@
 
       <form action="{{ route('corporate.login.submit') }}" method="POST">
         @csrf
+        @if(request('redirect'))<input type="hidden" name="redirect" value="{{ request('redirect') }}">@endif
 
         <div class="auth-field">
           <i class="bi bi-envelope"></i>
@@ -64,7 +65,7 @@
           Continue with Google
         </a>
 
-        <p class="auth-switch">Don't have an account? <a href="{{ route('corporate.register') }}">Register Now</a></p>
+        <p class="auth-switch">Don't have an account? <a href="{{ route('corporate.register', request('redirect') ? ['redirect' => request('redirect')] : []) }}">Register Now</a></p>
       </form>
     </div>
 </div>

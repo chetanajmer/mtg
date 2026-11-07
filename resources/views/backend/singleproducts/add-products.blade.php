@@ -770,6 +770,8 @@ window.location.href = "{{url('/admin')}}";</script>
 
                     </div>
 
+@include('backend.product.delivery-time-field')
+
                   </div>
 
                 </div>
@@ -802,7 +804,9 @@ window.location.href = "{{url('/admin')}}";</script>
 
                       <div class="col-md-3">Max Qty</div>
 
-                      <div class="col-md-4">Price</div>
+                      <div class="col-md-2">% of Cost</div>
+
+                      <div class="col-md-2">Price / Piece</div>
 
                       <div class="col-md-2"></div>
 
@@ -812,7 +816,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                     <a href="javascript:void(0);" id="add_tier_row" class="btn btn-purple btn-sm waves-effect waves-light">Add Tier</a>
 
-                    <p style="color:blue;margin-top:10px;">Leave Max Qty blank for "Unlimited". Savings % is auto-calculated against the base product price.</p>
+                    <p style="color:blue;margin-top:10px;">Leave Max Qty blank on the last tier so it covers every larger order. Tiers must follow on from each other, with no gaps or overlaps. Type a % of Cost Price or a price, and the other fills in.</p>
 
                   </div>
 
@@ -2248,7 +2252,7 @@ $('#radio2').on('change',function(e)
         row.next('.spec-row').after(row);
     });
 
-    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-3"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50"></div><div class="col-md-3"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited"></div><div class="col-md-4"><input type="number" step="0.01" min="0" name="tier_percentage[]" class="form-control tier-percentage-input" placeholder="e.g : 10" data-original="0"></div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
+    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-3"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50"></div><div class="col-md-3"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited"></div><div class="col-md-2"><input type="number" step="0.01" min="0.01" class="form-control tier-percent" placeholder="%" aria-label="Percent of Cost Price"></div><div class="col-md-2"><input type="number" step="0.01" min="0.01" name="tier_price[]" class="form-control" placeholder="e.g : 45"></div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
 
     function toggleTierBody(){
         var isChecked = $('input[name="tier_pricing_enabled"]').is(':checked');
@@ -2256,72 +2260,28 @@ $('#radio2').on('change',function(e)
         if(isChecked){
             $('#tier_pricing_body').show();
             if($('#tier_rows .tier-row').length === 0){
-                // Load tier pricing from database
+                // Start from the defaults on the Tier Pricing page: the customer pays that percentage of the Cost Price
                 @if(!empty($tier_pricing))
                     @foreach($tier_pricing as $tier)
-                    var tierRow = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-3"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50" value="{{$tier->min_qty}}"></div><div class="col-md-3"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited" value="{{$tier->max_qty ?? ''}}"></div><div class="col-md-4"><input type="number" step="0.01" min="0" name="tier_percentage[]" class="form-control tier-percentage-input" placeholder="e.g : 10" value="{{$tier->percentage}}" data-original="{{$tier->percentage}}"></div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
+                    var tierRow = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-3"><input type="number" min="1" name="tier_min[]" class="form-control" placeholder="e.g : 50" value="{{$tier->min_qty}}"></div><div class="col-md-3"><input type="number" min="1" name="tier_max[]" class="form-control" placeholder="Unlimited" value="{{$loop->last ? '' : $tier->max_qty}}"></div><div class="col-md-2"><input type="number" step="0.01" min="0.01" class="form-control tier-percent" placeholder="%" aria-label="Percent of Cost Price" value="{{$tier->percentage + 0}}"></div><div class="col-md-2"><input type="number" step="0.01" min="0.01" name="tier_price[]" class="form-control" placeholder="e.g : 45"></div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
                     $('#tier_rows').append(tierRow);
                     @endforeach
                 @else
                     $('#tier_rows').append(tierRowHtml);
                 @endif
+                tierPricesFromPercent();
             }
-            // Apply Cost Price + Percentage integration when toggle is ON
-            applyCostPriceIntegration();
         } else {
             $('#tier_pricing_body').hide();
-            // Restore original values when toggle is OFF
-            restoreOriginalPercentages();
         }
-    }
-
-    function applyCostPriceIntegration(){
-        var costPrice = parseFloat($('input[name="price"]').val()) || 0;
-        $('.tier-row').each(function(){
-            var $percentageInput = $(this).find('.tier-percentage-input');
-            var originalPercentage = parseFloat($percentageInput.data('original')) || 0;
-            var newPercentage = originalPercentage + costPrice;
-            $percentageInput.val(newPercentage.toFixed(2));
-        });
-    }
-
-    function restoreOriginalPercentages(){
-        $('.tier-row').each(function(){
-            var $percentageInput = $(this).find('.tier-percentage-input');
-            var originalPercentage = parseFloat($percentageInput.data('original')) || 0;
-            $percentageInput.val(originalPercentage.toFixed(2));
-        });
     }
 
     $('#add_tier_row').on('click', function(){
         $('#tier_rows').append(tierRowHtml);
-        // Apply Cost Price integration if toggle is ON
-        if($('input[name="tier_pricing_enabled"]').is(':checked')){
-            applyCostPriceIntegration();
-        }
     });
 
     $(document).on('click', '.tier-remove', function(){
         $(this).closest('.tier-row').remove();
-    });
-
-    $(document).on('input change', '.tier-row input, input[name="price"]', function(){
-        recalcTierSavings();
-    });
-
-    // Handle manual percentage edits - update original value
-    $(document).on('input change', '.tier-percentage-input', function(){
-        var newValue = parseFloat($(this).val()) || 0;
-        $(this).data('original', newValue);
-    });
-
-    // Cost Price change event - apply integration only if toggle is ON
-    $('input[name="price"]').on('input change', function(){
-        var isTierPricingEnabled = $('input[name="tier_pricing_enabled"]').is(':checked');
-        
-        if(isTierPricingEnabled){
-            applyCostPriceIntegration();
-        }
     });
 
     // Toggle change event using Switchery library
@@ -2330,6 +2290,8 @@ $('#radio2').on('change',function(e)
     });
 
     toggleTierBody();
+
+    @include('backend.product.partials.tier-check')
 
     $('input[name="occasion_tags"], input[name="preferences"], input[name="ai_tags"]').tagsinput();
 

@@ -17,6 +17,7 @@
 </head>
 
 <body class="mat-typography">
+@include('web_frontend.partials.site-loader')
 
 @yield('content')
 

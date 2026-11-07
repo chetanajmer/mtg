@@ -11,6 +11,8 @@ use App\Models\Footer_setting;
 use App\Models\Homepage_setting;
 use App\Models\Product;
 use App\Models\Category;
+use App\Models\Subcategory;
+use App\Models\HomeLogo;
 use App\Models\Brand;
 use App\Models\Tmporder;
 use App\Models\Cartorder;
@@ -42,11 +44,72 @@ class HomepageController extends Controller
 {
 	public function index()
 	{
-		// Basic new-design homepage (the old one only showed a SilverGiftz logo
-		// linking to silvergiftz.com)
-		$categories=Category::where('is_active','online')->orderBy('ranking')->orderBy('id')->get();
-		$products=Product::where('is_active','online')->orderByDesc('id')->take(8)->get();
-		return view('web_frontend.home',compact('categories','products'));
+		$subcategories=Subcategory::where('is_active','online')->whereIn('slug',collect(config('home_page.category_cards'))->pluck('subcategories')->flatten()->filter()->all())->get()->keyBy('slug');
+
+		$categoryCards=[];
+		foreach(config('home_page.category_cards') as $card)
+		{
+			$links=[];
+			foreach($card['subcategories'] ?? [] as $slug)
+			{
+				if(isset($subcategories[$slug]))
+				{
+					$links[]=['label'=>$subcategories[$slug]->catname,'url'=>url('subcategory/'.$slug)];
+				}
+			}
+			$categoryCards[]=['title'=>$card['title'],'image'=>$card['image'],'links'=>$links,'url'=>url('category/'.$card['category'])];
+		}
+
+		$newArrivals=$this->newArrivals()->take(config('home_page.new_arrivals_count'));
+
+		$homeLogos=HomeLogo::where('is_active',true)->ordered()->get()->groupBy('type');
+
+		return view('web_frontend.home',compact('categoryCards','newArrivals','homeLogos'));
+	}
+
+	/**
+	 * Products marked New Arrival first, then the latest, leaving out any without a picture.
+	 */
+	private function newArrivals()
+	{
+		return Product::where('is_active','online')->orderByRaw("newarrival='online' desc")->orderByDesc('id')->take(60)->get()
+			->filter(function($product) { return $product->imageUrl() && $product->priceForQuantity($product->minOrderQuantity())>0; })->values();
+	}
+
+	public function search(Request $request)
+	{
+		$query=trim(preg_replace('/\s+/u',' ',mb_substr((string)$request->query('q',''),0,100)));
+		$newOnly=$request->boolean('new') && $query==='';
+
+		$products=Product::where('is_active','online');
+		if($newOnly)
+		{
+			$products->orderByRaw("newarrival='online' desc");
+		}
+		else
+		{
+			// Every word must appear somewhere
+			$words=array_filter(explode(' ',$query));
+			if(!$words)
+			{
+				$products->whereRaw('1=0');
+			}
+			foreach($words as $word)
+			{
+				$like='%'.addcslashes($word,'%_\\').'%';
+				$products->where(function($q) use ($like) {
+					foreach(['name','modelno','ai_tags','occasion_tags','preferences','shortdescription'] as $column)
+					{
+						$q->orWhere($column,'like',$like);
+					}
+				});
+			}
+		}
+
+		$products=$products->orderByDesc('id')->paginate(20)->withQueryString();
+		$heading=$newOnly ? 'New Arrivals' : ($query==='' ? 'Search our gifts' : 'Results for "'.$query.'"');
+
+		return view('web_frontend.search-results',compact('products','query','heading'));
 	}
 
 	public function product($slug)
@@ -62,9 +125,12 @@ class HomepageController extends Controller
 		if(!$product) {
 			abort(404);
 		}
-		// Tier rows are kept when the toggle is off, so only use them when it is on
+		// Tier rows are kept when the toggle is off, so only use them when it is on.
+		// A tier that ends below the MOQ can never be ordered, so it isn't shown.
+		$moq=$product->minOrderQuantity();
 		$tier_prices=$product->tier_pricing_enabled==='yes'
 			? \DB::table('product_tier_prices')->where('product_id',$product->id)->where('price','>',0)->orderBy('min_qty')->orderBy('id')->get()
+				->filter(function($tier) use ($moq) { return !$tier->max_qty || $tier->max_qty>=$moq; })->values()
 			: collect();
 		return view('web_frontend.product',compact('product','tier_prices'));
 	}
@@ -460,95 +526,6 @@ class HomepageController extends Controller
 		return array('product'=>$product);
 	}
 
-
-	public function addtowishlist(Request $request)
-	{
-		$userid=session()->get('userid');
-
-		if(!empty($userid))
-		{
-			$checkproduct=Wishlist::where('productid',$request->id)->where('userid',$userid)->first();
-
-			if(!empty($checkproduct))
-			{
-				$msg="Product already in Wishlist";
-				$code="error"; 
-				return array($msg, $code);
-			}
-			else
-			{
-
-				$getproductdata=Product::where('id',$request->id)->first();    
-
-				if(!empty($getproductdata))
-				{
-					$wishlist=new Wishlist;
-					$wishlist->productslug=$getproductdata->slug;
-					$wishlist->productid=$getproductdata->id;
-					$wishlist->image=$getproductdata->thumbnail;
-					$wishlist->modelno=$getproductdata->modelno;
-					$wishlist->name=$getproductdata->name;
-					$wishlist->price=$getproductdata->price;
-					$wishlist->userid=$userid;
-
-					$wishlist->save();
-
-					$msg="Product Added to Wishlist";
-					$code="success"; 
-					return array($msg, $code);
-				}
-				else
-				{
-
-					$msg="Product Not Exists";
-					$code="error"; 
-					return array($msg, $code);
-				}    
-				
-			   
-			}   
-		}
-		else
-		{
-			$msg="Login to Add product to wishlist";
-			$code="error"; 
-			return array($msg, $code);
-		}    
-		 
-	 
-	}
-
-	public function wishlist(Request $request)
-	{
-
-		$userid=session()->get('userid');
-		if(!empty($userid))
-		{
-
-			$items_array=Wishlist::where('userid',$userid)->get();   
-
-		   // echo"<pre>";print_r($items_array);die;            
-			return view('frontend.wishlist',compact('items_array'));
-		}
-		else
-		{
-			session()->flash('error','Please Login to view Wishlist'); 
-			return Redirect::to('/store/login');
-		}    
-
-	}
-
-	public function deletewishlist($id)
-	{
-
-		$userid=session()->get('userid');
-
-		//echo $userid."-".$id;die;
-		Wishlist::where('id',$id)->where('userid',$userid)->delete();
-		session()->flash('success', 'Deleted successfully');
-		return Redirect::back();
-
-	}
 
 	public function addsubscriber(Request $request)
 	{

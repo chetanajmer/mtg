@@ -42,10 +42,26 @@ class AppServiceProvider extends ServiceProvider
     {
          Schema::defaultStringLength(191);
 
-         View::composer('web_frontend.partials.header', function ($view) {
-             $count = session()->has('userid')
-                 ? \App\Models\CartItem::where('user_id', session()->get('userid'))->count()
-                 : \App\Models\CartItem::where('session_id', session()->getId())->count();
+         // Logged-out customers log in first, then land on their orders
+         View::composer(['web_frontend.partials.home-header', 'web_frontend.partials.home-footer', 'web_frontend.home'], function ($view) {
+             $view->with('ordersUrl', session()->has('userid') ? url('orders') : route('corporate.login', ['redirect' => '/orders']));
+         });
+
+         View::composer('web_frontend.partials.home-header', function ($view) {
+             $view->with('supplyCountries', rescue(function () {
+                 return \App\Models\SupplyCountry::where('is_active', true)->ordered()->get();
+             }, collect(), false));
+             $view->with('navCategories', rescue(function () {
+                 return \App\Models\Category::where('is_active', 'online')->orderBy('ranking')->orderBy('id')->get(['catname', 'slug']);
+             }, collect(), false));
+         });
+
+         View::composer(['web_frontend.partials.header', 'web_frontend.partials.home-header'], function ($view) {
+             $count = rescue(function () {
+                 return session()->has('userid')
+                     ? \App\Models\CartItem::where('user_id', session()->get('userid'))->count()
+                     : \App\Models\CartItem::where('session_id', session()->getId())->count();
+             }, 0, false);
 
              $view->with('cartItemCount', $count ?: 0);
          });

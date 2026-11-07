@@ -25,11 +25,12 @@
   <nav>
     <a href="{{ route('corporate.portal') }}"><i class="bi bi-gift"></i>Dashboard</a>
     <a class="active" href="/orders"><i class="bi bi-cart3"></i>Orders @if($waiting->count())<span class="count">{{ $waiting->count() }}</span>@endif</a>
-    <a href="#addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
-    <a href="#branding"><i class="bi bi-image"></i>Branding Assets</a>
+    <a href="/corporate-addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
+    <a href="{{ route('corporate.portal') }}#branding"><i class="bi bi-image"></i>Branding Assets</a>
     <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
     <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
     <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('planner.index') }}"><i class="bi bi-calculator"></i>Budget Planner</a>
     <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
     <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
   </nav>
@@ -67,7 +68,7 @@
               <strong>{{ $done ? 'Order completed' : 'Step ' . $o->current_step . ' of 10 · ' . $steps[$o->current_step]['customer'] }}</strong>
               <span class="op-pill {{ $done ? 'done' : $o->step_state }}">{{ $done ? 'Completed' : $labels[$o->step_state] }}</span>
             </div>
-            <div class="opl-total">AED {{ number_format($o->total, 2) }}</div>
+            <div class="opl-total">{{ $o->totalLabel() }}</div>
             <span class="opl-go">{{ $attention ? 'Respond' : 'View order' }} <i class="bi bi-arrow-right"></i></span>
           </a>
         @endforeach

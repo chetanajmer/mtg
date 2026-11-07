@@ -52,7 +52,7 @@ class AdminPermission
             'admin/orders', 'admin/orders/*', 'abandoned_order', 'abandoned_orderdetails/*', 'send_abandoned_mail',
             'printinvoice/*', 'deleteorder/*', 'orderdetails/*', 'update_orderstatus',
             'order-tracking', 'order-tracking/*', 'orderprocessing', 'orderprocessing/*',
-            'date_report', 'user_report', 'product_report', 'admin/reports', 'admin/reports/*', 'b2b-enquiry', 'exportb2benquiry', 'instock-notifier',
+            'date_report', 'user_report', 'product_report', 'admin/reports', 'admin/reports/*', 'admin/planner-logs','b2b-enquiry', 'exportb2benquiry', 'instock-notifier',
             'store-user', 'exportstoreuser', 'search_monthly', 'search_yearly',
         ],
         'slider_status' => [
@@ -66,6 +66,7 @@ class AdminPermission
             'category-section', 'categorysettingupdate', 'tag-section', 'tagsettingupdate', 'content-section', 'contentupdate',
         ],
         'config_status' => [
+            'filter-settings', 'admin/email-templates', 'admin/email-templates/*', 'supply-countries', 'supply-countries/*', 'home-logos', 'home-logos/*',
             'cms-settings', 'update-cms-settings', 'seo-settings', 'updateseo-settings', 'header-settings', 'updateheader-settings',
             'footerlevel1', 'updatefooterlevel1', 'footer-section*', 'footer-updatesection*', 'homepage-settings', 'homepage-update',
             'addprivacy', 'updateprivacy', 'addreturn', 'updatereturn', 'addshippment', 'updateshippment',

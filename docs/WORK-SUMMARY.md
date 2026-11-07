@@ -66,6 +66,9 @@ This document lists everything that was added, rebuilt or fixed, grouped by area
   - Tier prices of 0 or less are refused, where before they were silently saved as free.
   - The real stored value is shown with a warning.
 - **Negative prices fixed:** two products had every tier stored at AED −100. Tiers of 0 or less are now ignored everywhere, and those two products use their normal price until real tiers are entered.
+- **Tier pricing flow repaired:** new products can be saved with tiers, the last tier can be Unlimited, and tiers with gaps, overlaps or below the minimum order are refused with a clear message. The product page shows only real tiers, savings against the first tier, and a "Save up to" figure. "From AED" prices now match the price at the minimum order.
+- **Budget Planner works on real data:** customers pick occasion, team size, budget and preferences, and get up to 3 bundles of real products at the price the cart will charge. Choosing a bundle adds it to the cart. AI recommendations come next.
+- **Budget Planner page rebuilt to the design, with AI ready:** the page follows the manager's design. AI wording and pictures for bundles are built and turn on once an OpenRouter key and models are added; until then the standard text and pictures show.
 - **Product photos:** one helper finds a product's photo for every page. It handles MidOcean photo links and missing files.
 
 ## 4. Order workflow (the core of the business)

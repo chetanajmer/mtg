@@ -77,7 +77,7 @@
         <h1>{{ $c['hero_title'] }}</h1>
         <p>{{ $c['hero_text'] }}</p>
         <a href="{{ url('/') }}#categories" class="ab-btn ab-btn-dark">Browse products <i class="bi bi-arrow-right"></i></a>
-        <a href="{{ route('cart.index') }}" class="ab-btn ab-btn-light">Request a quote</a>
+        <a href="{{ route('custom-order.create') }}" class="ab-btn ab-btn-light">Request a quote</a>
       </div>
       @if($heroImage)
         <div class="ab-hero-img"><img src="{{ $heroImage }}" alt=""></div>
@@ -165,7 +165,7 @@
         </div>
       </div>
       <div>
-        <a href="{{ route('cart.index') }}" class="ab-btn ab-btn-light">Request a quote</a>
+        <a href="{{ route('custom-order.create') }}" class="ab-btn ab-btn-light">Request a quote</a>
         <a href="{{ url('contactus') }}" class="ab-btn ab-btn-light">Contact us</a>
       </div>
     </div>

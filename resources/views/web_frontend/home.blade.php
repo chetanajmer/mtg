@@ -1,102 +1,131 @@
-@extends('web_frontend.layouts.app')
+@extends('web_frontend.layouts.home')
 
 @section('title', 'More Than Giftz | Corporate Gifts in the UAE')
 @section('meta')
-  <meta name="description" content="Branded corporate gifts for UAE businesses: drinkware, technology, bags, apparel, awards and more, with logo branding and quantity pricing.">
-@endsection
-
-@section('styles')
-<style>
-  .home-hero { background: var(--light); border-bottom: 1px solid var(--border); padding: 56px 0; }
-  .home-hero h1 { font-family: Georgia, "Times New Roman", serif; font-size: clamp(30px, 4vw, 46px); color: var(--black); margin: 0 0 12px; }
-  .home-hero p { color: var(--muted); font-size: 17px; max-width: 620px; margin: 0 0 24px; }
-  .home-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; border-radius: 6px; font-weight: 600; text-decoration: none; }
-  .home-btn-dark { background: var(--black); color: #fff; }
-  .home-btn-dark:hover { color: #fff; opacity: .9; }
-  .home-btn-light { background: #fff; color: var(--black); border: 1px solid var(--border); }
-  .home-section { padding: 48px 0; }
-  .home-section h2 { font-family: Georgia, "Times New Roman", serif; font-size: 28px; color: var(--black); margin: 0 0 24px; }
-  .home-tile { display: block; text-decoration: none; color: var(--text); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; background: #fff; height: 100%; transition: box-shadow .15s; }
-  .home-tile:hover { box-shadow: 0 6px 18px rgba(0,0,0,.08); color: var(--text); }
-  .home-tile-img { aspect-ratio: 1 / 1; background: var(--light); display: flex; align-items: center; justify-content: center; }
-  .home-tile-img img { width: 100%; height: 100%; object-fit: contain; }
-  .home-tile-img .bi { font-size: 40px; color: var(--muted); }
-  .home-tile-body { padding: 12px 14px; }
-  .home-tile-body strong { display: block; font-size: 15px; }
-  .home-tile-body span { color: var(--muted); font-size: 14px; }
-  .home-cta { background: var(--black); color: #fff; border-radius: 10px; padding: 36px; }
-  .home-cta h2 { color: #fff; margin-bottom: 8px; }
-  .home-cta p { color: #c9ccd1; margin: 0 0 20px; }
-</style>
+  <meta name="description" content="Discover, compare and find the perfect corporate gifts. Branded gifts, bulk orders and custom logos for companies across the UAE and GCC.">
 @endsection
 
 @section('content')
-<section class="home-hero">
-  <div class="container">
-    <h1>Corporate gifts your team and clients will keep</h1>
-    <p>Branded gifts for UAE businesses, with your logo, quantity pricing and delivery across the UAE &amp; GCC.</p>
-    <a href="#categories" class="home-btn home-btn-dark">Browse categories <i class="bi bi-arrow-down"></i></a>
-    <a href="{{ route('cart.index') }}" class="home-btn home-btn-light">Request a quote</a>
-  </div>
-</section>
+<main id="homePage">
 
-<section class="home-section" id="categories">
-  <div class="container">
-    <h2>Shop by category</h2>
-    <div class="row g-3">
-      @foreach($categories as $category)
-        <div class="col-6 col-md-4 col-lg-3">
-          <a href="{{ url('category/' . $category->slug) }}" class="home-tile">
-            <div class="home-tile-img">
-              @if($category->image1 && is_file(public_path('upload/category/' . $category->image1)))
-                <img src="{{ asset('upload/category/' . $category->image1) }}" alt="{{ $category->catname }}" loading="lazy">
-              @else
-                <i class="bi bi-gift"></i>
-              @endif
-            </div>
-            <div class="home-tile-body"><strong>{{ $category->catname }}</strong></div>
-          </a>
-        </div>
+  <section class="mh-hero">
+    {{-- Decoration behind the text: the gift box bursts open, the products fly out to their places on the right,
+         rest there, fly back in and the lid closes, in a loop (home.css + home.js). While it is open, confetti,
+         ribbons and stars stream out of it over the page (home.js, .mh-fall). --}}
+    <div class="mh-gift" aria-hidden="true">
+      @foreach(['notebook' => [294, 420], 'bottle' => [133, 420], 'giftbox' => [342, 420]] as $item => $size)
+        <img class="mh-gift-item mh-gift-{{ $item }}" src="{{ asset('web_frontend/assets/images/home/hero-gift/gift-' . $item . '.webp') }}" alt="" width="{{ $size[0] }}" height="{{ $size[1] }}" decoding="async">
+      @endforeach
+      <div class="mh-gift-box">
+        <span class="mh-gift-glow"></span>
+        <span class="mh-gift-shadow"></span>
+        <img class="mh-gift-lid" src="{{ asset('web_frontend/assets/images/home/hero-gift/gift-lid.webp') }}" alt="" width="520" height="199" decoding="async">
+        <img class="mh-gift-base" src="{{ asset('web_frontend/assets/images/home/hero-gift/gift-base.webp') }}" alt="" width="520" height="273" decoding="async">
+        <div class="mh-gift-burst"></div>
+      </div>
+    </div>
+    <div class="mh-hero-center">
+      <span class="mh-eyebrow">CORPORATE GIFTING SOLUTIONS</span>
+      <h1>Where should we <em>begin?</em></h1>
+      <p>Discover, compare and find the perfect corporate gifts with AI</p>
+      <form class="mh-search" action="{{ route('home.search') }}" method="get" role="search">
+        <span class="mh-search-ai">Ai<i class="bi bi-stars"></i></span>
+        <input type="search" id="homeSearch" name="q" placeholder="Ask anything related to Gifts..." aria-label="Ask anything related to gifts" maxlength="100">
+        <button type="button" class="mh-search-tool" id="voiceSearch" aria-label="Search by voice"><i class="bi bi-mic"></i></button>
+        <button type="button" class="mh-search-tool" data-soon="Searching with a picture arrives with our AI search." aria-label="Search with a picture"><i class="bi bi-image"></i></button>
+        <button type="submit" class="mh-search-go" aria-label="Search"><i class="bi bi-search"></i></button>
+      </form>
+    </div>
+    <div class="mh-hints">
+      <button type="button" data-focus-search><i class="bi bi-globe"></i> Search in any Language</button>
+      <button type="button" data-soon="Searching with a picture arrives with our AI search."><i class="bi bi-camera"></i> Search with Product Pics</button>
+      <a href="{{ route('planner.index') }}"><i class="bi bi-cash-coin"></i> Search with your Budget</a>
+      <a href="{{ $ordersUrl }}"><i class="bi bi-box-seam"></i> Track your Order with Invoice no.</a>
+    </div>
+  </section>
+
+  <nav class="mh-shortcuts" aria-label="Shortcuts">
+    <a href="{{ route('corporate.portal') }}"><i class="bi bi-person-gear"></i> Customer Portal</a>
+    <a href="/annual-corporate-membership"><i class="bi bi-person-vcard"></i> Annual Membership Contract</a>
+    <a href="{{ route('planner.index') }}"><i class="bi bi-coin"></i> Budget Planner</a>
+    <button type="button" data-soon="Compare Products is coming soon."><i class="bi bi-sliders"></i> Compare Products</button>
+  </nav>
+
+  <section class="mh-section">
+    <h2 class="mh-title">Search by Category</h2>
+    <div class="mh-categories-grid">
+      @foreach($categoryCards as $card)
+      <article class="mh-cat">
+        <a href="{{ $card['url'] }}" class="mh-cat-top">
+          <img src="{{ asset('web_frontend/assets/images/home/' . $card['image']) }}" alt="" loading="lazy">
+          <h3 class="mh-cat-title">{{ $card['title'] }}</h3>
+        </a>
+        <ul>
+          @foreach($card['links'] as $link)
+            <li><a href="{{ $link['url'] }}">{{ $link['label'] }}</a></li>
+          @endforeach
+        </ul>
+        <a href="{{ $card['url'] }}" class="mh-cat-all">View All <i class="bi bi-chevron-right"></i></a>
+      </article>
       @endforeach
     </div>
-  </div>
-</section>
+  </section>
 
-@if($products->isNotEmpty())
-<section class="home-section" style="padding-top: 0;">
-  <div class="container">
-    <h2>Latest products</h2>
-    <div class="row g-3">
-      @foreach($products as $product)
-        @php $image = $product->imageUrl(); @endphp
-        <div class="col-6 col-md-4 col-lg-3">
-          <a href="{{ route('web.product', $product->slug) }}" class="home-tile">
-            <div class="home-tile-img">
-              @if($image)
-                <img src="{{ $image }}" alt="{{ $product->name }}" loading="lazy">
-              @else
-                <i class="bi bi-image"></i>
-              @endif
-            </div>
-            <div class="home-tile-body">
-              <strong>{{ $product->name }}</strong>
-              <span>From AED {{ number_format($product->displayPrice(), 2) }} &middot; MOQ {{ $product->minOrderQuantity() }}</span>
-            </div>
-          </a>
+  @if($newArrivals->count())
+  <section class="mh-section mh-arrivals">
+    <div class="mh-arrivals-head">
+      <h2>New Arrivals</h2>
+      <span class="mh-pill">Just In</span>
+      <a href="{{ route('home.search', ['new' => 1]) }}" class="mh-view-all">View All New Arrivals <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="mh-carousel">
+      <button type="button" class="mh-arrow mh-arrow-prev" id="arrivalsPrev" aria-label="Previous products"><i class="bi bi-chevron-left"></i></button>
+      <div class="mh-track" id="arrivalsTrack" aria-label="New arrivals">
+        @foreach($newArrivals as $product)
+          @include('web_frontend.partials.home-product-card', ['product' => $product])
+        @endforeach
+      </div>
+      <button type="button" class="mh-arrow mh-arrow-next" id="arrivalsNext" aria-label="Next products"><i class="bi bi-chevron-right"></i></button>
+    </div>
+    <div class="mh-dots" id="arrivalsDots"></div>
+  </section>
+  @endif
+
+  @if($homeLogos->count())
+  <section class="mh-logos {{ $homeLogos->count() === 1 ? 'mh-logos-single' : '' }}">
+    @foreach(\App\Models\HomeLogo::TYPES as $type => $title)
+      @if(isset($homeLogos[$type]))
+      <div>
+        <h2 class="mh-title">{{ $title }}</h2>
+        <div class="mh-logo-row">
+          @foreach($homeLogos[$type] as $logo)
+            <img src="{{ $logo->logoUrl() }}" alt="{{ $logo->name }}" title="{{ $logo->name }}" loading="lazy">
+          @endforeach
         </div>
-      @endforeach
-    </div>
-  </div>
-</section>
-@endif
+      </div>
+      @endif
+    @endforeach
+  </section>
+  @endif
 
-<section class="home-section" style="padding-top: 0;">
-  <div class="container">
-    <div class="home-cta">
-      <h2>Need gifts for a team or an event?</h2>
-      <p>Add products to your quote cart and send it to us. We'll reply with a confirmed price, branding options and delivery date.</p>
-      <a href="{{ route('cart.index') }}" class="home-btn home-btn-light">Open quote cart <i class="bi bi-arrow-right"></i></a>
+  <section class="mh-why">
+    <h2 class="mh-title">Why Choose Us</h2>
+    <p class="mh-why-sub">More Than Giftz — A Trusted Partner for Your Corporate Gifting Needs</p>
+    <div class="mh-why-grid">
+      <div class="mh-why-col">
+        @foreach(config('home_page.why_left') as $item)
+          <div class="mh-why-item"><span><i class="bi {{ $item['icon'] }}"></i></span><div><strong>{{ $item['title'] }}</strong><p>{{ $item['text'] }}</p></div></div>
+        @endforeach
+      </div>
+      <img class="mh-why-gift" src="{{ asset('web_frontend/assets/images/home/why-gift.jpg') }}" alt="A black gift box tied with a gold ribbon" loading="lazy">
+      <div class="mh-why-col">
+        @foreach(config('home_page.why_right') as $item)
+          <div class="mh-why-item"><span><i class="bi {{ $item['icon'] }}"></i></span><div><strong>{{ $item['title'] }}</strong><p>{{ $item['text'] }}</p></div></div>
+        @endforeach
+      </div>
     </div>
-  </div>
-</section>
+  </section>
+
+  <div class="mh-toast" id="homeToast" role="status" hidden></div>
+</main>
 @endsection

@@ -132,7 +132,7 @@ function addToCart(productId, productName, price, image, quantity = 1) {
   .then(data => {
     if (data.success) {
       const cartCount = document.getElementById('cartCount');
-      if (cartCount) cartCount.textContent = data.count;
+      if (cartCount) cartCount.textContent = data.items;
       showNotification('Added to Cart!');
     } else {
       showNotification(data.message || 'Could not add to cart');

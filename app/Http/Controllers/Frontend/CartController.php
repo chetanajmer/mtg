@@ -8,6 +8,8 @@ use App\Models\CartItem;
 use App\Models\Cartorder;
 use App\Models\Enquiry;
 use App\Models\Product;
+use App\Services\GiftPlanner;
+use Illuminate\Validation\Rule;
 use DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -85,6 +87,7 @@ class CartController extends Controller
             'success' => true,
             'message' => 'Added to Cart!',
             'count' => $count,
+            'items' => $this->cartQuery()->count(),
         ]);
     }
 
@@ -93,6 +96,42 @@ class CartController extends Controller
      * the product's minimum order quantity, at the tier price for the new total.
      * Also used to send a saved collection to the cart.
      */
+    /**
+     * Budget Planner: a chosen bundle goes into the cart for the team size.
+     * Selecting it again doesn't double what is already there.
+     */
+    public function addBundle(Request $request, GiftPlanner $planner)
+    {
+        if (!session()->has('userid')) {
+            return response()->json(['message' => 'Please log in.'], 401);
+        }
+        $data = $request->validate([
+            'team' => ['required', Rule::in(array_keys(config('gift_planner.team_sizes')))],
+            'product_ids' => 'required|array|min:1|max:10',
+            'product_ids.*' => 'integer',
+        ]);
+        $team = config('gift_planner.team_sizes')[$data['team']];
+
+        $products = Product::whereIn('id', $data['product_ids'])->where('is_active', 'online')->get();
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'These products are no longer available.'], 422);
+        }
+
+        foreach ($products as $product) {
+            $quantity = $planner->quantityFor($product, $team);
+            $existing = $this->cartQuery()->where('product_id', $product->id)->first();
+            if (!$existing) {
+                $this->addProductToCart($product, $quantity);
+            } elseif ($existing->quantity < $quantity) {
+                $existing->quantity = $quantity;
+                $existing->price = $product->priceForQuantity($quantity);
+                $existing->save();
+            }
+        }
+
+        return response()->json(['redirect' => route('cart.index')]);
+    }
+
     public function addProductToCart(Product $product, $quantity)
     {
         $quantity = max((int) ($quantity ?: 1), $product->minOrderQuantity());
@@ -251,7 +290,7 @@ class CartController extends Controller
      * Tell staff and the customer about a new quote request. A mail problem is
      * logged but never stops the customer's request.
      */
-    private function sendQuoteEmails(Enquiry $enquiry, $items)
+    public function sendQuoteEmails(Enquiry $enquiry, $items)
     {
         $staff = staff_email();
         $data = ['enquiry' => $enquiry, 'items' => $items];

@@ -29,7 +29,7 @@ class Registrationemail extends Mailable
      */
     public function build()
     {
-        return $this->subject('Registration Successful ')
-                    ->view('mail.registrationmail');
+        return $this->subject('Welcome to ' . config('company.name'))
+                    ->view('mail.registrationmail', ['name' => $this->details['name'] ?? null]);
     }
 }

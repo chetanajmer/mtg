@@ -310,16 +310,16 @@
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 60px 20px;
+  padding: 28px 20px;
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.empty-state i {
-  font-size: 64px;
+.empty-state > i {
+  font-size: 44px;
   color: #d1d5db;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   display: inline-block;
 }
 
@@ -331,7 +331,7 @@
 
 .empty-state p {
   color: #6b7280;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 .empty-state p a {

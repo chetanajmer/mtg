@@ -28,10 +28,11 @@
     <a href="{{ route('corporate.portal') }}"><i class="bi bi-gift"></i>Dashboard</a>
     <a href="/orders"><i class="bi bi-cart3"></i>Orders</a>
     <a href="/corporate-addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
-    <a href="#branding"><i class="bi bi-image"></i>Branding Assets</a>
+    <a href="{{ route('corporate.portal') }}#branding"><i class="bi bi-image"></i>Branding Assets</a>
     <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
     <a class="active" href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
     <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('planner.index') }}"><i class="bi bi-calculator"></i>Budget Planner</a>
     <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
     <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
   </nav>

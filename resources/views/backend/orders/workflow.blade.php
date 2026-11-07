@@ -118,7 +118,7 @@ a.ow-btn { display: inline-block; text-decoration: none; }
             </div>
         </div>
         <div class="ow-figs">
-            <div class="ow-fig"><small>Order value</small><b>AED {{ number_format($order->total, 2) }}</b></div>
+            <div class="ow-fig"><small>Order value</small><b>{{ $order->totalLabel() }}</b></div>
             <div class="ow-fig"><small>Received</small><b>{{ optional($order->created_at)->format('d M Y') }}</b></div>
             <div class="ow-fig"><small>Now at</small><b>Step {{ $order->current_step }}</b> <span class="ow-pill {{ $order->step_state }}">{{ \App\Models\OrderStepState::label($order->step_state) }}</span></div>
             <div class="ow-fig"><small>In this step</small><b>{{ $daysInStep }} {{ $daysInStep == 1 ? 'day' : 'days' }}</b></div>
@@ -217,6 +217,7 @@ a.ow-btn { display: inline-block; text-decoration: none; }
                     @if($type === 'review')
                         <form class="ow-form" method="POST" action="{{ $form('confirm') }}">@csrf
                             <h3>Confirm the order</h3>
+                            <p style="margin:0 0 10px;color:#7a5200">@if($order->isCustom())Custom request: agree the price, then enter the total including VAT.@else Enter the agreed total including VAT.@endif It becomes the order value and sets the line prices and payment amounts.</p>
                             <div class="ow-fields">
                                 <div class="ow-field"><label for="confirmed_total">Confirmed total (AED)</label><input id="confirmed_total" name="confirmed_total" type="number" step="0.01" min="0" required value="{{ $old('confirmed_total', $order->total) }}"></div>
                                 <div class="ow-field full"><label for="msg_confirm">Message to the customer (optional)</label><textarea id="msg_confirm" name="message">{{ $formErr === 'confirm' ? old('message') : '' }}</textarea></div>

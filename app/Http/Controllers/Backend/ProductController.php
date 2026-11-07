@@ -37,6 +37,7 @@ use App\Models\Counter;
 use App\Models\Admin;
 
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 
 use ImageOptimizer;
 
@@ -782,6 +783,8 @@ class ProductController extends Controller
           'min_order_quantity' => $request->min_order_quantity,
 
           'moq_unit' => $request->moq_unit,
+
+          'estimated_delivery_time' => trim((string) $request->estimated_delivery_time) ?: null,
 
           'branding_options' => !empty($request->branding_options) ? (is_array($request->branding_options) ? implode(',', $request->branding_options) : $request->branding_options) : null,
 
@@ -2869,11 +2872,115 @@ class ProductController extends Controller
     public function tierPricing()
     {
         $tierPricing = DB::table('tier_pricing')->orderBy('min_qty')->get();
-        return view('backend.product.tier_pricing', compact('tierPricing'));
+        $tierListProblem = $this->tierListProblem($tierPricing);
+        $tierProductCount = DB::table('products')->where('tier_pricing_enabled','yes')->where('price','>',0)->count();
+        return view('backend.product.tier_pricing', compact('tierPricing','tierListProblem','tierProductCount'));
+    }
+
+    private function tierRowProblem($request)
+    {
+        if((int)$request->min_qty<1)
+        {
+            return 'Min Qty must be 1 or more.';
+        }
+        if($request->max_qty && (int)$request->max_qty<(int)$request->min_qty)
+        {
+            return 'Max Qty can\'t be below Min Qty.';
+        }
+        if((float)$request->percentage<=0)
+        {
+            return 'The percentage must be above 0.';
+        }
+        return null;
+    }
+
+    /**
+     * Why the Tier Pricing list can't be applied to products, else null.
+     */
+    private function tierListProblem($rows)
+    {
+        $rows=$rows->values();
+        if($rows->isEmpty())
+        {
+            return 'there are no tiers.';
+        }
+        foreach($rows as $i=>$row)
+        {
+            if(!isset($rows[$i+1]))
+            {
+                continue;
+            }
+            $next=$rows[$i+1];
+            if(!$row->max_qty || $next->min_qty<=$row->max_qty)
+            {
+                return 'the tiers starting at '.$row->min_qty.' and '.$next->min_qty.' pcs overlap.';
+            }
+            if($next->min_qty>$row->max_qty+1)
+            {
+                return 'no tier covers '.($row->max_qty+1).' to '.($next->min_qty-1).' pcs.';
+            }
+            if($next->percentage>$row->percentage)
+            {
+                return 'the percentage goes up at '.$next->min_qty.' pcs. A larger quantity must not cost more per piece.';
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Rebuilds the tiers of every product with tier pricing on from the Tier
+     * Pricing list and the product's Cost Price. The old rows are saved first.
+     */
+    public function applyTierPricing()
+    {
+        $rows=DB::table('tier_pricing')->orderBy('min_qty')->get();
+        if($problem=$this->tierListProblem($rows))
+        {
+            return Redirect::back()->with('error','Nothing was changed: '.$problem);
+        }
+
+        $products=DB::table('products')->where('tier_pricing_enabled','yes')->where('price','>',0)->get(['id','price','min_order_quantity']);
+        $file='tier-price-backups/'.date('Y-m-d-His').'.json';
+        Storage::disk('local')->put($file,DB::table('product_tier_prices')->whereIn('product_id',$products->pluck('id'))->get()->toJson());
+
+        DB::transaction(function() use ($rows,$products) {
+            $last=$rows->last()->id;
+            foreach($products as $product)
+            {
+                DB::table('product_tier_prices')->where('product_id',$product->id)->delete();
+                $moq=max(1,(int)$product->min_order_quantity);
+                $sort=0;
+                foreach($rows as $row)
+                {
+                    $max=$row->id==$last?null:$row->max_qty;
+                    $price=round($product->price*$row->percentage/100,2);
+                    if(($max && $max<$moq) || $price<=0)
+                    {
+                        continue;
+                    }
+                    DB::table('product_tier_prices')->insert(array(
+                        'product_id'=>$product->id,
+                        'min_qty'=>$row->min_qty,
+                        'max_qty'=>$max,
+                        'price'=>$price,
+                        'sort_order'=>$sort++,
+                        'created_at'=>date('Y-m-d H:i:s'),
+                        'updated_at'=>date('Y-m-d H:i:s')
+                    ));
+                }
+            }
+        });
+
+        return Redirect::back()->with('success','Tier prices updated on '.$products->count().' products. The previous prices are saved in storage/app/'.$file.'.');
     }
 
     public function addTierPricing(Request $request)
     {
+        if($problem=$this->tierRowProblem($request))
+        {
+            return response($problem,422);
+        }
+
         DB::table('tier_pricing')->insert([
             'min_qty' => $request->min_qty,
             'max_qty' => $request->max_qty ? $request->max_qty : null,
@@ -2894,6 +3001,11 @@ class ProductController extends Controller
 
     public function updateTierPricing(Request $request)
     {
+        if($problem=$this->tierRowProblem($request))
+        {
+            return response($problem,422);
+        }
+
         $id = (int)$request->id;
         DB::table('tier_pricing')
         ->where('id', $id)
@@ -2947,19 +3059,77 @@ class ProductController extends Controller
     }
 
     /**
-     * Message when tier pricing is on and a tier has no price above 0, else null.
+     * Message when tier pricing is on and the tiers can't price every quantity
+     * correctly, else null. resources/views/backend/product/partials/tier-check
+     * runs the same rules in the browser before the form is sent.
      */
     private function invalidTierPrices($request)
     {
-        if(!$request->tier_pricing_enabled || empty($request->tier_min))
+        if(!$request->tier_pricing_enabled)
         {
             return null;
         }
-        foreach($request->tier_min as $i=>$min)
+
+        $tiers=array();
+        foreach((array)$request->tier_min as $i=>$min)
         {
-            if((int)$min>0 && (float)($request->tier_price[$i] ?? 0)<=0)
+            $min=(int)$min;
+            $max=(int)($request->tier_max[$i] ?? 0);
+            $price=(float)($request->tier_price[$i] ?? 0);
+
+            if($min<=0 && $max<=0 && $price<=0)
             {
-                return 'Tier pricing: every quantity tier needs a price above 0 (tier starting at '.(int)$min.' pcs). Nothing was saved.';
+                continue; // a row left empty
+            }
+            if($min<=0)
+            {
+                return 'Tier pricing: every quantity tier needs a Min Qty. Nothing was saved.';
+            }
+            if($price<=0)
+            {
+                return 'Tier pricing: every quantity tier needs a price above 0 (tier starting at '.$min.' pcs). Nothing was saved.';
+            }
+            if($max>0 && $max<$min)
+            {
+                return 'Tier pricing: the tier starting at '.$min.' pcs has a Max Qty below its Min Qty. Nothing was saved.';
+            }
+            $tiers[]=array('min'=>$min,'max'=>$max,'price'=>$price);
+        }
+
+        if(empty($tiers))
+        {
+            return 'Tier pricing is on but no tiers were entered. Add a tier or turn tier pricing off. Nothing was saved.';
+        }
+
+        usort($tiers,function($a,$b){ return $a['min']-$b['min']; });
+
+        $moq=max(1,(int)$request->min_order_quantity);
+        foreach($tiers as $i=>$tier)
+        {
+            if($tier['max']>0 && $tier['max']<$moq)
+            {
+                return 'Tier pricing: the tier ending at '.$tier['max'].' pcs is below the minimum order quantity ('.$moq.') and could never be ordered. Nothing was saved.';
+            }
+            if(!isset($tiers[$i+1]))
+            {
+                if($tier['max']>0)
+                {
+                    return 'Tier pricing: leave Max Qty blank on the last tier, so orders above '.$tier['max'].' pcs keep the tier price. Nothing was saved.';
+                }
+                continue;
+            }
+            $next=$tiers[$i+1]['min'];
+            if($tier['max']<=0 || $next<=$tier['max'])
+            {
+                return 'Tier pricing: the tiers starting at '.$tier['min'].' and '.$next.' pcs overlap. Nothing was saved.';
+            }
+            if($next>$tier['max']+1)
+            {
+                return 'Tier pricing: no tier covers '.($tier['max']+1).' to '.($next-1).' pcs. Nothing was saved.';
+            }
+            if($tiers[$i+1]['price']>$tier['price'])
+            {
+                return 'Tier pricing: the price goes up at '.$next.' pcs. A larger quantity must not cost more per piece. Nothing was saved.';
             }
         }
         return null;
@@ -3170,6 +3340,8 @@ class ProductController extends Controller
        $product->min_order_quantity=$request->min_order_quantity;
 
        $product->moq_unit=$request->moq_unit;
+
+       $product->estimated_delivery_time=trim((string) $request->estimated_delivery_time) ?: null;
 
        $occasion_names=$this->resolveTagNames($request->occasion_tags,'occasions');
 

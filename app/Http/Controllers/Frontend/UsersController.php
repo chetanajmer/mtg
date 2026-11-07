@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Storeuser;
 use App\Models\Cartorder;
-use App\Models\General_setting;
 use App\Models\Collection;
 use App\Models\CollectionItem;
 use App\Models\CartItem;
@@ -101,20 +100,7 @@ class UsersController extends Controller
          	$user->newsletteropted=$request->newsletter;
          	$user->save();
 
-         	$general_settings=General_setting::where('id','1')->first();
-
-         	$admin_email=$general_settings->mailfromemail;
-         	$mail_from=$general_settings->mailname;
-
-
-         	$details = [
-          	'email'=>$email,
-          	'password'=>null,
-          	'$admin_email'=>$admin_email,
-          	'mail_from'=>$mail_from,
-        	 ];
-
-    		Mail::to($email)->send(new \App\Mail\Registrationemail($details));
+    		$this->sendWelcome($email, $request->firstname);
 
         }
 
@@ -333,6 +319,7 @@ class UsersController extends Controller
             $user->mobile = $request->mobile;
             $user->location = $request->location;
             $user->save();
+            $this->sendWelcome($user->email, $user->fname);
 
             // Auto-login after registration
             session()->put('userid', $user->id);
@@ -373,6 +360,7 @@ class UsersController extends Controller
         $user->location = $request->address;
         $user->password = Hash::make($request->password);
         $user->save();
+        $this->sendWelcome($user->email, $user->fname);
 
         session()->put('userid', $user->id);
         session()->put('username', $user->email);
@@ -383,6 +371,16 @@ class UsersController extends Controller
         $request->session()->flash('success', 'Registered successfully!');
         $request->session()->flash('account_created', ['name' => $user->fname]); // welcome pop-up
         return redirect($this->safeRedirect($request->input('redirect'), route('cart.index')));
+    }
+
+    /** Welcome email after signing up; a mail problem never stops the sign-up. */
+    private function sendWelcome($email, $name)
+    {
+        try {
+            Mail::to($email)->send(new \App\Mail\Registrationemail(['name' => trim((string) $name) ?: null]));
+        } catch (\Throwable $e) {
+            \Log::error('Welcome email failed for ' . $email . ': ' . $e->getMessage());
+        }
     }
 
     public function accountSettings(Request $request)
@@ -804,13 +802,38 @@ class UsersController extends Controller
                     'name' => $product->name,
                     'modelno' => $product->modelno,
                     'image' => $product->imageUrl(),
-                    'price' => round($product->displayPrice(), 2),
+                    'price' => round($product->priceForQuantity($product->minOrderQuantity()), 2),
                     'moq' => $product->minOrderQuantity(),
                     'url' => route('web.product', $product->slug),
                     'inCollection' => (int) ($inCollection[$product->id] ?? 0),
                 ];
             })->values(),
         ]);
+    }
+
+    /**
+     * The customer's collections for the Save to Collection pop-up, saying which already hold this product.
+     */
+    public function collectionsForProduct(Request $request)
+    {
+        if (!session()->has('userid')) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        $request->validate(['product_id' => 'required|integer']);
+
+        $collections = Collection::where('user_id', session()->get('userid'))->withCount('items')->orderByDesc('updated_at')->get();
+        $saved = CollectionItem::whereIn('collection_id', $collections->pluck('id'))->where('product_id', $request->product_id)->pluck('collection_id')->all();
+
+        return response()->json(['success' => true, 'collections' => $collections->map(function ($collection) use ($saved) {
+            return [
+                'id' => $collection->id,
+                'name' => $collection->name,
+                'count' => (int) $collection->items_count,
+                'saved' => in_array($collection->id, $saved),
+                'url' => route('collections.view', $collection->id),
+            ];
+        })->values()]);
     }
 
     public function deleteCollection($id)

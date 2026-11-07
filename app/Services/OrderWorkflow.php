@@ -264,7 +264,7 @@ class OrderWorkflow
     {
         switch ($type . '.' . $action) {
             case 'review.confirm':
-                return ['confirmed_total' => 'required|numeric|min:0', 'message' => 'nullable|string|max:5000'];
+                return ['confirmed_total' => 'required|numeric|min:0.01', 'message' => 'nullable|string|max:5000'];
             case 'approval.send':
                 return ['files' => 'required|array|min:1', 'files.*' => self::FILES, 'message' => 'nullable|string|max:5000'];
             case 'approval.decision':
@@ -301,6 +301,12 @@ class OrderWorkflow
         $date = function ($d) { return \Carbon\Carbon::parse($d)->format('d M Y'); };
         switch ($type . '.' . $action) {
             case 'review.confirm':
+                // Money already taken was based on the current total, so it can't move now
+                if (abs((float) $in['confirmed_total'] - (float) $order->total) >= 0.005
+                    && ($order->invoices()->exists() || !empty((array) optional($order->state(3))->data) || !empty((array) optional($order->state(7))->data))) {
+                    throw ValidationException::withMessages(['confirmed_total' => 'A payment or invoice is already recorded on this order, so its total can\'t be changed here. Confirm it at AED ' . number_format($order->total, 2) . '.']);
+                }
+                $order->applyConfirmedTotal($in['confirmed_total']);
                 return [$to, trim('Order confirmed for AED ' . number_format($in['confirmed_total'], 2) . '. ' . $msg), ['confirmed_total' => (float) $in['confirmed_total']]];
             case 'approval.send':
                 $round = (int) ($current['round'] ?? 0) + 1;

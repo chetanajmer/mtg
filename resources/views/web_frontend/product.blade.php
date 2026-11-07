@@ -299,6 +299,7 @@
             <div class="product-buttons">
               <button type="button" class="btn btn-dark quote-button" id="addToQuoteBtn"><i class="bi bi-cart3"></i> Add to Quote</button>
               <button class="btn sample-button"><i class="bi bi-gift"></i> Request a Sample</button>
+              <button type="button" class="btn sample-button mh-save-product-btn" data-save-collection="{{ $product->id }}" data-quantity="{{ $moq }}" data-name="{{ $product->name }}"><i class="bi bi-bookmark"></i> Save to Collection</button>
             </div>
           </div>
         </div>
@@ -306,14 +307,19 @@
         <!-- TIER PRICING -->
         <div class="col-xl-4">
           <aside class="pricing-card">
-            @if($product->tier_pricing_enabled === 'yes')
+            @if(count($tier_prices) > 0)
+            @php
+              // Savings are measured against the first tier; quantities below it pay the normal price
+              $firstTier = $tier_prices->first();
+              $saveUpTo = round((($firstTier->price - $tier_prices->min('price')) / $firstTier->price) * 100);
+            @endphp
             <div class="pricing-header">
               <div>
                 <h2><i class="bi bi-coin"></i> Tier Pricing <span>(Per Piece)</span></h2>
                 <p>Transparent pricing. No hidden charges.</p>
               </div>
-              @if($product->sprice && $product->sprice < $product->price)
-              <span class="save-pill">Save {{ round((($product->price - $product->sprice) / $product->price) * 100) }}%</span>
+              @if($saveUpTo > 0)
+              <span class="save-pill">Save up to {{ $saveUpTo }}%</span>
               @endif
             </div>
 
@@ -327,24 +333,19 @@
                   </tr>
                 </thead>
                 <tbody>
-                  @if(isset($tier_prices) && count($tier_prices) > 0)
-                    @foreach($tier_prices as $tier)
-                      @php
-                        $maxQty = !empty($tier->max_qty) ? $tier->max_qty : 'Unlimited';
-                        $savings = (!empty($product->price) && !empty($tier->price) && $tier->price < $product->price) ? round((($product->price - $tier->price) / $product->price) * 100) : '-';
-                      @endphp
-                      <tr>
-                        <td>{{ $tier->min_qty }} - {{ $maxQty }}</td>
-                        <td>AED {{ number_format($tier->price, 2) }}</td>
-                        <td>{{ $savings != '-' ? $savings . '%' : '–' }}</td>
-                      </tr>
-                    @endforeach
-                  @else
-                    <tr><td>1 pcs</td><td>AED {{ $product->price ?? 0 }}</td><td>–</td></tr>
-                    @if($product->sprice && $product->sprice < $product->price)
-                    <tr><td>Bulk Order</td><td>AED {{ $product->sprice }}</td><td>{{ round((($product->price - $product->sprice) / $product->price) * 100) }}%</td></tr>
-                    @endif
+                  @if($moq < $firstTier->min_qty)
+                    <tr><td>{{ $moq }} - {{ $firstTier->min_qty - 1 }}</td><td>AED {{ number_format($product->displayPrice(), 2) }}</td><td>–</td></tr>
                   @endif
+                  @foreach($tier_prices as $tier)
+                    @php
+                      $savings = round((($firstTier->price - $tier->price) / $firstTier->price) * 100);
+                    @endphp
+                    <tr>
+                      <td>{{ max($tier->min_qty, $moq) }} - {{ $tier->max_qty ?: 'Unlimited' }}</td>
+                      <td>AED {{ number_format($tier->price, 2) }}</td>
+                      <td>{{ $savings > 0 ? $savings . '%' : '–' }}</td>
+                    </tr>
+                  @endforeach
                 </tbody>
               </table>
             </div>
@@ -356,7 +357,7 @@
                 <strong>Need a custom quantity?</strong>
                 <p>Get a personalized quote for larger volumes.</p>
               </div>
-              <button type="button">Request a Quote <i class="bi bi-arrow-right"></i></button>
+              <a href="{{ route('custom-order.create', ['product' => $product->name]) }}">Request a Quote <i class="bi bi-arrow-right"></i></a>
             </div>
 
             <div class="benefit-grid">
@@ -491,6 +492,7 @@
         </div>
       </div>
     </section>
+@include('web_frontend.partials.save-to-collection')
 @endsection
 
 @section('scripts')
@@ -677,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function (response) { return response.json(); })
             .then(function (data) {
                 const cartCount = document.getElementById('cartCount');
-                if (data.success && cartCount) cartCount.textContent = data.count;
+                if (data.success && cartCount) cartCount.textContent = data.items;
                 showQuoteMessage(data.success ? 'Added to Quote!' : (data.message || 'Could not add to quote'), data.success);
             })
             .catch(function () { showQuoteMessage('Could not add to quote. Please try again.', false); })

@@ -85,7 +85,7 @@
       </div>
     </div>
     <div class="op-figs">
-      <div><small>Order value</small><b>AED {{ number_format($order->total, 2) }}</b></div>
+      <div><small>Order value</small><b>{{ $order->totalLabel() }}</b></div>
       <div><small>Items</small><b>{{ $qty }} pcs</b></div>
       <div><small>Progress</small><b>{{ $doneCount }}/10</b></div>
     </div>

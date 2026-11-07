@@ -37,6 +37,7 @@
     <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
     <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
     <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('planner.index') }}"><i class="bi bi-calculator"></i>Budget Planner</a>
     <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
     <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
   </nav>
@@ -79,7 +80,7 @@
             <div class="order-info">
               <strong>#{{ $order->orderid }} · {{ optional($order->created_at)->format('d M Y') }}</strong>
               <small>{{ optional($first)->name ?: 'Order' }}@if($more > 0) + {{ $more }} more @endif</small>
-              <small>{{ number_format($order->items->sum('quantity')) }} pcs · AED {{ number_format($order->total, 2) }}</small>
+              <small>{{ number_format($order->items->sum('quantity')) }} pcs · {{ $order->totalLabel() }}</small>
               <span class="recent-status {{ $state }}">{{ $finished ? 'Completed' : config('order_steps.' . $order->current_step . '.customer') . ' · ' . \App\Services\OrderWorkflow::CUSTOMER_LABELS[$state] }}</span>
             </div>
             <a class="outline track" href="{{ route('customer.orders.show', $order->orderid) }}{{ $state === 'waiting_customer' ? '#respond' : '' }}">{{ $state === 'waiting_customer' ? 'Respond' : 'Track' }} <i class="bi bi-arrow-right"></i></a>
@@ -92,7 +93,7 @@
       @endif
     </article>
     <div class="right-stack">
-      <article class="quote-card"><h3>Need a Custom Solution?</h3><p>Talk to your dedicated account manager for bulk pricing, custom branding and special requirements.</p><a class="dark" href="{{ route('cart.index') }}">Request a Quote{{ $cartCount ? ' (' . $cartCount . ' item' . ($cartCount == 1 ? '' : 's') . ')' : '' }} <i class="bi bi-arrow-right"></i></a><div class="quote-product">Your<br>Logo</div></article>
+      <article class="quote-card"><h3>Need a Custom Solution?</h3><p>Talk to your dedicated account manager for bulk pricing, custom branding and special requirements.</p><a class="dark" href="{{ route('custom-order.create') }}">Request a Quote <i class="bi bi-arrow-right"></i></a><div class="quote-product">Your<br>Logo</div></article>
       <article class="panel report" id="reports"><div class="panel-head"><div><i class="bi bi-file-earmark-text"></i><span><strong>Download Reports</strong><small>This year as CSV, or open your reports.</small></span></div><a class="outline" href="{{ route('corporate.reports') }}">Open <i class="bi bi-arrow-right"></i></a></div><div class="report-actions"><select aria-label="Report to download" onchange="document.getElementById('reportDownload').href = this.value"><option value="{{ route('corporate.reports.download', 'orders') }}">Order History Report</option><option value="{{ route('corporate.reports.download', 'spending') }}">Spending Summary</option><option value="{{ route('corporate.reports.download', 'approvals') }}">Approval Report</option></select><a class="dark" id="reportDownload" href="{{ route('corporate.reports.download', 'orders') }}" style="justify-content: center;" aria-label="Download report" title="Download"><i class="bi bi-download"></i></a></div></article>
     </div>
   </section>
