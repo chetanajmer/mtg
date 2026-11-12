@@ -71,7 +71,19 @@ class HomepageController extends Controller
 
 	public function compareProducts()
 	{
-		return view('web_frontend.compare-products');
+		// Get previously selected products from session
+		$selectedProductIds = session()->get('compare_products', []);
+
+		// Load selected products if any
+		$selectedProducts = [];
+		if (!empty($selectedProductIds)) {
+			$selectedProducts = Product::whereIn('id', $selectedProductIds)
+				->where('is_active', 'online')
+				->get()
+				->keyBy('id');
+		}
+
+		return view('web_frontend.compare-products', compact('selectedProducts'));
 	}
 
 	 public function myaccount()

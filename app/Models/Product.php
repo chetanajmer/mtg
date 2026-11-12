@@ -51,11 +51,18 @@ class Product extends Model
      */
     public function imageUrl()
     {
-        $candidates = array_filter([$this->thumbnail, $this->image1, explode(',', (string) $this->bulk_image)[0] ?? null]);
+        $candidates = array_filter(array_map('trim', array_merge(
+            [(string) $this->thumbnail, (string) $this->image1],
+            explode(',', (string) $this->bulk_image)
+        )));
 
         foreach ($candidates as $file) {
             if (preg_match('#^https?://#i', $file)) {
                 return $file;
+            }
+            // Path already relative to public/ (e.g. "web_frontend/assets/images/x.jpg")
+            if (strpos($file, '/') !== false &&is_file(public_path(ltrim($file, '/')))) {
+                return asset(ltrim($file, '/'));
             }
             foreach (['upload/product/thumbnail/', 'upload/product/'] as $folder) {
                 if (is_file(public_path($folder . $file))) {

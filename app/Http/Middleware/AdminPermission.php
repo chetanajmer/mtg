@@ -72,6 +72,7 @@ class AdminPermission
             '*shipping*', 'add-coupon', 'add', 'list-coupon', 'edit-coupon/*', 'updatecoupon', 'deletecoupon/*',
             '*flipbook*', '*portfolio*', '*division*', 'visited_page', 'mostvisitedpage', 'usersbydate', 'reviews',
             'storeaboutus', 'updateaboutus', 'storecontactus', 'updatecontactus',
+            'admin/annual-membership', 'admin/annual-membership/*',
         ],
     ];
 

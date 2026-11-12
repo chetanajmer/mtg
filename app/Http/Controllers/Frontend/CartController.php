@@ -14,6 +14,22 @@ use Illuminate\Support\Facades\Mail;
 
 class CartController extends Controller
 {
+    /**
+     * Number of lines in the current cart (the number the header cart badge shows).
+     */
+    public function lineCount()
+    {
+        return $this->cartQuery()->count();
+    }
+
+    /**
+     * Whether the current cart already has a line for this product.
+     */
+    public function hasProduct($productId)
+    {
+        return $this->cartQuery()->where('product_id', $productId)->exists();
+    }
+
     private function cartQuery()
     {
         if (session()->has('userid')) {
