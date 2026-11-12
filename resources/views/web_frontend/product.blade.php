@@ -291,18 +291,8 @@
                 </div>
               </div>
               <div class="pricing-wrapper">
-                @php
-                  // Default to cost price
-                  $unitPrice = $product->cost_price ?? 0;
-
-                  // If tier pricing is enabled and has records, use the highest quantity range tier's price
-                  if($product->tier_pricing_enabled === 'yes' && isset($tier_prices) && count($tier_prices) > 0) {
-                    $highestTier = $tier_prices->sortByDesc('min_qty')->first();
-                    $unitPrice = $highestTier->price;
-                  }
-                @endphp
-                <div class="pricing-text">Unit Price: <span class="price-highlight" id="totalPrice">AED {{ number_format($unitPrice, 2) }}</span></div>
-                <span class="minimum-text" id="unitPriceText">AED {{ number_format($unitPrice, 2) }} per piece × {{ $moq }} {{ $moqUnit }}</span>
+                <div class="pricing-text">Total: <span class="price-highlight" id="totalPrice">AED {{ number_format($startUnitPrice * $moq, 2) }}</span></div>
+                <span class="minimum-text" id="unitPriceText">AED {{ number_format($startUnitPrice, 2) }} per piece × {{ $moq }} {{ $moqUnit }}</span>
                 <span class="minimum-text">Minimum order quantity: {{ $moq }} {{ $moqUnit }}</span>              </div>
             </div>
 
@@ -635,18 +625,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const tiers = @json(collect($tier_prices)->map(function ($t) { return ['min' => (int) $t->min_qty, 'max' => $t->max_qty ? (int) $t->max_qty : null, 'price' => (float) $t->price]; })->values());
 
     function unitPriceFor(qty) {
-        // Always return the highest tier price if tiers exist
-        if (tiers.length > 0) {
-            // Find the tier with the highest min_qty (last tier)
-            let highestTier = tiers[0];
-            tiers.forEach(function (t) {
-                if (t.min > highestTier.min) {
-                    highestTier = t;
-                }
-            });
-            return highestTier.price;
-        }
-        return basePrice;
+        let match = null;
+        tiers.forEach(function (t) {
+            if (t.min <= qty && (t.max === null || t.max >= qty) && (match === null || t.min > match.min)) {
+                match = t;
+            }
+        });
+        return match ? match.price : basePrice;
     }
 
     function formatAed(value) {
@@ -660,7 +645,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function refreshTotal() {
         const qty = Math.max(currentQty(), moq);
         const unit = unitPriceFor(qty);
-        document.getElementById('totalPrice').textContent = formatAed(unit);
+        document.getElementById('totalPrice').textContent = formatAed(unit * qty);
         document.getElementById('unitPriceText').textContent = formatAed(unit) + ' per piece × ' + qty + ' ' + moqUnit;
         qtyMinus.disabled = currentQty() <= moq;
     }

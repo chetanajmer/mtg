@@ -15,7 +15,8 @@ class CreateBrandingAssetsTable extends Migration
     {
         Schema::create('branding_assets', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
+            // Same type as storeusers.id (a signed INT), or MySQL refuses the foreign key
+            $table->integer('user_id');
             $table->string('asset_name');
             $table->string('file_name');
             $table->string('file_path');

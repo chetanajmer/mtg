@@ -44,14 +44,13 @@ class BrandingAssetController extends Controller
 
         $request->validate([
             'asset_name' => 'required|string|max:255',
-            'file' => 'required|file|mimes:png,jpg,jpeg,webp,pdf,ai,svg|max:10240',
+            'file' => array_merge(['required'], $this->fileRules()),
             'description' => 'nullable|string'
         ]);
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('branding_assets', $fileName, 'public');
+            [$fileName, $filePath] = $this->storeFile($file);
 
             $asset = BrandingAsset::create([
                 'user_id' => $userid,
@@ -94,7 +93,7 @@ class BrandingAssetController extends Controller
 
         $request->validate([
             'asset_name' => 'required|string|max:255',
-            'file' => 'nullable|file|mimes:png,jpg,jpeg,webp,pdf,ai,svg|max:10240',
+            'file' => array_merge(['nullable'], $this->fileRules()),
             'description' => 'nullable|string'
         ]);
 
@@ -108,8 +107,7 @@ class BrandingAssetController extends Controller
             }
 
             $file = $request->file('file');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $file->storeAs('branding_assets', $fileName, 'public');
+            [$fileName, $filePath] = $this->storeFile($file);
 
             $asset->file_name = $fileName;
             $asset->file_path = $filePath;
@@ -140,6 +138,32 @@ class BrandingAssetController extends Controller
         $asset->delete();
 
         return response()->json(['success' => true, 'message' => 'Asset deleted successfully']);
+    }
+
+    /**
+     * Upload rules. Files are served from the public storage folder, so an SVG must not carry
+     * scripts (same check as the order approval uploads in OrderWorkflow).
+     */
+    private function fileRules()
+    {
+        return ['file', 'mimes:png,jpg,jpeg,webp,pdf,ai,svg', 'max:10240', function ($attribute, $file, $fail) {
+            if (strtolower($file->getClientOriginalExtension()) === 'svg'
+                && preg_match('/<script|<foreignObject|\bon[a-z]+\s*=|javascript:|<!ENTITY/i', (string) file_get_contents($file->getRealPath()))) {
+                $fail('This SVG contains scripts and cannot be accepted. Please upload it as PDF or PNG.');
+            }
+        }];
+    }
+
+    /**
+     * Stores the upload under a random name (not guessable, no odd characters in the path).
+     * The original name is kept for the download.
+     * @return array [original file name, stored path]
+     */
+    private function storeFile($file)
+    {
+        $extension = strtolower($file->getClientOriginalExtension());
+        $path = $file->storeAs('branding_assets', \Illuminate\Support\Str::random(40) . '.' . $extension, 'public');
+        return [mb_substr(basename($file->getClientOriginalName()), 0, 200), $path];
     }
 
     public function download($id)

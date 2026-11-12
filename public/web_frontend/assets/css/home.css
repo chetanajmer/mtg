@@ -55,44 +55,8 @@
 }
 
 /* Hero */
-.mh-hero { position: relative; aspect-ratio: 1024 / 328; min-height: 260px; overflow: hidden; background: #f4dfcd url('../images/home/hero-banner-clean.jpg') center 52% / cover no-repeat; }
+.mh-hero { position: relative; aspect-ratio: 1024 / 328; min-height: 260px; overflow: hidden; background: #f4dfcd url('../images/home/hero-banner.jpg') center 52% / cover no-repeat; }
 
-/* Gift box behind the headline: it bursts open, the products fly out to their places on the right,
-   rest, then fly back in (timing in home.js). Positions are % of the hero, matching the original picture. */
-.mh-gift { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
-.mh-gift img { display: block; }
-.mh-gift-box { position: absolute; left: 48.85%; bottom: 9%; width: 19%; translate: -50% 0; transform-origin: 50% 100%; }
-.mh-gift-base { position: relative; z-index: 3; width: 100%; height: auto; filter: drop-shadow(0 8px 10px rgba(90, 60, 20, .2)); }
-.mh-gift-lid { position: absolute; bottom: 100%; left: 0; z-index: 4; width: 100%; height: auto; margin-bottom: -1px; }
-.mh-gift-shadow { position: absolute; left: 2%; right: 2%; bottom: -7%; z-index: 0; height: 16%; border-radius: 50%; background: radial-gradient(closest-side, rgba(70, 45, 15, .3), rgba(70, 45, 15, 0)); }
-.mh-gift-glow { position: absolute; left: 50%; bottom: 40%; z-index: 0; width: 260%; aspect-ratio: 1; translate: -50% 50%; border-radius: 50%; background: radial-gradient(closest-side, rgba(255, 215, 120, .75), rgba(255, 215, 120, .25) 45%, rgba(255, 215, 120, 0)); opacity: 0; }
-.mh-gift-burst { position: absolute; left: 50%; bottom: 100%; z-index: 5; width: 0; height: 0; }
-.mh-gift-burst span { position: absolute; left: 0; top: 0; width: 18px; aspect-ratio: 1; margin: -9px 0 0 -9px; background: #e2b552; filter: drop-shadow(0 0 5px rgba(255, 200, 90, .9)); clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); opacity: 0; }
-.mh-gift-burst span.dot { clip-path: circle(50%); background: #fff3cf; }
-/* Hero: confetti, ribbons and stars stream out of the gift box and fall inside the hero (moved by home.js).
-   Clipped to the hero, in front of the box but behind the text and search; never catches clicks. */
-.mh-fall { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
-.mh-fall-piece { position: absolute; left: 0; top: 0; display: block; opacity: 0; will-change: transform, opacity; }
-.mh-fall-confetti { width: 9px; height: 13px; margin: -6px 0 0 -4px; border-radius: 1.5px; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .08); }
-.mh-fall-confetti.round { width: 9px; height: 9px; margin-top: -4px; border-radius: 50%; }
-.mh-fall-confetti.long { width: 5px; height: 18px; margin: -9px 0 0 -2px; }
-.mh-fall-ribbon { width: 18px; height: 64px; margin: -32px 0 0 -9px; overflow: visible; }
-.mh-fall-ribbon path { fill: none; stroke-width: 4; stroke-linecap: round; filter: drop-shadow(0 1px 1px rgba(60, 40, 10, .2)); }
-.mh-fall-star { width: 16px; height: 16px; margin: -8px 0 0 -8px; background: #e2b552; clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%); }
-.mh-fall-star.glint { width: 13px; height: 13px; margin: -6px 0 0 -6px; background: #fff7de; filter: drop-shadow(0 0 4px rgba(255, 210, 110, .95)); }
-
-/* Party popper out of the box: confetti and curly ribbon streamers (built and timed in home.js) */
-.mh-gift-party { position: absolute; left: 50%; bottom: 100%; z-index: 5; width: 0; height: 0; perspective: 600px; }
-.mh-confetti { position: absolute; left: 0; top: 0; width: 8px; height: 12px; margin: -6px 0 0 -4px; border-radius: 1.5px; opacity: 0; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .08); }
-.mh-confetti.round { width: 8px; height: 8px; margin-top: -4px; border-radius: 50%; }
-.mh-confetti.long { width: 5px; height: 17px; margin: -8px 0 0 -2px; }
-.mh-ribbon { position: absolute; left: -15px; top: -105px; width: 30px; height: 105px; overflow: visible; opacity: 0; transform-origin: 50% 100%; }
-.mh-ribbon path { fill: none; stroke-width: 4; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; filter: drop-shadow(0 1px 1px rgba(60, 40, 10, .25)); }
-.mh-gift-item { position: absolute; z-index: 2; width: auto; translate: -50% 0; filter: drop-shadow(0 10px 12px rgba(60, 40, 10, .22)); will-change: transform, opacity; }
-.mh-gift-bottle { left: 80%; bottom: 14%; height: 80%; }
-.mh-gift-notebook { left: 91.5%; bottom: 14%; height: 71%; }
-.mh-gift-giftbox { left: 90.3%; bottom: 8%; height: 44%; }
-@media (max-width: 991px) { .mh-gift { display: none; } }
 .mh-hero-center { position: absolute; top: 11%; left: 20%; right: 22.3%; z-index: 2; display: flex; flex-direction: column; align-items: center; text-align: center; }
 .mh-eyebrow { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; font-size: 11.5px; letter-spacing: 2px; color: #33363b; white-space: nowrap; }
 .mh-eyebrow::before, .mh-eyebrow::after { content: ''; width: 38px; height: 1px; background: #c98a1b; }

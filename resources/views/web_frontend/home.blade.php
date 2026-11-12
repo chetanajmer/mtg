@@ -9,21 +9,6 @@
 <main id="homePage">
 
   <section class="mh-hero">
-    {{-- Decoration behind the text: the gift box bursts open, the products fly out to their places on the right,
-         rest there, fly back in and the lid closes, in a loop (home.css + home.js). While it is open, confetti,
-         ribbons and stars stream out of it over the page (home.js, .mh-fall). --}}
-    <div class="mh-gift" aria-hidden="true">
-      @foreach(['notebook' => [294, 420], 'bottle' => [133, 420], 'giftbox' => [342, 420]] as $item => $size)
-        <img class="mh-gift-item mh-gift-{{ $item }}" src="{{ asset('web_frontend/assets/images/home/hero-gift/gift-' . $item . '.webp') }}" alt="" width="{{ $size[0] }}" height="{{ $size[1] }}" decoding="async">
-      @endforeach
-      <div class="mh-gift-box">
-        <span class="mh-gift-glow"></span>
-        <span class="mh-gift-shadow"></span>
-        <img class="mh-gift-lid" src="{{ asset('web_frontend/assets/images/home/hero-gift/gift-lid.webp') }}" alt="" width="520" height="199" decoding="async">
-        <img class="mh-gift-base" src="{{ asset('web_frontend/assets/images/home/hero-gift/gift-base.webp') }}" alt="" width="520" height="273" decoding="async">
-        <div class="mh-gift-burst"></div>
-      </div>
-    </div>
     <div class="mh-hero-center">
       <span class="mh-eyebrow">CORPORATE GIFTING SOLUTIONS</span>
       <h1>Where should we <em>begin?</em></h1>

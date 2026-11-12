@@ -22,6 +22,7 @@
       <a href="/annual-corporate-membership">Annual Contract</a>
       <a href="{{ $ordersUrl }}" class="{{ request()->is('orders') ? 'active' : '' }}">Track your Order</a>
       <a href="{{ route('planner.index') }}" class="{{ request()->routeIs('planner.index') ? 'active' : '' }}">Budget Planner</a>
+      <a href="{{ route('compare.products') }}" class="{{ request()->routeIs('compare.products') ? 'active' : '' }}">Compare Gifts</a>
     </nav>
     <div class="mh-account">
       <a href="{{ session()->has('userid') ? route('corporate.portal') : route('corporate.login') }}" class="mh-account-link"><i class="bi bi-person"></i> Account</a>
