@@ -52,7 +52,7 @@ class AdminPermission
             'admin/orders', 'admin/orders/*', 'abandoned_order', 'abandoned_orderdetails/*', 'send_abandoned_mail',
             'printinvoice/*', 'deleteorder/*', 'orderdetails/*', 'update_orderstatus',
             'order-tracking', 'order-tracking/*', 'orderprocessing', 'orderprocessing/*',
-            'date_report', 'user_report', 'product_report', 'admin/reports', 'admin/reports/*', 'admin/planner-logs','b2b-enquiry', 'exportb2benquiry', 'instock-notifier',
+            'date_report', 'user_report', 'product_report', 'admin/reports', 'admin/reports/*', 'admin/planner-logs', 'admin/planner-recommendations', 'admin/planner-recommendations/*', 'admin/planner-pictures', 'admin/planner-pictures/*','b2b-enquiry', 'exportb2benquiry', 'instock-notifier',
             'store-user', 'exportstoreuser', 'search_monthly', 'search_yearly',
         ],
         'slider_status' => [

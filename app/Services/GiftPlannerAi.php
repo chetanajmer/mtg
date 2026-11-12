@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\PlannerImage;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Crypt;
@@ -31,13 +32,14 @@ class GiftPlannerAi
      * Adds a stored picture, or a token the page uses to ask for one.
      * $brand: the customer's logo/asset fingerprint, so pictures with their logo are theirs alone.
      */
-    public function decorate(array $bundles, $occasionKey, $custom = null, $brand = '')
+    public function decorate(array $bundles, $occasionKey, $custom = null, $brand = '', $userId = null)
     {
         foreach ($bundles as $i => $bundle) {
             $ids = array_column($bundle['items'], 'id');
-            $stored = $this->storedImage($this->imageKey($this->imageScope($occasionKey, $custom), $ids, $bundle['badge'], $brand));
+            $stored = $this->findImage($occasionKey, $custom, $ids, $brand, $userId, $bundle['badge']);
             if ($stored) {
-                $bundles[$i]['image'] = $stored;
+                $stored->increment('times_used', 1, ['last_used_at' => now()]);
+                $bundles[$i]['image'] = $stored->url();
             } elseif ($this->imageEnabled()) {
                 $bundles[$i]['image_token'] = Crypt::encryptString(json_encode(['occasion' => $occasionKey, 'custom' => $custom, 'ids' => $ids, 'badge' => $bundle['badge']]));
             }
@@ -110,9 +112,10 @@ class GiftPlannerAi
         $custom = $data['custom'] ?? null;
         $brandFiles = app(PlannerBrandFiles::class);
         $brand = $userId ? $brandFiles->fingerprint($userId) : '';
-        $key = $this->imageKey($this->imageScope($data['occasion'], $custom), $data['ids'], $data['badge'], $brand);
-        if ($stored = $this->storedImage($key)) {
-            return $stored;
+        $key = $this->pictureKey($data['occasion'], $custom, $data['ids'], $brand);
+        if ($stored = $this->findImage($data['occasion'], $custom, $data['ids'], $brand, $userId, $data['badge'])) {
+            $stored->increment('times_used', 1, ['last_used_at' => now()]);
+            return $stored->url();
         }
 
         $products = Product::whereIn('id', $data['ids'])->where('is_active', 'online')->get();
@@ -131,7 +134,13 @@ class GiftPlannerAi
                 return null;
             }
             Cache::put($dayKey, (int) Cache::get($dayKey, 0) + 1, now()->addDays(2));
-            return $this->requestImage($key, $data['occasion'], $custom, $products, $brand ? $brandFiles->files($userId) : []);
+            $file = $this->requestImage($key, $data['occasion'], $custom, $products, $brand ? $brandFiles->files($userId) : []);
+            if ($file === null) {
+                return null;
+            }
+            $image = $this->register($key, $file, $data['occasion'], $custom, $data['ids'], $brand ? $userId : null, config('gift_planner.ai.image_model'));
+            $image->increment('times_used', 1, ['last_used_at' => now()]);
+            return $image->url();
         } finally {
             $lock->release();
         }
@@ -174,12 +183,9 @@ class GiftPlannerAi
             mkdir($folder, 0755, true);
         }
         $small = $this->smallWebp($bytes);
-        if ($small !== null) {
-            file_put_contents($folder . '/' . $key . '.webp', $small);
-        } else {
-            file_put_contents($folder . '/' . $key . '.' . ($match[1] === 'jpeg' ? 'jpg' : $match[1]), $bytes);
-        }
-        return $this->storedImage($key);
+        $file = $key . '.' . ($small !== null ? 'webp' : ($match[1] === 'jpeg' ? 'jpg' : $match[1]));
+        file_put_contents($folder . '/' . $file, $small !== null ? $small : $bytes);
+        return $file;
     }
 
     /**
@@ -253,17 +259,51 @@ class GiftPlannerAi
         return $custom ? $occasionKey . '|' . mb_strtolower($custom) : $occasionKey;
     }
 
-    private function imageKey($occasionKey, array $ids, $badge, $brand = '')
+    /**
+     * One picture per occasion and set of products (and the customer's logo, if any): the bundle's
+     * tier, team size and budget don't change the picture, so they don't make a new one.
+     */
+    public function pictureKey($occasionKey, $custom, array $ids, $brand = '')
     {
         sort($ids);
-        // v4: real product photos composed together, occasion props, optional customer logo, no product names as text
-        return sha1('v4|' . $occasionKey . '|' . $badge . '|' . implode('-', $ids) . ($brand !== '' ? '|' . $brand : ''));
+        return sha1('v5|' . $this->imageScope($occasionKey, $custom) . '|' . implode('-', $ids) . ($brand !== '' ? '|' . $brand : ''));
     }
 
-    private function storedImage($key)
+    /**
+     * The saved picture for these products, or null. A picture made before pictures were recorded
+     * (named by the older key, which also used the bundle's tier) is recorded on first use.
+     */
+    private function findImage($occasionKey, $custom, array $ids, $brand, $userId, $badge)
     {
-        $files = glob(public_path(self::IMAGE_FOLDER) . '/' . $key . '.*');
-        return $files ? asset(self::IMAGE_FOLDER . '/' . basename($files[0])) : null;
+        $key = $this->pictureKey($occasionKey, $custom, $ids, $brand);
+        $image = PlannerImage::where('image_key', $key)->first();
+        if ($image && !is_file($image->path())) {
+            $image->delete();
+            $image = null;
+        }
+        if (!$image) {
+            sort($ids);
+            $old = sha1('v4|' . $this->imageScope($occasionKey, $custom) . '|' . $badge . '|' . implode('-', $ids) . ($brand !== '' ? '|' . $brand : ''));
+            $files = glob(public_path(self::IMAGE_FOLDER) . '/' . $old . '.*');
+            if ($files) {
+                $image = $this->register($key, basename($files[0]), $occasionKey, $custom, $ids, $brand !== '' ? $userId : null, null);
+            }
+        }
+        return $image;
+    }
+
+    private function register($key, $file, $occasionKey, $custom, array $ids, $userId, $model)
+    {
+        sort($ids);
+        return PlannerImage::updateOrCreate(['image_key' => $key], [
+            'occasion' => $occasionKey,
+            'occasion_label' => mb_substr($custom ?: config('gift_planner.occasions')[$occasionKey]['label'], 0, 60),
+            'product_ids' => implode('-', $ids),
+            'product_names' => Product::whereIn('id', $ids)->pluck('name')->values()->all(),
+            'storeuser_id' => $userId,
+            'file' => $file,
+            'model' => $model,
+        ]);
     }
 
     /**

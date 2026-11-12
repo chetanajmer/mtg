@@ -118,7 +118,7 @@ class GiftPlannerController extends Controller
         unset($result['plan']);
 
         try {
-            $result['bundles'] = $ai->decorate($result['bundles'], $data['occasion'], $custom ?: null, app(PlannerBrandFiles::class)->fingerprint(session()->get('userid')));
+            $result['bundles'] = $ai->decorate($result['bundles'], $data['occasion'], $custom ?: null, app(PlannerBrandFiles::class)->fingerprint(session()->get('userid')), session()->get('userid'));
         } catch (\Throwable $e) {
             Log::warning('Budget planner AI: ' . $e->getMessage());
         }

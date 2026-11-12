@@ -36,6 +36,7 @@ use App\Http\Controllers\Backend\B2BenquiryController;
 use App\Http\Controllers\Backend\Instock_notifierController;
 use App\Http\Controllers\Backend\ReportController;
 use App\Http\Controllers\Backend\PlannerLogController;
+use App\Http\Controllers\Backend\PlannerLibraryController;
 use App\Http\Controllers\Backend\EmailTemplateController;
 use App\Http\Controllers\Backend\OrderController;
 use App\Http\Controllers\Backend\FlipbookController;
@@ -695,6 +696,10 @@ Route::any('instock-notifier', [Instock_notifierController::class, 'list'])->nam
 Route::get('admin/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('admin/reports/export', [ReportController::class, 'export'])->name('reports.export');
 Route::get('admin/planner-logs', [PlannerLogController::class, 'index'])->name('planner-logs.index');
+Route::get('admin/planner-recommendations', [PlannerLibraryController::class, 'recommendations'])->name('planner-recommendations.index');
+Route::post('admin/planner-recommendations/{id}/delete', [PlannerLibraryController::class, 'destroyRecommendation'])->name('planner-recommendations.destroy')->where('id', '[0-9]+');
+Route::get('admin/planner-pictures', [PlannerLibraryController::class, 'pictures'])->name('planner-pictures.index');
+Route::post('admin/planner-pictures/{id}/delete', [PlannerLibraryController::class, 'destroyPicture'])->name('planner-pictures.destroy')->where('id', '[0-9]+');
 
 /* Email templates: previews and a test send to the logged-in admin */
 Route::get('admin/email-templates', [EmailTemplateController::class, 'index'])->name('email-templates.index');

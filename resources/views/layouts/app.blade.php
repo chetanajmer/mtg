@@ -512,6 +512,12 @@ figure figcaption {
                              <li>
                                 <a href="{{ route('planner-logs.index') }}" class="waves-effect"><i class="ti-gift"></i><span> Planner Log </span></a>
                             </li>
+                             <li>
+                                <a href="{{ route('planner-recommendations.index') }}" class="waves-effect"><i class="ti-bookmark-alt"></i><span> Planner Saved Bundles </span></a>
+                            </li>
+                             <li>
+                                <a href="{{ route('planner-pictures.index') }}" class="waves-effect"><i class="ti-image"></i><span> Planner Pictures </span></a>
+                            </li>
                              @endadminCan
                             
                              @adminCan('list-coupon')
