@@ -16,14 +16,14 @@
 .wrap{padding:0 36px}
 /* Banner: products sit on the right of the image, so the text stays on the left */
 /* Full width, flush under the header: cancel .wrap's 36px side padding */
-.hero{display:flex;align-items:center;margin:0 -36px;min-height:340px;padding:44px 36px;border-radius:0;overflow:hidden;background:#f6e9da url('{{ asset('web_frontend/assets/images/compare-hero-new.webp') }}') right center/cover no-repeat}
+.hero{display:flex;align-items:center;margin:0 -36px;min-height:340px;padding:44px 36px;border-radius:0;overflow:hidden;background:#f6e9da url('{{ asset('web_frontend/assets/images/compare-hero-v2.webp') }}') right center/cover no-repeat}
 .hero-text{max-width:560px}
 .eyebrow{font-size:12.5px;letter-spacing:2.3px;font-weight:500;margin-bottom:5px}
 h1{font-size:50px;font-weight:800;letter-spacing:-1.5px;line-height:1.1}
 .hero p{font-size:20px;color:#555;margin-top:6px;font-weight:300;letter-spacing:.1px}
 .bulk{width:466px;max-width:100%;background:rgba(255,255,255,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.8);border-radius:6px;display:flex;align-items:center;gap:22px;padding:18px 24px;margin-top:22px;box-shadow:0 6px 20px rgba(120,80,30,.08)}
 @media(max-width:900px){
- .hero{min-height:0;padding:28px 36px;background-image:linear-gradient(90deg,rgba(250,240,228,.95) 0%,rgba(250,240,228,.85) 55%,rgba(250,240,228,.35) 100%),url('{{ asset('web_frontend/assets/images/compare-hero-new.webp') }}');background-position:center,70% center}
+ .hero{min-height:0;padding:28px 36px;background-image:linear-gradient(90deg,rgba(250,240,228,.95) 0%,rgba(250,240,228,.85) 55%,rgba(250,240,228,.35) 100%),url('{{ asset('web_frontend/assets/images/compare-hero-v2.webp') }}');background-position:center,70% center}
  h1{font-size:36px}
  .hero p{font-size:16px}
 }
@@ -85,6 +85,15 @@ a.pimg{text-decoration:none;cursor:pointer}
 
 /* Comparison cards container */
 #comparisonCards{display:contents}
+/* Shown in the product area while nothing is selected */
+.empty-cmp{grid-column:2 / -1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 24px;background:linear-gradient(135deg,#fffaf5 0%,#fdf1e7 100%);border:1px dashed #e9c9a3}
+.empty-cmp .ec-icon{width:64px;height:64px;border-radius:18px;background:linear-gradient(135deg,#ffd9a8,#f5a524);display:grid;place-items:center;box-shadow:0 8px 18px rgba(245,165,36,.3);margin-bottom:16px}
+.empty-cmp .ec-icon svg{width:32px;height:32px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.empty-cmp h3{font-size:20px;font-weight:700;color:#3d2410;margin:0 0 8px}
+.empty-cmp p{font-size:14.5px;color:#7a5a3e;max-width:440px;line-height:1.5;margin:0 0 20px;font-weight:400}
+.empty-cmp .ec-steps{list-style:none;padding:0;margin:0;display:flex;gap:22px;flex-wrap:wrap;justify-content:center}
+.empty-cmp .ec-steps li{display:flex;align-items:center;gap:8px;font-size:13.5px;color:#5a3410;font-weight:500}
+.empty-cmp .ec-steps span{width:24px;height:24px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
 
 /* table */
 .tbl{display:grid;grid-template-columns:278px repeat(6,1fr);margin-top:6px;border:1px solid var(--line);border-bottom:0;background:#fff}
@@ -217,9 +226,8 @@ let productDetails = {};
 // Load products on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadProducts();
-    if (selectedProductIds.length > 0) {
-        loadProductDetails();
-    }
+    // With nothing selected this shows the "No products selected yet" message
+    loadProductDetails();
 });
 
 // Load available products
@@ -344,6 +352,17 @@ function renderComparisonCards() {
 
     if (selectedProductIds.length === 0) {
         grid.style.gridTemplateColumns = '278px repeat(3, 1fr)';
+        container.innerHTML = `
+            <div class="card empty-cmp">
+                <div class="ec-icon"><svg viewBox="0 0 24 24"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.500 2.500 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.500a2.500 2.500 0 1 0 0-5C13 2 12 7 12 7z"/></svg></div>
+                <h3>No products selected yet</h3>
+                <p>Pick up to 3 gifts from the list on the left to compare their features, bulk prices and savings side by side.</p>
+                <ol class="ec-steps">
+                    <li><span>1</span>Search or tick a product</li>
+                    <li><span>2</span>Compare prices by quantity</li>
+                    <li><span>3</span>Request a quote in one click</li>
+                </ol>
+            </div>`;
         return;
     }
 
@@ -498,6 +517,8 @@ function renderSavings() {
     const container = document.querySelector('.sav');
     const label = document.getElementById('savLabel');
 
+    // Nothing selected: hide the empty green savings bar
+    container.style.display = selectedProductIds.length === 0 ? 'none' : '';
     if (selectedProductIds.length === 0) {
         label.textContent = 'Your Savings';
         // Reset to default 3 columns
