@@ -496,6 +496,12 @@ figure figcaption {
                               </li>
                               @endadminCan
 
+                              @adminCan('admin/annual-membership')
+                              <li>
+                                <a href="{{ route('membership.index') }}" class="waves-effect {{ request()->is('admin/annual-membership*') ? 'active' : '' }}"><i class="ti-crown"></i><span> Annual Membership</span></a>
+                              </li>
+                              @endadminCan
+
                              @adminCan('admin/reports')
                              <li>
                                 <a href="{{ route('reports.index') }}" class="waves-effect"><i class="ti-book"></i><span> Reports </span></a>

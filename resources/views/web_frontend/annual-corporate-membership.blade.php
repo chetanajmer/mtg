@@ -18,70 +18,47 @@
         <a href="#plans" class="btn dark">Choose Your Plan <span>&rarr;</span></a>
         <a href="#" class="btn light">Talk to Our Team</a>
       </div>
+      @if($stats->count())
       <div class="stats">
-        <div><b>500+</b><span>Corporate Clients</span></div>
-        <div><b>50,000+</b><span>Gifts Delivered</span></div>
-        <div><b>4.9/5</b><span>Client Satisfaction</span></div>
+        @foreach($stats as $stat)
+        <div><b>{{ $stat->value }}</b><span>{{ $stat->label }}</span></div>
+        @endforeach
       </div>
+      @endif
     </div>
     <div class="tag">GIFTS THAT BUILD BUSINESS</div>
   </section>
 
   <main class="wrap plans" id="plans">
-    <span class="eyebrow">MEMBERSHIP PLANS</span>
-    <h2>Choose the Right Plan for Your Business</h2>
-    <p class="sub2">More gifting. More savings. More possibilities.</p>
+    @if($settings->plans_eyebrow)<span class="eyebrow">{{ $settings->plans_eyebrow }}</span>@endif
+    <h2>{{ $settings->plans_title }}</h2>
+    @if($settings->plans_subtitle)<p class="sub2">{{ $settings->plans_subtitle }}</p>@endif
 
-    <div class="grid">
-      <article class="plan">
+    @if($plans->count())
+    <div class="grid" style="--plans: {{ min($plans->count(), 4) }}">
+      @foreach($plans as $plan)
+      <article class="plan {{ $plan->is_popular ? 'gold' : '' }}">
+        @if($plan->is_popular && $plan->badge_text)<span class="badge">{{ $plan->badge_text }}</span>@endif
         <div class="head">
-          <div class="medal silver"><i></i><u></u></div>
-          <div><h3>Silver</h3><p>For Growing Teams</p><small>Essential benefits to get you started.</small></div>
+          <div class="medal {{ $plan->medalClass() }}"><i></i><u></u></div>
+          <div>
+            <h3>{{ $plan->name }}</h3>
+            @if($plan->tagline)<p @if($plan->is_popular) style="text-decoration:underline;text-decoration-color:#c9ad7a;text-underline-offset:3px" @endif>{{ $plan->tagline }}</p>@endif
+            @if($plan->description)<small>{{ $plan->description }}</small>@endif
+          </div>
         </div>
+        @if(count($plan->features ?? []))
         <div class="rows">
-          <div>Annual Spend<b>₹2,00,000 / year</b></div>
-          <div>Estimated Savings<b>₹20,000 (10%)</b></div>
-          <div>Free Customization<b>Up to 5 products</b></div>
-          <div>Priority Dispatch<b>Standard</b></div>
-          <div>Dedicated Account Manager<b>–</b></div>
-          <div>Unused Budget Rollover<b>–</b></div>
+          @foreach($plan->features as $feature)
+          <div>{{ $feature['label'] ?? '' }}<b>{{ ($feature['value'] ?? '') !== '' ? $feature['value'] : '–' }}</b></div>
+          @endforeach
         </div>
-        <div class="foot"><span class="price">₹2,00,000 / <small>year</small></span><button class="sel">Select Plan</button></div>
+        @endif
+        <div class="foot"><span class="price">{{ $plan->price }}@if($plan->price_period) / <small>{{ $plan->price_period }}</small>@endif</span><button class="sel">{{ $plan->button_text ?: 'Select Plan' }}</button></div>
       </article>
-
-      <article class="plan gold">
-        <span class="badge">MOST POPULAR</span>
-        <div class="head">
-          <div class="medal goldm"><i></i><u></u></div>
-          <div><h3>Gold</h3><p style="text-decoration:underline;text-decoration-color:#c9ad7a;text-underline-offset:3px">For Established Businesses</p><small>Maximum value with premium benefits.</small></div>
-        </div>
-        <div class="rows">
-          <div>Annual Spend<b>₹5,00,000 / year</b></div>
-          <div>Estimated Savings<b>₹75,000 (15%)</b></div>
-          <div>Free Customization<b>Up to 10 products</b></div>
-          <div>Priority Dispatch<b>Priority (3–5 days)</b></div>
-          <div>Dedicated Account Manager<b>✓</b></div>
-          <div>Unused Budget Rollover<b>Up to 25%</b></div>
-        </div>
-        <div class="foot"><span class="price">₹5,00,000 / <small>year</small></span><button class="sel">Select Plan</button></div>
-      </article>
-
-      <article class="plan">
-        <div class="head">
-          <div class="medal plat"><i></i><u></u></div>
-          <div><h3>Platinum</h3><p>For Large Enterprises</p><small>The complete corporate gifting solution.</small></div>
-        </div>
-        <div class="rows">
-          <div>Annual Spend<b>₹10,00,000 / year</b></div>
-          <div>Estimated Savings<b>₹2,00,000 (20%)</b></div>
-          <div>Free Customization<b>Unlimited</b></div>
-          <div>Priority Dispatch<b>Express (1–3 days)</b></div>
-          <div>Dedicated Account Manager<b>✓</b></div>
-          <div>Unused Budget Rollover<b>Up to 50%</b></div>
-        </div>
-        <div class="foot"><span class="price">₹10,00,000 / <small>year</small></span><button class="sel">Select Plan</button></div>
-      </article>
+      @endforeach
     </div>
+    @endif
 
     <div class="strip">
       <div><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><rect x="3" y="9" width="18" height="12"/><path d="M12 9v12M3 9h18V6H3zM12 6c-3-4-6-1-4 0M12 6c3-4 6-1 4 0"/></svg>Exclusive<br>Member Pricing</div>
@@ -96,7 +73,10 @@
       <div class="info">
         <div class="circ"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#a47624" stroke-width="1.8"><path d="M20 8a8 8 0 0 0-14-2M4 4v3h3M4 16a8 8 0 0 0 14 2m2 2v-3h-3"/></svg></div>
         <div><h4>Auto-Renewal</h4><p>Keep enjoying uninterrupted benefits. Your membership auto-renews annually, so you never miss out on savings.</p></div>
-        <div class="toggle" role="switch" aria-checked="true">ON</div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoRenewal" checked>
+          <span class="toggle-slider"></span>
+        </label>
       </div>
       <div class="info">
         <div class="circ" style="background:#f3f1ee"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v4c0 2 3.5 3 8 3s8-1 8-3V6M4 10v4c0 2 3.5 3 8 3s8-1 8-3v-4M4 14v4c0 2 3.5 3 8 3s8-1 8-3v-4"/></svg></div>
@@ -112,3 +92,71 @@
   </main>
 </div>
 @endsection
+
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Auto-Renewal toggle
+  const autoRenewalToggle = document.getElementById('autoRenewal');
+  if (autoRenewalToggle) {
+    autoRenewalToggle.addEventListener('change', function() {
+      const isEnabled = this.checked;
+      // Here you can make an API call to save the setting
+      console.log('Auto-renewal is now ' + (isEnabled ? 'enabled' : 'disabled'));
+    });
+  }
+
+  // Plan selection functionality
+  const planCards = document.querySelectorAll('.membership-wrapper .plan');
+  
+  // Get saved selection from localStorage
+  const savedPlan = localStorage.getItem('selectedMembershipPlan');
+  
+  // Set selected plan on page load
+  if (savedPlan) {
+    planCards.forEach(card => {
+      const planName = card.querySelector('h3').textContent.toLowerCase();
+      if (planName === savedPlan.toLowerCase()) {
+        card.classList.add('selected');
+      }
+    });
+  } else {
+    // Set Gold as default selected on page load if no saved selection
+    const goldPlan = document.querySelector('.membership-wrapper .plan.gold');
+    if (goldPlan) {
+      goldPlan.classList.add('selected');
+      localStorage.setItem('selectedMembershipPlan', 'Gold');
+    }
+  }
+  
+  // Add click event to all plan cards including Gold
+  planCards.forEach(card => {
+    card.addEventListener('click', function() {
+      // Remove selected class from all plans
+      planCards.forEach(p => p.classList.remove('selected'));
+      
+      // Add selected class to clicked plan
+      this.classList.add('selected');
+      
+      // Get plan name and save to localStorage
+      const planName = this.querySelector('h3').textContent;
+      localStorage.setItem('selectedMembershipPlan', planName);
+      console.log('Selected plan:', planName);
+      
+      // Here you can make an API call to save the selected plan
+    });
+  });
+
+  // Select Plan buttons
+  const selectButtons = document.querySelectorAll('.membership-wrapper .sel');
+  selectButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const planCard = this.closest('.plan');
+      const planName = planCard.querySelector('h3').textContent;
+      alert(`You selected the ${planName} plan. Proceeding to registration...`);
+      // Here you would navigate to the registration/checkout flow
+    });
+  });
+});
+</script>

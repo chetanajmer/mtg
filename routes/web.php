@@ -43,6 +43,8 @@ use App\Http\Controllers\Backend\ReviewController;
 use App\Http\Controllers\Backend\PortfolioController;
 use App\Http\Controllers\Backend\OrderTrackingController;
 use App\Http\Controllers\Backend\OrderWorkflowController;
+use App\Http\Controllers\Backend\MembershipController;
+use App\Http\Controllers\Frontend\MembershipPageController;
 use App\Http\Controllers\NewBrandController;
 use App\Http\Controllers\OrderProcessingController;
 
@@ -83,6 +85,15 @@ Route::get('product/{slug}', [HomepageController::class, 'webProduct'])->name('w
 Route::any('product/{product_slug}/{slug}', [HomepageController::class, 'variationproduct'])->name('variationproduct');
 Route::any('variant_price', [HomepageController::class, 'variant_price'])->name('variant_price');
 Route::get('compare-products', [HomepageController::class, 'compareProducts'])->name('compare.products');
+
+// Compare Products AJAX routes
+Route::prefix('api/compare')->group(function () {
+    Route::get('search', [App\Http\Controllers\Frontend\CompareController::class, 'searchProducts'])->name('compare.search');
+    Route::post('product-details', [App\Http\Controllers\Frontend\CompareController::class, 'getProductDetails'])->name('compare.product-details');
+    Route::post('add-to-cart', [App\Http\Controllers\Frontend\CompareController::class, 'addToCart'])->name('compare.add-to-cart');
+});
+
+Route::post('compare/save-selection', [App\Http\Controllers\Frontend\CompareController::class, 'saveSelection'])->name('compare.save-selection');
 
 Route::any('incrementquantity', [HomepageController::class, 'incrementquantity'])->name('incrementquantity');
 Route::any('decrementquantity', [HomepageController::class, 'decrementquantity'])->name('decrementquantity');
@@ -259,7 +270,7 @@ Route::get('/corporate/auth/google/callback', [UsersController::class, 'handleGo
 Route::get('/track-order', [CustomerOrderController::class, 'trackForm'])->name('track.form');
 Route::post('/track-order', [CustomerOrderController::class, 'trackLookup'])->name('track.lookup')->middleware('throttle:order-lookup');
 Route::get('/track-order/{orderid}', [CustomerOrderController::class, 'trackShow'])->name('track.show')->where('orderid', '[0-9]+');
-Route::view('/annual-corporate-membership', 'web_frontend.annual-corporate-membership');
+Route::get('/annual-corporate-membership', [MembershipPageController::class, 'show'])->name('membership.page');
 Route::get('/corporate-gifting-budget-planner', [GiftPlannerController::class, 'index'])->name('planner.index');
 Route::post('/corporate-gifting-budget-planner/recommend', [GiftPlannerController::class, 'recommend'])->name('planner.recommend')->middleware('throttle:planner-recommend');
 Route::post('/corporate-gifting-budget-planner/image', [GiftPlannerController::class, 'image'])->name('planner.image')->middleware('throttle:planner-image');
@@ -722,6 +733,17 @@ Route::any('delete_flipbook/{id}', [FlipbookController::class, 'delete_flipbook'
 
 // Reviews
 Route::any('reviews', [ReviewController::class, 'index']);
+
+// Annual Membership page content (stats, plans section, plans)
+Route::prefix('admin/annual-membership')->name('membership.')->group(function () {
+    Route::get('/', [MembershipController::class, 'index'])->name('index');
+    Route::post('/content', [MembershipController::class, 'updateContent'])->name('content');
+    Route::get('/plans/create', [MembershipController::class, 'create'])->name('plans.create');
+    Route::post('/plans', [MembershipController::class, 'store'])->name('plans.store');
+    Route::get('/plans/{id}/edit', [MembershipController::class, 'edit'])->name('plans.edit')->where('id', '[0-9]+');
+    Route::post('/plans/{id}', [MembershipController::class, 'update'])->name('plans.update')->where('id', '[0-9]+');
+    Route::post('/plans/{id}/delete', [MembershipController::class, 'destroy'])->name('plans.destroy')->where('id', '[0-9]+');
+});
 
 // Order Tracking (Backend)
 Route::prefix('order-tracking')->name('ordertracking.')->group(function () {

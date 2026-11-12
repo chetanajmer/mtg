@@ -29,10 +29,13 @@
 .membership-wrapper .plans .eyebrow{display:block;margin-top:18px;letter-spacing:3.4px;color:#555;font-weight:500;font-size:9.5px}
 .membership-wrapper .plans h2{font-size:28px;font-weight:800;letter-spacing:-.4px;margin:12px 0 6px}
 .membership-wrapper .plans .sub2{color:#777;font-size:15px;margin-bottom:24px}
-.membership-wrapper .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;text-align:left}
-.membership-wrapper .plan{position:relative;border:1px solid #e6e3de;border-radius:8px;padding:12px 15px 18px;background:#fff}
-.membership-wrapper .plan.gold{border:2px solid #8a5f1a;background:#fbf6ec}
-.membership-wrapper .badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#8a5f1a;color:#fff;font-size:8.5px;font-weight:700;letter-spacing:1.4px;padding:4px 16px;border-radius:10px;white-space:nowrap}
+/* --plans = number of plan cards (set in the view, max 4); fewer cards stay centred */
+.membership-wrapper .grid{display:grid;grid-template-columns:repeat(var(--plans,3),minmax(0,1fr));gap:15px;text-align:left;max-width:calc(var(--plans,3) * 400px);margin-left:auto;margin-right:auto}
+.membership-wrapper .plan{position:relative;border:1px solid #e6e3de;border-radius:8px;padding:12px 15px 18px;background:#fff;cursor:pointer;transition:all 0.3s ease}
+.membership-wrapper .plan:hover{border-color:#8a5f1a;box-shadow:0 4px 12px rgba(138,95,26,0.15);transform:translateY(-2px)}
+.membership-wrapper .plan.selected{border:2px solid #8a5f1a !important;background:#fbf6ec !important;box-shadow:0 4px 12px rgba(138,95,26,0.2)}
+.membership-wrapper .plan.gold{border:1px solid #e6e3de;background:#fff}
+.membership-wrapper .badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#8a5f1a;color:#fff;font-size:8.5px;font-weight:700;letter-spacing:1.4px;padding:4px 16px;border-radius:10px;white-space:nowrap;pointer-events:none}
 .membership-wrapper .head{display:flex;gap:18px;align-items:center;margin-bottom:17px;min-height:96px}
 .membership-wrapper .medal{position:relative;flex:none;width:72px;height:92px}
 .membership-wrapper .medal i{position:absolute;left:4px;top:0;width:64px;height:64px;border-radius:50%;display:block}
@@ -51,8 +54,8 @@
 .membership-wrapper .foot{display:flex;align-items:center;justify-content:space-between;margin-top:22px}
 .membership-wrapper .price{font-size:19px;font-weight:700}
 .membership-wrapper .price small{font-size:14px;font-weight:600}
-.membership-wrapper .sel{height:38px;width:165px;border:0;border-radius:5px;background:#141414;color:#fff;font-size:13px;font-weight:500}
-.membership-wrapper .gold .sel{background:#8a5f1a}
+.membership-wrapper .sel{height:38px;width:165px;border:0;border-radius:5px;background:#141414;color:#fff;font-size:13px;font-weight:500;transition:background 0.3s ease}
+.membership-wrapper .selected .sel{background:#8a5f1a}
 
 /* benefits strip */
 .membership-wrapper .strip{display:grid;grid-template-columns:repeat(6,1fr);background:#f6f5f3;border-radius:8px;margin-top:24px;padding:14px 0}
@@ -66,8 +69,15 @@
 .membership-wrapper .circ{flex:none;width:68px;height:68px;border-radius:50%;background:#f5ebd9;display:grid;place-items:center}
 .membership-wrapper .info h4{font-size:15px;font-weight:700;margin-bottom:6px}
 .membership-wrapper .info p{font-size:12px;line-height:1.5;color:#777}
-.membership-wrapper .toggle{flex:none;width:68px;height:34px;border-radius:17px;background:#a47624;position:relative;color:#fff;font-size:10px;font-weight:700;padding:11px 0 0 14px}
-.membership-wrapper .toggle::after{content:"";position:absolute;right:3px;top:3px;width:28px;height:28px;border-radius:50%;background:#fff}
+/* Auto-Renewal switch: 50x26 track, one 20px knob that slides 24px (3px gap each side) */
+.membership-wrapper .toggle-switch{position:relative;display:inline-block;width:50px;height:26px;flex:0 0 50px;margin-left:auto;cursor:pointer}
+.membership-wrapper .toggle-switch input{position:absolute;opacity:0;width:0;height:0}
+.membership-wrapper .toggle-slider{position:absolute;inset:0;cursor:pointer;background-color:#ccc;transition:background-color .3s;border-radius:13px}
+.membership-wrapper .toggle-slider::before{content:none} /* membership.css (loaded on every page) adds a second knob */
+.membership-wrapper .toggle-slider::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s;box-shadow:0 1px 3px rgba(0,0,0,0.3)}
+.membership-wrapper .toggle-switch input:checked+.toggle-slider{background-color:#b8860b}
+.membership-wrapper .toggle-switch input:checked+.toggle-slider::after{transform:translateX(24px)}
+.membership-wrapper .toggle-switch input:focus-visible+.toggle-slider{outline:2px solid #b8860b;outline-offset:2px}
 .membership-wrapper .cal{flex:none;width:68px;height:68px;border-radius:50%;background:#f5ebd9;display:grid;place-items:center;margin-left:auto}
 .membership-wrapper .cta{text-align:center;padding:12px 0 34px}
 .membership-wrapper .cta .btn{height:32px;padding:0 36px;font-size:12px;background:#141414;color:#fff;border-radius:4px}
