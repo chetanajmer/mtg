@@ -29,8 +29,8 @@
   </div>
   <div class="mh-footer-col">
     <h4>Categories</h4>
-    @foreach(config('home_page.category_cards') as $card)
-      <a href="{{ isset($card['category']) ? url('category/' . $card['category']) : url('search?q=' . urlencode($card['search'])) }}">{{ $card['title'] }}</a>
+    @foreach($footerCategoryCards as $card)
+      <a href="{{ $card['url'] }}">{{ $card['title'] }}</a>
     @endforeach
   </div>
   <div class="mh-footer-col">

@@ -21,6 +21,7 @@ use App\Http\Controllers\Backend\OccasionController;
 use App\Http\Controllers\Backend\SupplyCountryController;
 use App\Http\Controllers\Backend\FilterSettingController;
 use App\Http\Controllers\Backend\HomeLogoController;
+use App\Http\Controllers\Backend\HomeCategoryCardController;
 use App\Http\Controllers\Backend\PreferenceController;
 use App\Http\Controllers\Backend\ExhibitionEventController;
 use App\Http\Controllers\Backend\CouponController;
@@ -628,6 +629,10 @@ Route::get('home-logos', [HomeLogoController::class, 'index'])->name('home-logos
 Route::post('home-logos', [HomeLogoController::class, 'store'])->name('home-logos.store');
 Route::post('home-logos/{id}', [HomeLogoController::class, 'update'])->name('home-logos.update')->where('id', '[0-9]+');
 Route::post('home-logos/{id}/remove', [HomeLogoController::class, 'destroy'])->name('home-logos.destroy')->where('id', '[0-9]+');
+Route::get('home-category-cards', [HomeCategoryCardController::class, 'index'])->name('home-category-cards.index');
+Route::post('home-category-cards', [HomeCategoryCardController::class, 'store'])->name('home-category-cards.store');
+Route::post('home-category-cards/{id}', [HomeCategoryCardController::class, 'update'])->name('home-category-cards.update')->where('id', '[0-9]+');
+Route::post('home-category-cards/{id}/remove', [HomeCategoryCardController::class, 'destroy'])->name('home-category-cards.destroy')->where('id', '[0-9]+');
 
 /*Supplies To*/
 Route::get('filter-settings', [FilterSettingController::class, 'index'])->name('filter-settings.index');

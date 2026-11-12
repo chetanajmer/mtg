@@ -44,21 +44,8 @@ class HomepageController extends Controller
 {
 	public function index()
 	{
-		$subcategories=Subcategory::where('is_active','online')->whereIn('slug',collect(config('home_page.category_cards'))->pluck('subcategories')->flatten()->filter()->all())->get()->keyBy('slug');
-
-		$categoryCards=[];
-		foreach(config('home_page.category_cards') as $card)
-		{
-			$links=[];
-			foreach($card['subcategories'] ?? [] as $slug)
-			{
-				if(isset($subcategories[$slug]))
-				{
-					$links[]=['label'=>$subcategories[$slug]->catname,'url'=>url('subcategory/'.$slug)];
-				}
-			}
-			$categoryCards[]=['title'=>$card['title'],'image'=>$card['image'],'links'=>$links,'url'=>url('category/'.$card['category'])];
-		}
+		// Managed in the admin panel: Setup & Config > Home Category Cards
+		$categoryCards=\App\Models\HomeCategoryCard::forHome();
 
 		$newArrivals=$this->newArrivals()->take(config('home_page.new_arrivals_count'));
 

@@ -66,7 +66,7 @@ class AdminPermission
             'category-section', 'categorysettingupdate', 'tag-section', 'tagsettingupdate', 'content-section', 'contentupdate',
         ],
         'config_status' => [
-            'filter-settings', 'admin/email-templates', 'admin/email-templates/*', 'supply-countries', 'supply-countries/*', 'home-logos', 'home-logos/*',
+            'filter-settings', 'admin/email-templates', 'admin/email-templates/*', 'supply-countries', 'supply-countries/*', 'home-logos', 'home-logos/*', 'home-category-cards', 'home-category-cards/*',
             'cms-settings', 'update-cms-settings', 'seo-settings', 'updateseo-settings', 'header-settings', 'updateheader-settings',
             'footerlevel1', 'updatefooterlevel1', 'footer-section*', 'footer-updatesection*', 'homepage-settings', 'homepage-update',
             'addprivacy', 'updateprivacy', 'addreturn', 'updatereturn', 'addshippment', 'updateshippment',

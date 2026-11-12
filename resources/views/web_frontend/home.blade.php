@@ -42,7 +42,7 @@
       @foreach($categoryCards as $card)
       <article class="mh-cat">
         <a href="{{ $card['url'] }}" class="mh-cat-top">
-          <img src="{{ asset('web_frontend/assets/images/home/' . $card['image']) }}" alt="" loading="lazy">
+          <img src="{{ $card['image'] }}" alt="" loading="lazy">
           <h3 class="mh-cat-title">{{ $card['title'] }}</h3>
         </a>
         <ul>

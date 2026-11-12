@@ -16,7 +16,7 @@
 .wrap{padding:0 36px}
 /* Banner: products sit on the right of the image, so the text stays on the left */
 /* Full width, flush under the header: cancel .wrap's 36px side padding */
-.hero{display:flex;align-items:center;margin:0 -36px;min-height:340px;padding:44px 36px;border-radius:0;overflow:hidden;background:#f6e9da url('{{ asset('web_frontend/assets/images/compare-hero-v2.webp') }}') right center/cover no-repeat}
+.hero{display:flex;align-items:center;margin:0 -36px;min-height:max(340px,27.5vw);padding:44px 36px;border-radius:0;overflow:hidden;background:#f6e9da url('{{ asset('web_frontend/assets/images/compare-hero-v2.webp') }}') right bottom/cover no-repeat}
 .hero-text{max-width:560px}
 .eyebrow{font-size:12.5px;letter-spacing:2.3px;font-weight:500;margin-bottom:5px}
 h1{font-size:50px;font-weight:800;letter-spacing:-1.5px;line-height:1.1}
