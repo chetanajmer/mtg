@@ -6,24 +6,20 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/account-settings.css') }}">
-<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/dashboard-new.css') }}">
 <style>
+/* Colours of the rest of the portal (style.css) */
 .branding-assets-page {
-  --gold: #b8860b;
-  --gold-dark: #8b6914;
-  --gold-text: #8b6914;
-  --cream: #fff8dc;
-  --cream-border: #d4b896;
-  --ink: #000000;
-  --text: #333333;
-  --muted: #666666;
-  --line: #e0e0e0;
-  --line-soft: #f5f5f5;
-  background: #ffffff;
+  --gold: #c78113;
+  --gold-dark: #9a640e;
+  --gold-text: #9a640e;
+  --cream: #fff7e9;
+  --cream-border: #ecd3a6;
+  --ink: #111214;
+  --text: #16181c;
+  --muted: #667080;
+  --line: #dfe3e8;
+  --line-soft: #f4f5f6;
   color: var(--text);
-  padding: 14px 0 60px;
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 /* Welcome Banner */
@@ -608,22 +604,26 @@
   $brandingOptions = \App\Models\Branding_option::all();
 @endphp
 
-<div class="branding-assets-page">
-  <div class="container-fluid px-4 px-xl-5">
+<div class="dashboard-wrapper">
 
-    <nav class="account-breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a>
-      <i class="bi bi-chevron-right"></i>
-      <a href="{{ route('corporate.portal') }}">My Account</a>
-      <i class="bi bi-chevron-right"></i>
-      <span>Branding Assets</span>
-    </nav>
+<aside class="sidebar">
+  <button class="company"><i class="bi bi-buildings"></i><span><strong>{{ $userName }}</strong><small>Switch Company <i class="bi bi-arrow-right"></i></small></span></button>
+  <nav>
+    <a href="{{ route('corporate.portal') }}"><i class="bi bi-gift"></i>Dashboard</a>
+    <a href="/orders"><i class="bi bi-cart3"></i>Orders</a>
+    <a href="/corporate-addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
+    <a class="active" href="{{ route('branding-assets.index') }}"><i class="bi bi-image"></i>Branding Assets</a>
+    <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
+    <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
+    <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('planner.index') }}"><i class="bi bi-calculator"></i>Budget Planner</a>
+    <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
+    <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
+  </nav>
+  <div class="help"><i class="bi bi-headset"></i><div><strong>Need Help?</strong><p>Your dedicated account manager is here.</p></div><a class="outline full help-link" href="mailto:info@morethangiftz.com?subject=Help%20with%20my%20account">Contact Us <i class="bi bi-arrow-right"></i></a><a class="help-call" href="tel:+971557863450"><i class="bi bi-telephone"></i> +971 55 786 3450</a></div>
+</aside>
 
-    <div class="account-layout">
-
-      @include('web_frontend.partials.corporate-sidebar', ['activePage' => 'branding'])
-
-      <main class="account-main">
+<main class="content branding-assets-page">
 
         <!-- Welcome Banner -->
         <div class="branding-banner">
@@ -681,7 +681,7 @@
                 </div>
                 <div class="asset-preview">
                   @if(in_array(strtolower($asset->file_type), ['png', 'jpg', 'jpeg', 'webp']))
-                    <img src="{{ asset('storage/' . $asset->file_path) }}" alt="{{ $asset->asset_name }}">
+                    <img src="{{ $asset->file_url }}" alt="{{ $asset->asset_name }}">
                   @else
                     <i class="bi bi-file-earmark document-icon {{ strtolower($asset->file_type) }}"></i>
                   @endif
@@ -735,9 +735,7 @@
           </div>
         @endif
 
-      </main>
-    </div>
-  </div>
+</main>
 </div>
 
 <!-- Toaster Notification -->
@@ -1053,14 +1051,13 @@ $(document).ready(function() {
 
     $.get('{{ route('branding-assets.show', '__ID__') }}'.replace('__ID__', id), function(data) {
       $('#editAssetId').val(data.id);
-      $('#editAssetPath').val(data.file_path);
       $('#editAssetName').val(data.asset_name);
       $('#editAssetDescription').val(data.description || '');
 
       // Show image preview if it's an image file
       if (['PNG', 'JPG', 'JPEG', 'WEBP'].includes(data.file_type)) {
         $('#editImagePreviewGroup').show();
-        $('#editImagePreviewImg').attr('src', '/storage/' + data.file_path);
+        $('#editImagePreviewImg').attr('src', data.file_url);
       } else {
         $('#editImagePreviewGroup').hide();
       }
@@ -1123,10 +1120,10 @@ $(document).ready(function() {
       var previewContent = $('#previewContent');
 
       if (['PNG', 'JPG', 'JPEG', 'WEBP'].includes(data.file_type)) {
-        var imagePath = '/storage/' + data.file_path;
+        var imagePath = data.file_url;
         previewContent.html('<img src="' + imagePath + '" style="max-width: 100%; max-height: 500px; object-fit: contain;">');
       } else if (data.file_type === 'PDF') {
-        var pdfPath = '/storage/' + data.file_path;
+        var pdfPath = data.file_url;
         previewContent.html('<embed src="' + pdfPath + '" type="application/pdf" width="100%" height="500px">');
       } else {
         previewContent.html('<p>Preview not available for this file type.</p><a href="' + '{{ route('branding-assets.download', '__ID__') }}'.replace('__ID__', id) + '" class="btn-download" style="display: inline-block; margin-top: 16px;">Download File</a>');

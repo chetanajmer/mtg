@@ -69,6 +69,7 @@ class BrandController extends Controller
   public function edit($slug)
   {
     $items =DB::Table('brands')->select('*')->where('slug',$slug)->first();
+    abort_unless($items, 404); // unknown record: not found page, not a crash
     return view('backend.brand.edit-brands',compact('items'));
   }
 

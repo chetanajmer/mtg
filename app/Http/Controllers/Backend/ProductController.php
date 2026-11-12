@@ -659,6 +659,7 @@ class ProductController extends Controller
         $subcategory=Subcategory::all();
 
         $items =DB::Table('products')->select('*')->where('slug',$slug)->first();
+        abort_unless($items, 404); // unknown record: not found page, not a crash
 
         $product_id=$items->id;
 

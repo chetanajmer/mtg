@@ -108,4 +108,24 @@ class Order extends Model
             ? 'Completed'
             : $title . ' · ' . OrderStepState::label($this->step_state);
     }
+
+    /**
+     * The next website order number (the orderids counter, from 10001). Call it inside the transaction that saves
+     * the order. orderid is unique in that table (InnoDB): if two requests reach the same number, the second one
+     * takes the next number instead of a duplicate being saved.
+     */
+    public static function nextOrderNumber()
+    {
+        for ($try = 1; ; $try++) {
+            $orderid = ((int) \Illuminate\Support\Facades\DB::table('orderids')->lockForUpdate()->max('orderid') ?: 10000) + 1;
+            try {
+                \Illuminate\Support\Facades\DB::table('orderids')->insert(['orderid' => $orderid]);
+                return $orderid;
+            } catch (\Illuminate\Database\QueryException $e) {
+                if ($try >= 5 || ($e->errorInfo[1] ?? null) !== 1062) {
+                    throw $e;
+                }
+            }
+        }
+    }
 }

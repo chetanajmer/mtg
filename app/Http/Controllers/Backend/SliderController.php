@@ -66,6 +66,7 @@ class SliderController extends Controller
     	
     	
     	$items =DB::Table('sliders')->select('*')->where('slug',$slug)->first();
+    	abort_unless($items, 404); // unknown record: not found page, not a crash
      	return view('backend.slider.edit-slider',compact('items'));
 
     }

@@ -7,7 +7,6 @@
 
 @section('styles')
 <link rel="stylesheet" href="{{ asset('web_frontend/assets/css/reports.css') }}">
-<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/orders-new.css') }}">
 @endsection
 
 @section('content')
@@ -20,27 +19,37 @@
   $downloadQuery = http_build_query(array_filter($query));
 @endphp
 
-<div class="orders-page">
-  <div class="container-fluid px-4 px-xl-5">
+<div class="dashboard-wrapper">
 
-    <nav class="account-breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a>
-      <i class="bi bi-chevron-right"></i>
-      <a href="{{ route('corporate.portal') }}">My Account</a>
-      <i class="bi bi-chevron-right"></i>
-      <span>Reports</span>
-    </nav>
+<aside class="sidebar">
+  <button class="company"><i class="bi bi-buildings"></i><span><strong>{{ $userName }}</strong><small>Switch Company <i class="bi bi-arrow-right"></i></small></span></button>
+  <nav>
+    <a href="{{ route('corporate.portal') }}"><i class="bi bi-gift"></i>Dashboard</a>
+    <a href="/orders"><i class="bi bi-cart3"></i>Orders</a>
+    <a href="/corporate-addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
+    <a href="{{ route('branding-assets.index') }}"><i class="bi bi-image"></i>Branding Assets</a>
+    <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
+    <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
+    <a class="active" href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('planner.index') }}"><i class="bi bi-calculator"></i>Budget Planner</a>
+    <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
+    <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
+  </nav>
+  <div class="help"><i class="bi bi-headset"></i><div><strong>Need Help?</strong><p>Your dedicated account manager is here.</p></div><a class="outline full help-link" href="mailto:info@morethangiftz.com?subject=Help%20with%20my%20account">Contact Us <i class="bi bi-arrow-right"></i></a><a class="help-call" href="tel:+971557863450"><i class="bi bi-telephone"></i> +971 55 786 3450</a></div>
+</aside>
 
-    <div class="account-layout">
-
-      @include('web_frontend.partials.corporate-sidebar', ['activePage' => 'reports'])
-
-      <main class="account-main">
-
-        <div class="orders-head">
-          <h1>Reports</h1>
-          <p>Your orders, spending and approvals at a glance, with downloads for your records.</p>
-        </div>
+<main class="content">
+  <section class="hero" style="min-height: 150px;">
+    <div style="width: 100%;">
+      <nav style="margin-bottom: 10px; font-size: 14px; color: #6b7280;">
+        <a href="{{ route('corporate.portal') }}" style="color: #6b7280; text-decoration: none;">Corporate Portal</a>
+        <span style="margin: 0 8px;">›</span>
+        <span style="color: #374151;">Reports</span>
+      </nav>
+      <h1>Reports</h1>
+      <p>Your orders, spending and approvals at a glance, with downloads for your records.</p>
+    </div>
+  </section>
 
   <section class="rp-filters">
     <div class="rp-periods" role="group" aria-label="Period">
@@ -136,9 +145,6 @@
       </div>
     @endif
   </section>
-
-      </main>
-    </div>
-  </div>
+</main>
 </div>
 @endsection

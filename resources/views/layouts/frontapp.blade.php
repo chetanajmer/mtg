@@ -280,45 +280,7 @@ var dangerClick = function(message){
 
 </script>
 
-<script>
-$(document).ready(function(){
-$("#option-choice-form").submit(function (e) {
-  e.preventDefault();
-         $.ajax({
-                url:"{{ route('addtocart') }}",
-                method:"POST",
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                data: $('#option-choice-form').serializeArray(),
-                success:function (data) 
-                {
-                  console.log(data);
-                  successClick(data);
-                  $( "#cart_count" ).load(window.location.href + " #cart_count" );
-                } 
-              });
-         });
-});
-
-
-$(document).ready(function(){
-$("#variant-form").submit(function (e) {
-  e.preventDefault();
-         $.ajax({
-                url:"{{ route('addtocart') }}",
-                method:"POST",
-                headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')},
-                data: $('#variant-form').serializeArray(),
-                success:function (data) 
-                {
-                  console.log(data);
-                  successClick(data);
-                  $( "#cart_count" ).load(window.location.href + " #cart_count" );
-                   $('#exampleModal').modal('hide');
-                } 
-              });
-         });
-});
-</script>
+{{-- Old add-to-cart scripts removed: they posted to /addtocart, which no longer exists (FX-09) --}}
 <script>
 function get_qty()
 {

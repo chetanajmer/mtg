@@ -63,9 +63,7 @@ class CustomOrderController extends Controller
         $message = implode("\n", $summary);
 
         [$enquiry, $rows] = DB::transaction(function () use ($data, $user, $name, $phone, $message) {
-            $last = DB::table('orderids')->lockForUpdate()->max('orderid');
-            $orderid = $last ? ((int) $last + 1) : 10001;
-            DB::table('orderids')->insert(['orderid' => $orderid]);
+            $orderid = \App\Models\Order::nextOrderNumber();
 
             $enquiry = new Enquiry();
             $enquiry->orderid = $orderid;

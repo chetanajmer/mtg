@@ -52,6 +52,7 @@ class PortfolioController extends Controller
   	$division=Portfolio_division::where('is_active','online')->get();
   	$category=Portfolio_category::where('is_active','online')->get();
   	$items=Portfolio::where('slug',$request->slug)->first();
+  	abort_unless($items, 404); // unknown record: not found page, not a crash
     return view('backend.portfolio.edit-portfolio',compact('division','category','items'));
   }
 
@@ -325,6 +326,7 @@ class PortfolioController extends Controller
   public function edit_division(Request $request)
   {
   	$item=Portfolio_division::where('slug',$request->slug)->first();
+  	abort_unless($item, 404); // unknown record: not found page, not a crash
     return view('backend.portfolio.edit-division',compact('item'));
   }
 
@@ -387,6 +389,7 @@ class PortfolioController extends Controller
   public function edit_portfolio_category(Request $request)
   {
   	$item=Portfolio_category::where('slug',$request->slug)->first();
+  	abort_unless($item, 404); // unknown record: not found page, not a crash
     return view('backend.portfolio.edit-category',compact('item'));
   }
 
@@ -464,6 +467,7 @@ class PortfolioController extends Controller
   {
   	$category=Portfolio_category::where('is_active','online')->get();
   	$item=Portfolio_subcategory::where('slug',$request->slug)->first();
+  	abort_unless($item, 404); // unknown record: not found page, not a crash
     return view('backend.portfolio.edit-subcategory',compact('item','category'));
   }
 

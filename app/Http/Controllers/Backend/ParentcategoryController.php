@@ -125,6 +125,7 @@ class ParentcategoryController extends Controller
     public function edit($slug)
     {
     	$items =DB::Table('parentcategories')->select('*')->where('slug',$slug)->first();
+    	abort_unless($items, 404); // unknown record: not found page, not a crash
     	return view('backend.parentcategory.edit-categories',compact('items'));
     }
 

@@ -67,6 +67,7 @@ class CouponController extends Controller
     $subcategories=Subcategory::where('is_active','online')->get();
     $products=Product::where('is_active','online')->get();
     $items =DB::Table('coupons')->select('*')->where('slug',$slug)->first();
+    abort_unless($items, 404); // unknown record: not found page, not a crash
     return view('backend.coupon.edit-coupons',compact('items','categories','products','parentcategories','subcategories'));
   }
 

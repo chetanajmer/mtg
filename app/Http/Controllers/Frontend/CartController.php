@@ -95,15 +95,20 @@ class CartController extends Controller
             'quantity' => 'nullable|integer|min:1',
         ]);
 
-        $this->addProductToCart(Product::find($request->product_id), $request->quantity);
+        $product = Product::find($request->product_id);
+        if ($product->is_active !== 'online') {
+            return response()->json(['success' => false, 'message' => 'This product is no longer available.'], 422);
+        }
+        $this->addProductToCart($product, $request->quantity);
 
-        $count = $this->cartQuery()->sum('quantity');
+        // Both are the number of lines, which is what the header cart badge shows
+        $lines = $this->lineCount();
 
         return response()->json([
             'success' => true,
             'message' => 'Added to Cart!',
-            'count' => $count,
-            'items' => $this->cartQuery()->count(),
+            'count' => $lines,
+            'items' => $lines,
         ]);
     }
 
@@ -225,6 +230,16 @@ class CartController extends Controller
             return redirect()->route('cart.index');
         }
 
+        // A product taken offline (or deleted) since it was added can't be quoted: take it out and tell the customer
+        $online = Product::whereIn('id', $items->pluck('product_id'))->where('is_active', 'online')->pluck('id')->all();
+        $gone = $items->reject(function ($item) use ($online) { return in_array($item->product_id, $online); });
+        if ($gone->isNotEmpty()) {
+            $this->cartQuery()->whereIn('id', $gone->pluck('id'))->delete();
+            $request->session()->flash('error', $gone->pluck('name')->implode(', ') . ($gone->count() === 1 ? ' is' : ' are')
+                . ' no longer available and ' . ($gone->count() === 1 ? 'was' : 'were') . ' removed from your cart. Please check your cart and send it again.');
+            return redirect()->route('cart.index');
+        }
+
         $user = DB::table('storeusers')->where('id', session()->get('userid'))->first();
 
         $subtotal = $items->sum(function ($item) {
@@ -236,10 +251,7 @@ class CartController extends Controller
         $customerName = trim(($user->fname ?? '') . ' ' . ($user->lname ?? '')) ?: 'Customer';
 
         $enquiry = DB::transaction(function () use ($request, $items, $user, $customerName, $subtotal, $tax, $total) {
-            // Same order numbers as the old enquiry flow (orderids counter)
-            $last = DB::table('orderids')->lockForUpdate()->max('orderid');
-            $orderid = $last ? ((int) $last + 1) : 10001;
-            DB::table('orderids')->insert(['orderid' => $orderid]);
+            $orderid = \App\Models\Order::nextOrderNumber();
 
             $enquiry = new Enquiry();
             $enquiry->orderid = $orderid;

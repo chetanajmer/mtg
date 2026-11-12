@@ -210,9 +210,6 @@ Route::post('/corporate-addresses', [UsersController::class, 'storeCorporateAddr
 Route::post('/corporate-addresses/{id}/select', [UsersController::class, 'selectCorporateAddress'])
     ->name('corporate.addresses.select');
 
-Route::match(['put', 'post'], '/corporate-addresses/{id}', [UsersController::class, 'updateSingleCorporateAddress'])
-    ->where('id', '[0-9]+')
-    ->name('corporate.addresses.update-single');
 
 Route::delete('/corporate-addresses/{id}', [UsersController::class, 'deleteCorporateAddress'])
     ->name('corporate.addresses.delete');
@@ -241,6 +238,9 @@ Route::delete('/branding-assets/{id}', [BrandingAssetController::class, 'destroy
     ->middleware('corporate.auth');
 Route::get('/branding-assets/{id}/download', [BrandingAssetController::class, 'download'])
     ->name('branding-assets.download')
+    ->middleware('corporate.auth');
+Route::get('/branding-assets/{id}/file', [BrandingAssetController::class, 'file'])
+    ->name('branding-assets.file')->where('id', '[0-9]+')
     ->middleware('corporate.auth');
 
 Route::match(['get', 'post'], '/corporate/logout', [UsersController::class, 'dostorelogout'])
@@ -338,11 +338,10 @@ Route::get('productl8', [ApiController::class, 'productl8'])->name('productl8');
 Route::get('productl9', [ApiController::class, 'productl9'])->name('productl9');
 
 
-Route::post('addtocart', [ApiController::class, 'addtocart'])->name('addtocart');
-Route::post('getcatproducts', [ApiController::class, 'getcatproducts'])->name('getcatproducts');
-Route::post('getsubcatproducts', [ApiController::class, 'getsubcatproducts'])->name('getsubcatproducts');
-
-Route::post('cartdata', [ApiController::class, 'cartdata'])->name('cartdata');
+// Removed (security, FX-09): addtocart, getcatproducts, getsubcatproducts, cartdata, getproductdetails,
+// getbrandproducts, searchproduct, stocknotify, b2benquiry and abandancart, all from the old Angular
+// storefront and unused by this site. addtocart could change any customer's email from just a user id
+// (account takeover) and started PayTabs payments at an amount the browser chose.
 Route::get('gethomedata', [ApiController::class, 'gethomedata'])->name('gethomedata');
 
 Route::get('getallparentcategories', [ApiController::class, 'getallparentcategories'])->name('getallparentcategories');
@@ -351,10 +350,6 @@ Route::get('getallbrands', [ApiController::class, 'getallbrands'])->name('getall
 
 Route::post('addsubscriber', [ApiController::class, 'addsubscriber'])->name('addsubscriber')->middleware('throttle:10,1');
 
-Route::post('getproductdetails', [ApiController::class, 'getproductdetails'])->name('getproductdetails');
-Route::post('getbrandproducts', [ApiController::class, 'getbrandproducts'])->name('getbrandproducts');
-
-Route::post('searchproduct', [ApiController::class, 'searchproduct'])->name('searchproduct');
 
 Route::any('paytab_returnurl', [ApiController::class, 'paytab_returnurl'])->name('paytab_returnurl');
 
@@ -363,9 +358,6 @@ Route::any('paytab_returnurl', [ApiController::class, 'paytab_returnurl'])->name
 // updateuserdetails. They read or changed any customer's account (including
 // the password) from just a user id, with no login.
 
-Route::post('stocknotify', [ApiController::class, 'stocknotify'])->name('stocknotify')->middleware('throttle:10,1');
-Route::post('b2benquiry', [ApiController::class, 'b2benquiry'])->name('b2benquiry')->middleware('throttle:10,1');
-Route::post('abandancart', [ApiController::class, 'abandancart'])->name('abandancart');
 // Removed: enquiry, search_or_update and contact (old Angular storefront). They
 // emailed customer enquiries and orders to outside addresses (FX-02); website
 // quotes go through CartController::sendEnquiry.

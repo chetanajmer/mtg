@@ -93,6 +93,7 @@ class ChildsubcategoryController extends Controller
     {
     	$categories=DB::select('select * from subcategories');
     	$items =DB::Table('childsubcategories')->select('*')->where('slug',$slug)->first();
+    	abort_unless($items, 404); // unknown record: not found page, not a crash
     	return view('backend.childsubcategory.edit-categories',compact('items','categories'));
     }
 
