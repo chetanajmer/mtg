@@ -6,64 +6,20 @@
 @endsection
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/account-settings.css') }}">
-<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/dashboard-new.css') }}">
 <style>
+/* Colours of the rest of the portal (style.css) */
 .branding-assets-page {
-  --gold: #b8860b;
-  --gold-dark: #8b6914;
-  --gold-text: #8b6914;
-  --cream: #fff8dc;
-  --cream-border: #d4b896;
-  --ink: #000000;
-  --text: #333333;
-  --muted: #666666;
-  --line: #e0e0e0;
-  --line-soft: #f5f5f5;
-  background: #ffffff;
+  --gold: #b98a35;
+  --gold-dark: #9a6b16;
+  --gold-text: #9a6b16;
+  --cream: #fbf5ea;
+  --cream-border: #e2c07a;
+  --ink: #111214;
+  --text: #16181c;
+  --muted: #667080;
+  --line: #dfe3e8;
+  --line-soft: #f4f5f6;
   color: var(--text);
-  padding: 14px 0 60px;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* Welcome Banner */
-.branding-banner {
-  background: var(--cream);
-  border: 1px solid var(--cream-border);
-  border-radius: 8px;
-  padding: 24px 32px;
-  margin-bottom: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 32px;
-}
-.branding-banner-content {
-  flex: 1;
-}
-.branding-banner h1 {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--ink);
-  margin: 0 0 8px;
-  letter-spacing: -0.5px;
-}
-.branding-banner p {
-  font-size: 15px;
-  color: var(--muted);
-  margin: 0;
-}
-.branding-banner-image {
-  width: 200px;
-  height: 100px;
-  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  font-size: 18px;
-  font-weight: 700;
-  flex-shrink: 0;
 }
 
 /* Search and Filter Toolbar */
@@ -83,7 +39,7 @@
   width: 100%;
   height: 44px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 0 44px 0 16px;
   font-size: 14px;
   color: var(--text);
@@ -110,7 +66,7 @@
   width: 100%;
   height: 44px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 0 40px 0 16px;
   font-size: 14px;
   color: var(--text);
@@ -135,18 +91,19 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
+  height: 46px;
+  padding: 0 20px;
   background: var(--ink);
   color: #fff;
   border: none;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
   transition: all .2s;
 }
 .btn-upload:hover {
-  background: #333;
+  background: #33363b;
 }
 .btn-upload i {
   font-size: 18px;
@@ -190,7 +147,7 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 .asset-card-menu button:hover {
-  background: #f5f5f5;
+  background: var(--line-soft);
   border-color: #999;
 }
 .asset-card-menu button i {
@@ -203,7 +160,7 @@
   top: 100%;
   right: 0;
   background: #ffffff;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--line);
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 1000;
@@ -222,7 +179,7 @@
   background: none;
   cursor: pointer;
   font-size: 14px;
-  color: #333333;
+  color: var(--text);
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
@@ -244,32 +201,32 @@
   flex-shrink: 0;
 }
 .asset-card .dropdown-item[data-action="edit"] {
-  background-color: #fff3e0 !important;
-  color: #333333 !important;
-  border: 1px solid #ff9800 !important;
+  background-color: #fff !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--line) !important;
 }
 .asset-card .dropdown-item[data-action="edit"] i {
-  color: #ff9800 !important;
+  color: var(--ink) !important;
 }
 .asset-card .dropdown-item[data-action="edit"]:hover {
-  background-color: #ffe0b2 !important;
-  border-color: #f57c00 !important;
+  background-color: var(--line-soft) !important;
+  border-color: var(--ink) !important;
 }
 .asset-card .dropdown-item[data-action="delete"] {
-  color: #d32f2f !important;
-  background-color: #ffebee !important;
-  border: 1px solid #ef5350 !important;
+  color: #b42318 !important;
+  background-color: #fff !important;
+  border: 1px solid #f1c4c0 !important;
 }
 .asset-card .dropdown-item[data-action="delete"] i {
-  color: #ef5350 !important;
+  color: #b42318 !important;
 }
 .asset-card .dropdown-item[data-action="delete"]:hover {
-  background-color: #ffcdd2 !important;
-  border-color: #e53935 !important;
+  background-color: #fdecea !important;
+  border-color: #b42318 !important;
 }
 .asset-card .dropdown-divider {
   height: 1px;
-  background-color: #e0e0e0;
+  background-color: var(--line);
   margin: 6px 0;
   width: 100%;
 }
@@ -325,7 +282,7 @@
   gap: 6px;
   padding: 10px 16px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 5px;
   background: #fff;
   color: var(--text);
   font-size: 13px;
@@ -334,8 +291,8 @@
   transition: all .2s;
 }
 .btn-preview:hover {
-  border-color: var(--gold);
-  color: var(--gold);
+  border-color: var(--ink);
+  color: var(--ink);
 }
 .btn-download {
   flex: 1;
@@ -347,14 +304,14 @@
   background: var(--ink);
   color: #fff;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all .2s;
 }
 .btn-download:hover {
-  background: #333;
+  background: #33363b;
 }
 
 /* Modal */
@@ -414,7 +371,7 @@
 .form-group textarea {
   width: 100%;
   border: 1px solid #d0d0d0 !important;
-  border-radius: 4px;
+  border-radius: 5px;
   padding: 0 16px;
   font-size: 14px;
   color: var(--text);
@@ -444,9 +401,9 @@
 }
 
 .file-upload-area {
-  border: 2px dashed #b8860b;
-  border-left: 4px solid #b8860b;
-  background: #faf8f0;
+  border: 2px dashed var(--gold);
+  border-left: 4px solid var(--gold);
+  background: #fffdf9;
   border-radius: 8px;
   padding: 20px 16px;
   text-align: center;
@@ -456,25 +413,25 @@
 }
 
 .file-upload-area:hover {
-  background: #f5f0e0;
-  border-color: #996b0a;
+  background: var(--cream);
+  border-color: var(--gold-text);
 }
 
 .file-upload-area.dragover {
-  background: #efe8d0;
-  border-color: #7a5000;
+  background: #f6ecd9;
+  border-color: #7d5a16;
 }
 
 .upload-icon {
   font-size: 32px;
-  color: #b8860b;
+  color: var(--gold);
   margin-bottom: 8px;
 }
 
 .upload-title {
   font-size: 14px;
   font-weight: 700;
-  color: #1e1b4b;
+  color: var(--ink);
   margin-bottom: 4px;
 }
 
@@ -488,7 +445,7 @@
   margin-top: 12px;
   padding: 8px 12px;
   background: #fff;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 13px;
   color: #374151;
   display: none;
@@ -507,7 +464,7 @@
   flex: 1;
   padding: 12px 24px;
   border: 1px solid var(--line);
-  border-radius: 4px;
+  border-radius: 5px;
   background: #fff !important;
   color: var(--text) !important;
   font-size: 14px;
@@ -517,16 +474,16 @@
 .btn-save {
   flex: 1;
   padding: 12px 24px;
-  background: #000000 !important;
-  color: #ffffff !important;
+  background: var(--ink) !important;
+  color: #fff !important;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
 }
 .btn-save:hover {
-  background: #333 !important;
+  background: #33363b !important;
 }
 
 /* Empty State */
@@ -564,14 +521,6 @@
 
 /* Responsive */
 @media (max-width: 991.98px) {
-  .branding-banner {
-    flex-direction: column;
-    text-align: center;
-  }
-  .branding-banner-image {
-    width: 100%;
-    max-width: 300px;
-  }
   .branding-toolbar {
     flex-direction: column;
     align-items: stretch;
@@ -586,12 +535,6 @@
 }
 
 @media (max-width: 767.98px) {
-  .branding-assets-page {
-    padding-top: 10px;
-  }
-  .branding-banner h1 {
-    font-size: 24px;
-  }
   .assets-grid {
     grid-template-columns: 1fr;
   }
@@ -608,33 +551,38 @@
   $brandingOptions = \App\Models\Branding_option::all();
 @endphp
 
-<div class="branding-assets-page">
-  <div class="container-fluid px-4 px-xl-5">
+<div class="dashboard-wrapper">
 
-    <nav class="account-breadcrumb" aria-label="Breadcrumb">
-      <a href="/">Home</a>
-      <i class="bi bi-chevron-right"></i>
-      <a href="{{ route('corporate.portal') }}">My Account</a>
-      <i class="bi bi-chevron-right"></i>
-      <span>Branding Assets</span>
-    </nav>
+<aside class="sidebar">
+  <button class="company"><i class="bi bi-buildings"></i><span><strong>{{ $userName }}</strong><small>Switch Company <i class="bi bi-arrow-right"></i></small></span></button>
+  <nav>
+    <a href="{{ route('corporate.portal') }}"><i class="bi bi-gift"></i>Dashboard</a>
+    <a href="/orders"><i class="bi bi-cart3"></i>Orders</a>
+    <a href="/corporate-addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
+    <a class="active" href="{{ route('branding-assets.index') }}"><i class="bi bi-image"></i>Branding Assets</a>
+    <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
+    <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
+    <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('planner.index') }}"><i class="bi bi-calculator"></i>Budget Planner</a>
+    <a href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
+    <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
+  </nav>
+  <div class="help"><i class="bi bi-headset"></i><div><strong>Need Help?</strong><p>Your dedicated account manager is here.</p></div><a class="outline full help-link" href="mailto:info@morethangiftz.com?subject=Help%20with%20my%20account">Contact Us <i class="bi bi-arrow-right"></i></a><a class="help-call" href="tel:+971557863450"><i class="bi bi-telephone"></i> +971 55 786 3450</a></div>
+</aside>
 
-    <div class="account-layout">
+<main class="content branding-assets-page">
 
-      @include('web_frontend.partials.corporate-sidebar', ['activePage' => 'branding'])
-
-      <main class="account-main">
-
-        <!-- Welcome Banner -->
-        <div class="branding-banner">
-          <div class="branding-banner-content">
-            <h1>Branding Assets</h1>
-            <p>Manage your uploaded branding assets, logos and documents.</p>
-          </div>
-          <div class="branding-banner-image">
-            Corporate<br>Gifting
-          </div>
-        </div>
+  <section class="hero" style="min-height: 150px;">
+    <div style="width: 100%;">
+      <nav style="margin-bottom: 10px; font-size: 14px; color: #6b7280;">
+        <a href="{{ route('corporate.portal') }}" style="color: #6b7280; text-decoration: none;">Corporate Portal</a>
+        <span style="margin: 0 8px;">›</span>
+        <span style="color: #374151;">Branding Assets</span>
+      </nav>
+      <h1>Branding Assets</h1>
+      <p>Keep your logos, brand guidelines and artwork in one place, ready for your next order.</p>
+    </div>
+  </section>
 
         <!-- Search and Filter Toolbar -->
         <div class="branding-toolbar">
@@ -681,7 +629,7 @@
                 </div>
                 <div class="asset-preview">
                   @if(in_array(strtolower($asset->file_type), ['png', 'jpg', 'jpeg', 'webp']))
-                    <img src="{{ asset('storage/' . $asset->file_path) }}" alt="{{ $asset->asset_name }}">
+                    <img src="{{ $asset->file_url }}" alt="{{ $asset->asset_name }}">
                   @else
                     <i class="bi bi-file-earmark document-icon {{ strtolower($asset->file_type) }}"></i>
                   @endif
@@ -735,9 +683,7 @@
           </div>
         @endif
 
-      </main>
-    </div>
-  </div>
+</main>
 </div>
 
 <!-- Toaster Notification -->
@@ -812,7 +758,7 @@
       </div>
       <div class="form-group" id="editImagePreviewGroup" style="display: none;">
         <label>Current Image</label>
-        <div id="editImagePreview" style="width: 100%; border: 1px solid #e0e0e0; border-radius: 4px; padding: 12px; background: #f8f9fa; text-align: center;">
+        <div id="editImagePreview" style="width: 100%; border: 1px solid var(--line); border-radius: 5px; padding: 12px; background: #f8f9fa; text-align: center;">
           <img id="editImagePreviewImg" src="" alt="Current image" style="max-width: 100%; max-height: 300px; object-fit: contain;">
         </div>
       </div>
@@ -1075,7 +1021,6 @@ $(document).ready(function() {
 
     $.get('{{ route('branding-assets.show', '__ID__') }}'.replace('__ID__', id), function(data) {
       $('#editAssetId').val(data.id);
-      $('#editAssetPath').val(data.file_path);
       $('#editAssetName').val(data.asset_name);
       $('#editAssetDescription').val(data.description || '');
       // Fresh file box: no file picked from a previous edit
@@ -1085,7 +1030,7 @@ $(document).ready(function() {
       // Show image preview if it's an image file
       if (['PNG', 'JPG', 'JPEG', 'WEBP'].includes(data.file_type)) {
         $('#editImagePreviewGroup').show();
-        $('#editImagePreviewImg').attr('src', '/storage/' + data.file_path);
+        $('#editImagePreviewImg').attr('src', data.file_url);
       } else {
         $('#editImagePreviewGroup').hide();
       }
@@ -1148,10 +1093,10 @@ $(document).ready(function() {
       var previewContent = $('#previewContent');
 
       if (['PNG', 'JPG', 'JPEG', 'WEBP'].includes(data.file_type)) {
-        var imagePath = '/storage/' + data.file_path;
+        var imagePath = data.file_url;
         previewContent.html('<img src="' + imagePath + '" style="max-width: 100%; max-height: 500px; object-fit: contain;">');
       } else if (data.file_type === 'PDF') {
-        var pdfPath = '/storage/' + data.file_path;
+        var pdfPath = data.file_url;
         previewContent.html('<embed src="' + pdfPath + '" type="application/pdf" width="100%" height="500px">');
       } else {
         previewContent.html('<p>Preview not available for this file type.</p><a href="' + '{{ route('branding-assets.download', '__ID__') }}'.replace('__ID__', id) + '" class="btn-download" style="display: inline-block; margin-top: 16px;">Download File</a>');

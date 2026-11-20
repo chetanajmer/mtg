@@ -70,7 +70,7 @@
             <small>Quantity: {{ $item['quantity'] }} pcs</small>
           </div>
           <div class="es-item-price">
-            AED {{ number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 1)) }}
+            @if(($item['price'] ?? 0) > 0)AED {{ number_format(($item['price'] ?? 0) * ($item['quantity'] ?? 1)) }}@else Price to be confirmed @endif
             <small>(est.)</small>
           </div>
         </div>
@@ -79,7 +79,7 @@
       <div class="es-summary-totals">
         <div><span>Total Items</span><span>{{ $totalItems }}</span></div>
         <div><span>Total Quantity</span><span>{{ $totalQuantity }} pcs</span></div>
-        <div class="es-grand"><span>Estimated Total</span><span>AED {{ number_format($enquiry->total, 2) }}</span></div>
+        <div class="es-grand"><span>Estimated Total</span><span>@if($enquiry->total > 0)AED {{ number_format($enquiry->total, 2) }}@else To be confirmed @endif</span></div>
       </div>
     </aside>
   </div>

@@ -45,6 +45,7 @@ class FlipbookController extends Controller
   public function edit_flipbook(Request $request)
   {
   	$items_array=Flipbook::where('id',$request->id)->first();
+  	abort_unless($items_array, 404); // unknown record: not found page, not a crash
     return view('backend.flipbook.edit-flipbook',compact('items_array'));
   }
 

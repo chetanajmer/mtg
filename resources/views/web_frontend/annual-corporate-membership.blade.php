@@ -3,9 +3,7 @@
 @section('title', 'Annual Corporate Membership | More Than Giftz')
 
 @section('content')
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/annual-corporate-membership.css') }}">
+<link rel="stylesheet" href="{{ asset('web_frontend/assets/css/annual-corporate-membership.css') }}?v={{ filemtime(public_path('web_frontend/assets/css/annual-corporate-membership.css')) }}">
 
 <div class="membership-wrapper">
   <section class="hero">
@@ -16,7 +14,7 @@
       <p class="copy">Join our annual membership program and unlock exclusive pricing, premium benefits and a seamless corporate gifting experience all year round.</p>
       <div class="btns">
         <a href="#plans" class="btn dark">Choose Your Plan <span>&rarr;</span></a>
-        <a href="#" class="btn light">Talk to Our Team</a>
+        <a href="{{ url('contactus') }}" class="btn light">Talk to Our Team</a>
       </div>
       @if($stats->count())
       <div class="stats">
@@ -43,7 +41,7 @@
           <div class="medal {{ $plan->medalClass() }}"><i></i><u></u></div>
           <div>
             <h3>{{ $plan->name }}</h3>
-            @if($plan->tagline)<p @if($plan->is_popular) style="text-decoration:underline;text-decoration-color:#c9ad7a;text-underline-offset:3px" @endif>{{ $plan->tagline }}</p>@endif
+            @if($plan->tagline)<p @if($plan->is_popular) style="text-decoration:underline;text-decoration-color:#d6ad63;text-underline-offset:3px" @endif>{{ $plan->tagline }}</p>@endif
             @if($plan->description)<small>{{ $plan->description }}</small>@endif
           </div>
         </div>
@@ -71,7 +69,7 @@
 
     <div class="two">
       <div class="info">
-        <div class="circ"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#a47624" stroke-width="1.8"><path d="M20 8a8 8 0 0 0-14-2M4 4v3h3M4 16a8 8 0 0 0 14 2m2 2v-3h-3"/></svg></div>
+        <div class="circ"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#9a6b16" stroke-width="1.8"><path d="M20 8a8 8 0 0 0-14-2M4 4v3h3M4 16a8 8 0 0 0 14 2m2 2v-3h-3"/></svg></div>
         <div><h4>Auto-Renewal</h4><p>Keep enjoying uninterrupted benefits. Your membership auto-renews annually, so you never miss out on savings.</p></div>
         <label class="toggle-switch">
           <input type="checkbox" id="autoRenewal" checked>
@@ -79,14 +77,14 @@
         </label>
       </div>
       <div class="info">
-        <div class="circ" style="background:#f3f1ee"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v4c0 2 3.5 3 8 3s8-1 8-3V6M4 10v4c0 2 3.5 3 8 3s8-1 8-3v-4M4 14v4c0 2 3.5 3 8 3s8-1 8-3v-4"/></svg></div>
+        <div class="circ"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#222" stroke-width="1.6"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v4c0 2 3.5 3 8 3s8-1 8-3V6M4 10v4c0 2 3.5 3 8 3s8-1 8-3v-4M4 14v4c0 2 3.5 3 8 3s8-1 8-3v-4"/></svg></div>
         <div><h4>Credit Rollover</h4><p>Unused annual budget rolls over to the next year (As per your plan benefits). No value goes to waste.</p></div>
-        <div class="cal"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#a47624" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M12 13v5M9.5 15.5h5"/></svg></div>
+        <div class="cal"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#9a6b16" stroke-width="1.8"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18M12 13v5M9.5 15.5h5"/></svg></div>
       </div>
     </div>
 
     <div class="cta">
-      <a href="#" class="btn">Get Started Today &nbsp;&rarr;</a>
+      <a href="#plans" class="btn">Get Started Today &nbsp;&rarr;</a>
       <p>Have questions? Contact our corporate gifting experts.</p>
     </div>
   </main>

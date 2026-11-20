@@ -35,7 +35,7 @@
 
       <form action="{{ route('cart.register') }}" method="POST">
         @csrf
-        <input type="hidden" name="redirect" value="{{ route('corporate.portal') }}">
+        <input type="hidden" name="redirect" value="{{ request('redirect', route('corporate.portal')) }}">
 
         <div class="auth-field-row">
           <div class="auth-field">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderInvoice;
 use App\Services\OrderWorkflow;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -29,6 +30,15 @@ class CustomerOrderController extends Controller
             }
         }
         return $this->page($order, 'account', $actions, compact('shares'));
+    }
+
+    /** /orders/{orderid}/invoices/{number}: the logged-in customer's own invoice, ready to print */
+    public function invoice($orderid, $number)
+    {
+        $order = $this->ownOrder($orderid);
+        $invoice = OrderInvoice::where('order_id', $order->id)->where('number', $number)->firstOrFail();
+
+        return view('invoices.show', ['invoice' => $invoice, 'back' => route('customer.orders.show', $order->orderid)]);
     }
 
     /** POST /orders/{orderid}/steps/{step}/{action} */

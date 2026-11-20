@@ -75,6 +75,11 @@
 .ow-btn { border: 0; border-radius: 8px; padding: 9px 16px; font-weight: 600; cursor: pointer; font: inherit; font-weight: 600; }
 .ow-btn.primary { background: var(--ow-ink); color: #fff; }
 .ow-btn.good { background: var(--ow-done); color: #fff; }
+a.ow-btn { display: inline-block; text-decoration: none; }
+.ow-invoice { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin: 14px 0; padding: 12px 14px; border: 1px solid #cfe6d5; background: #f2faf4; border-radius: 10px; }
+.ow-invoice b, .ow-invoice small { display: block; }
+.ow-invoice small { color: #4b5563; margin-top: 2px; }
+.ow-invoice form { margin: 0; }
 .ow-btn.warn { background: #fff; color: var(--ow-bad); border: 1px solid var(--ow-bad); }
 .ow-btn:focus-visible, .ow a:focus-visible { outline: 2px solid var(--ow-accent); outline-offset: 2px; }
 .ow-alert { border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
@@ -113,7 +118,7 @@
             </div>
         </div>
         <div class="ow-figs">
-            <div class="ow-fig"><small>Order value</small><b>AED {{ number_format($order->total, 2) }}</b></div>
+            <div class="ow-fig"><small>Order value</small><b>{{ $order->totalLabel() }}</b></div>
             <div class="ow-fig"><small>Received</small><b>{{ optional($order->created_at)->format('d M Y') }}</b></div>
             <div class="ow-fig"><small>Now at</small><b>Step {{ $order->current_step }}</b> <span class="ow-pill {{ $order->step_state }}">{{ \App\Models\OrderStepState::label($order->step_state) }}</span></div>
             <div class="ow-fig"><small>In this step</small><b>{{ $daysInStep }} {{ $daysInStep == 1 ? 'day' : 'days' }}</b></div>
@@ -181,6 +186,23 @@
                     <div class="ow-alert info">The customer shared {{ $ideas }} design idea{{ $ideas > 1 ? 's' : '' }} / file set{{ $ideas > 1 ? 's' : '' }} on this step. See the timeline below.</div>
                 @endif
 
+                {{-- Steps 3 and 7: payment invoice, issued once the payment is recorded --}}
+                @php $invoiceType = \App\Services\OrderInvoices::typeForStep($selected); @endphp
+                @if($invoiceType && $current->state === 'done')
+                    @php $stepInvoice = $order->invoices->firstWhere('type', $invoiceType); $invoiceLabel = \App\Services\OrderInvoices::TYPES[$invoiceType]['label']; @endphp
+                    <div class="ow-invoice">
+                        @if($stepInvoice)
+                            <div><b>Invoice {{ $stepInvoice->number }}</b><small>Issued {{ optional($stepInvoice->issued_at)->format('d M Y, H:i') }}{{ $stepInvoice->issued_by ? ' by ' . $stepInvoice->issued_by : '' }} · AED {{ number_format($stepInvoice->amount, 2) }} received · visible to the customer</small></div>
+                            <a class="ow-btn primary" href="{{ route('orders.invoice.show', [$order->id, $stepInvoice->id]) }}" target="_blank" rel="noopener">View / print invoice</a>
+                        @else
+                            <div><b>{{ ucfirst($invoiceLabel) }} invoice</b><small>Issue the invoice confirming the AED {{ number_format($data['amount'] ?? 0, 2) }} {{ $invoiceType }} was received. The customer will see it on their order page and get an email.</small></div>
+                            <form method="POST" action="{{ route('orders.invoice.issue', [$order->id, $invoiceType]) }}" onsubmit="return confirm('Issue the {{ $invoiceLabel }} invoice now? It gets a permanent number and is shown to the customer.');">@csrf
+                                <button class="ow-btn good">Generate invoice</button>
+                            </form>
+                        @endif
+                    </div>
+                @endif
+
                 @if($blocked && $current->state !== 'done')
                     <div class="ow-alert info">Finish step {{ $openBefore->first()->step }} ({{ $steps[$openBefore->first()->step]['title'] }}) before working on this step.@if($isSuper) As a superadmin you can tick "Override order" on a form to skip ahead.@endif</div>
                 @endif
@@ -195,6 +217,7 @@
                     @if($type === 'review')
                         <form class="ow-form" method="POST" action="{{ $form('confirm') }}">@csrf
                             <h3>Confirm the order</h3>
+                            <p style="margin:0 0 10px;color:#7a5200">@if($order->isCustom())Custom request: agree the price, then enter the total including VAT.@else Enter the agreed total including VAT.@endif It becomes the order value and sets the line prices and payment amounts.</p>
                             <div class="ow-fields">
                                 <div class="ow-field"><label for="confirmed_total">Confirmed total (AED)</label><input id="confirmed_total" name="confirmed_total" type="number" step="0.01" min="0" required value="{{ $old('confirmed_total', $order->total) }}"></div>
                                 <div class="ow-field full"><label for="msg_confirm">Message to the customer (optional)</label><textarea id="msg_confirm" name="message">{{ $formErr === 'confirm' ? old('message') : '' }}</textarea></div>

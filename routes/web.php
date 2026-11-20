@@ -18,6 +18,12 @@ use App\Http\Controllers\Backend\CategorybannerController;
 use App\Http\Controllers\Backend\ColorController;
 use App\Http\Controllers\Backend\BrandingOptionController;
 use App\Http\Controllers\Backend\OccasionController;
+use App\Http\Controllers\Backend\SupplyCountryController;
+use App\Http\Controllers\Backend\FilterSettingController;
+use App\Http\Controllers\Backend\HomeLogoController;
+use App\Http\Controllers\Backend\HeaderTopbarController;
+use App\Http\Controllers\Backend\PageBannerController;
+use App\Http\Controllers\Backend\HomeCategoryCardController;
 use App\Http\Controllers\Backend\PreferenceController;
 use App\Http\Controllers\Backend\ExhibitionEventController;
 use App\Http\Controllers\Backend\CouponController;
@@ -32,6 +38,9 @@ use App\Http\Controllers\Backend\PaytabController;
 use App\Http\Controllers\Backend\B2BenquiryController;
 use App\Http\Controllers\Backend\Instock_notifierController;
 use App\Http\Controllers\Backend\ReportController;
+use App\Http\Controllers\Backend\PlannerLogController;
+use App\Http\Controllers\Backend\PlannerLibraryController;
+use App\Http\Controllers\Backend\EmailTemplateController;
 use App\Http\Controllers\Backend\OrderController;
 use App\Http\Controllers\Backend\FlipbookController;
 use App\Http\Controllers\Backend\ReviewController;
@@ -47,8 +56,11 @@ use App\Http\Controllers\OrderProcessingController;
 use App\Http\Controllers\Frontend\HomepageController;
 use App\Http\Controllers\Frontend\UsersController;
 use App\Http\Controllers\Frontend\CartController;
+use App\Http\Controllers\Frontend\CustomOrderController;
+use App\Http\Controllers\Frontend\GiftPlannerController;
 use App\Http\Controllers\Frontend\CustomerOrderController;
 use App\Http\Controllers\Frontend\CustomerReportController;
+use App\Http\Controllers\Frontend\CorporateEmployeeController;
 use App\Http\Controllers\Frontend\StoreCategoryController;
 use App\Http\Controllers\Frontend\StoreBrandController;
 use App\Http\Controllers\Frontend\FiltersController;
@@ -72,6 +84,7 @@ Route::any('404', [HomepageController::class, 'fileerror'])->name('fileerror');
 /*Frontend Homepage*/
 
 Route::any('/', [HomepageController::class, 'index']);
+Route::get('/search', [HomepageController::class, 'search'])->name('home.search');
 Route::get('product/{slug}', [HomepageController::class, 'webProduct'])->name('web.product');
 Route::any('product/{product_slug}/{slug}', [HomepageController::class, 'variationproduct'])->name('variationproduct');
 Route::any('variant_price', [HomepageController::class, 'variant_price'])->name('variant_price');
@@ -99,6 +112,8 @@ Route::redirect('guestcheckout', '/cart');
 // Logged-in customer's own orders (the admin list is /admin/orders)
 Route::any('orders', [HomepageController::class, 'orders']);
 Route::get('orders/{orderid}', [CustomerOrderController::class, 'show'])->name('customer.orders.show')->where('orderid', '[0-9]+');
+Route::get('orders/{orderid}/invoices/{number}', [CustomerOrderController::class, 'invoice'])->name('customer.orders.invoice')
+    ->where(['orderid' => '[0-9]+', 'number' => '[A-Z0-9-]+']);
 Route::post('orders/{orderid}/steps/{step}/{action}', [CustomerOrderController::class, 'act'])->name('customer.orders.act')
     ->where(['orderid' => '[0-9]+', 'step' => '[0-9]+', 'action' => '[a-z]+'])->middleware('throttle:order-answer');
 // Signed link from order emails: approve / request changes / rate without logging in
@@ -109,9 +124,6 @@ Route::any('contactus', [HomepageController::class, 'contactus']);
 Route::any('aboutus', [HomepageController::class, 'aboutus']);
 
 
-Route::any('addtowishlist', [HomepageController::class, 'addtowishlist'])->name('addtowishlist');
-Route::any('wishlist', [HomepageController::class, 'wishlist'])->name('wishlist');
-Route::any('deletewishlist/{id}', [HomepageController::class, 'deletewishlist'])->name('deletewishlist');
 
 
 Route::any('privacy-policy', [HomepageController::class, 'privacy']);
@@ -141,6 +153,24 @@ Route::get('/corporate-reports/download/{type}', [CustomerReportController::clas
     ->name('corporate.reports.download')
     ->where('type', 'orders|spending|approvals')
     ->middleware('corporate.auth');
+
+// Customer's employees (gift recipients) and team logins; roles are enforced by CorporateTeamSession
+Route::middleware('corporate.auth')->group(function () {
+    Route::get('/corporate-employees', [CorporateEmployeeController::class, 'index'])->name('corporate.employees');
+    Route::post('/corporate-employees', [CorporateEmployeeController::class, 'store'])->name('corporate.employees.store');
+    Route::put('/corporate-employees/{id}', [CorporateEmployeeController::class, 'update'])->name('corporate.employees.update')->where('id', '[0-9]+');
+    Route::delete('/corporate-employees/{id}', [CorporateEmployeeController::class, 'destroy'])->name('corporate.employees.destroy')->where('id', '[0-9]+');
+    Route::post('/corporate-employees/import', [CorporateEmployeeController::class, 'import'])->name('corporate.employees.import');
+    Route::get('/corporate-employees/export', [CorporateEmployeeController::class, 'export'])->name('corporate.employees.export');
+    Route::get('/corporate-employees/template', [CorporateEmployeeController::class, 'template'])->name('corporate.employees.template');
+    Route::post('/corporate-employees/team', [CorporateEmployeeController::class, 'invite'])->name('team.invite')->middleware('throttle:20,1');
+    Route::post('/corporate-employees/team/{id}/resend', [CorporateEmployeeController::class, 'resend'])->name('team.resend')->where('id', '[0-9]+')->middleware('throttle:20,1');
+    Route::post('/corporate-employees/team/{id}/role', [CorporateEmployeeController::class, 'updateRole'])->name('team.role')->where('id', '[0-9]+');
+    Route::post('/corporate-employees/team/{id}/remove', [CorporateEmployeeController::class, 'remove'])->name('team.remove')->where('id', '[0-9]+');
+});
+// Invitation link (no login): the invited person sets their name and password
+Route::get('/corporate-team/accept/{token}', [CorporateEmployeeController::class, 'acceptForm'])->name('team.accept')->where('token', '[A-Za-z0-9]+');
+Route::post('/corporate-team/accept/{token}', [CorporateEmployeeController::class, 'accept'])->name('team.accept.submit')->where('token', '[A-Za-z0-9]+')->middleware('throttle:10,1');
 
 Route::get('/corporate/login', [UsersController::class, 'corporateLogin'])
     ->name('corporate.login');
@@ -182,9 +212,6 @@ Route::post('/corporate-addresses', [UsersController::class, 'storeCorporateAddr
 Route::post('/corporate-addresses/{id}/select', [UsersController::class, 'selectCorporateAddress'])
     ->name('corporate.addresses.select');
 
-Route::match(['put', 'post'], '/corporate-addresses/{id}', [UsersController::class, 'updateSingleCorporateAddress'])
-    ->where('id', '[0-9]+')
-    ->name('corporate.addresses.update-single');
 
 Route::delete('/corporate-addresses/{id}', [UsersController::class, 'deleteCorporateAddress'])
     ->name('corporate.addresses.delete');
@@ -214,10 +241,12 @@ Route::delete('/branding-assets/{id}', [BrandingAssetController::class, 'destroy
 Route::get('/branding-assets/{id}/download', [BrandingAssetController::class, 'download'])
     ->name('branding-assets.download')
     ->middleware('corporate.auth');
+Route::get('/branding-assets/{id}/file', [BrandingAssetController::class, 'file'])
+    ->name('branding-assets.file')->where('id', '[0-9]+')
+    ->middleware('corporate.auth');
 
 Route::match(['get', 'post'], '/corporate/logout', [UsersController::class, 'dostorelogout'])
     ->name('corporate.logout');
-Route::view('/corporate-portal/wishlist', 'web_frontend.corporate-wishlist');
 Route::post('/collections', [UsersController::class, 'createCollection'])->name('collections.create');
 Route::get('/collections/{id}', [UsersController::class, 'viewCollection'])->name('collections.view');
 Route::delete('/collections/{id}', [UsersController::class, 'deleteCollection'])->name('collections.delete');
@@ -225,15 +254,19 @@ Route::put('/collections/{id}', [UsersController::class, 'updateCollection'])->n
 Route::get('/collections-all', [UsersController::class, 'allCollections'])->name('collections.all');
 Route::post('/collections/{id}/to-cart', [UsersController::class, 'collectionToCart'])->name('collections.to-cart');
 Route::get('/collection-products/search', [UsersController::class, 'collectionProductSearch'])->name('collections.products');
+Route::get('/collections-for-product', [UsersController::class, 'collectionsForProduct'])->name('collections.for-product');
 Route::post('/collections/{id}/items', [UsersController::class, 'addItemToCollection'])->name('collections.add-item');
 Route::delete('/collections/{id}/items/{itemId}', [UsersController::class, 'removeItemFromCollection'])->name('collections.remove-item');
 Route::put('/collections/{id}/items/{itemId}', [UsersController::class, 'updateItemQuantity'])->name('collections.update-item');
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add', [CartController::class, 'addItem'])->name('cart.add');
+Route::post('/cart/add-bundle', [CartController::class, 'addBundle'])->name('cart.add-bundle')->middleware('throttle:30,1');
 Route::post('/cart/item/{id}', [CartController::class, 'updateItem'])->name('cart.update-item');
 Route::delete('/cart/item/{id}', [CartController::class, 'removeItem'])->name('cart.remove-item');
 Route::delete('/cart/clear', [CartController::class, 'clearCart'])->name('cart.clear');
 Route::post('/cart/send-enquiry', [CartController::class, 'sendEnquiry'])->name('cart.send-enquiry');
+Route::get('/request-quote', [CustomOrderController::class, 'create'])->name('custom-order.create');
+Route::post('/request-quote', [CustomOrderController::class, 'store'])->name('custom-order.store')->middleware('throttle:10,1');
 Route::post('/cart/register', [UsersController::class, 'storeCartRegister'])->name('cart.register')->middleware('throttle:5,1');
 Route::get('/enquiry/success/{id}', [CartController::class, 'enquirySuccess'])->name('enquiry.success');
 Route::get('/corporate/auth/google', [UsersController::class, 'redirectToGoogleCorporate'])->name('corporate.google');
@@ -242,7 +275,13 @@ Route::get('/track-order', [CustomerOrderController::class, 'trackForm'])->name(
 Route::post('/track-order', [CustomerOrderController::class, 'trackLookup'])->name('track.lookup')->middleware('throttle:order-lookup');
 Route::get('/track-order/{orderid}', [CustomerOrderController::class, 'trackShow'])->name('track.show')->where('orderid', '[0-9]+');
 Route::get('/annual-corporate-membership', [MembershipPageController::class, 'show'])->name('membership.page');
-Route::view('/corporate-gifting-budget-planner', 'web_frontend.corporate-gifting-budget-planner');
+Route::get('/corporate-gifting-budget-planner', [GiftPlannerController::class, 'index'])->name('planner.index');
+Route::post('/corporate-gifting-budget-planner/recommend', [GiftPlannerController::class, 'recommend'])->name('planner.recommend')->middleware('throttle:planner-recommend');
+Route::post('/corporate-gifting-budget-planner/image', [GiftPlannerController::class, 'image'])->name('planner.image')->middleware('throttle:planner-image');
+// The customer's logo and brand assets for the bundle pictures
+Route::post('/corporate-gifting-budget-planner/brand', [GiftPlannerController::class, 'brandStore'])->name('planner.brand.store')->middleware('throttle:20,1');
+Route::post('/corporate-gifting-budget-planner/brand/remove', [GiftPlannerController::class, 'brandRemove'])->name('planner.brand.remove')->middleware('throttle:20,1');
+Route::get('/corporate-gifting-budget-planner/brand/{id}', [GiftPlannerController::class, 'brandShow'])->name('planner.brand.show')->where('id', 'logo|asset-[0-9a-f]{12}');
 Route::any('/store/resetpassword', [UsersController::class, 'resetpassword']);
 Route::post('/store/doresetpassword', [UsersController::class, 'doresetpassword'])->name('doresetpassword')->middleware('throttle:5,1');
 
@@ -301,11 +340,10 @@ Route::get('productl8', [ApiController::class, 'productl8'])->name('productl8');
 Route::get('productl9', [ApiController::class, 'productl9'])->name('productl9');
 
 
-Route::post('addtocart', [ApiController::class, 'addtocart'])->name('addtocart');
-Route::post('getcatproducts', [ApiController::class, 'getcatproducts'])->name('getcatproducts');
-Route::post('getsubcatproducts', [ApiController::class, 'getsubcatproducts'])->name('getsubcatproducts');
-
-Route::post('cartdata', [ApiController::class, 'cartdata'])->name('cartdata');
+// Removed (security, FX-09): addtocart, getcatproducts, getsubcatproducts, cartdata, getproductdetails,
+// getbrandproducts, searchproduct, stocknotify, b2benquiry and abandancart, all from the old Angular
+// storefront and unused by this site. addtocart could change any customer's email from just a user id
+// (account takeover) and started PayTabs payments at an amount the browser chose.
 Route::get('gethomedata', [ApiController::class, 'gethomedata'])->name('gethomedata');
 
 Route::get('getallparentcategories', [ApiController::class, 'getallparentcategories'])->name('getallparentcategories');
@@ -314,10 +352,6 @@ Route::get('getallbrands', [ApiController::class, 'getallbrands'])->name('getall
 
 Route::post('addsubscriber', [ApiController::class, 'addsubscriber'])->name('addsubscriber')->middleware('throttle:10,1');
 
-Route::post('getproductdetails', [ApiController::class, 'getproductdetails'])->name('getproductdetails');
-Route::post('getbrandproducts', [ApiController::class, 'getbrandproducts'])->name('getbrandproducts');
-
-Route::post('searchproduct', [ApiController::class, 'searchproduct'])->name('searchproduct');
 
 Route::any('paytab_returnurl', [ApiController::class, 'paytab_returnurl'])->name('paytab_returnurl');
 
@@ -326,9 +360,6 @@ Route::any('paytab_returnurl', [ApiController::class, 'paytab_returnurl'])->name
 // updateuserdetails. They read or changed any customer's account (including
 // the password) from just a user id, with no login.
 
-Route::post('stocknotify', [ApiController::class, 'stocknotify'])->name('stocknotify')->middleware('throttle:10,1');
-Route::post('b2benquiry', [ApiController::class, 'b2benquiry'])->name('b2benquiry')->middleware('throttle:10,1');
-Route::post('abandancart', [ApiController::class, 'abandancart'])->name('abandancart');
 // Removed: enquiry, search_or_update and contact (old Angular storefront). They
 // emailed customer enquiries and orders to outside addresses (FX-02); website
 // quotes go through CartController::sendEnquiry.
@@ -452,6 +483,10 @@ Route::any('delete_childsubcategory_banner', [ChildsubcategoryController::class,
 
 /*Banners*/
 Route::any('banners', [CategorybannerController::class, 'banners']);
+Route::get('page-banners', [PageBannerController::class, 'index'])->name('page-banners.index');
+Route::post('page-banners', [PageBannerController::class, 'store'])->name('page-banners.store');
+Route::post('page-banners/{id}', [PageBannerController::class, 'update'])->name('page-banners.update')->where('id', '[0-9]+');
+Route::post('page-banners/{id}/remove', [PageBannerController::class, 'destroy'])->name('page-banners.destroy')->where('id', '[0-9]+');
 Route::any('updatebanner', [CategorybannerController::class, 'updatebanner'])->name('updatebanner');
 Route::any('small_banners_section1',[CategorybannerController::class,'small_banners_section1']);
 Route::any('updatesmall_banners_section1', [CategorybannerController::class, 'updatesmall_banners_section1'])->name('updatesmall_banners_section1');
@@ -587,6 +622,28 @@ Route::any('find-branding-option', [BrandingOptionController::class, 'find'])->n
 Route::any('update-branding-option', [BrandingOptionController::class, 'update'])->name('updatebrandingoption');
 Route::any('delete-branding-option', [BrandingOptionController::class, 'delete'])->name('deletebrandingoption');
 
+/*Homepage brands and clients*/
+Route::get('home-logos', [HomeLogoController::class, 'index'])->name('home-logos.index');
+Route::post('home-logos', [HomeLogoController::class, 'store'])->name('home-logos.store');
+Route::post('home-logos/{id}', [HomeLogoController::class, 'update'])->name('home-logos.update')->where('id', '[0-9]+');
+Route::post('home-logos/{id}/remove', [HomeLogoController::class, 'destroy'])->name('home-logos.destroy')->where('id', '[0-9]+');
+Route::get('home-category-cards', [HomeCategoryCardController::class, 'index'])->name('home-category-cards.index');
+Route::post('home-category-cards', [HomeCategoryCardController::class, 'store'])->name('home-category-cards.store');
+Route::post('home-category-cards/{id}', [HomeCategoryCardController::class, 'update'])->name('home-category-cards.update')->where('id', '[0-9]+');
+Route::post('home-category-cards/{id}/remove', [HomeCategoryCardController::class, 'destroy'])->name('home-category-cards.destroy')->where('id', '[0-9]+');
+Route::get('header-topbar', [HeaderTopbarController::class, 'index'])->name('header-topbar.index');
+Route::post('header-topbar', [HeaderTopbarController::class, 'store'])->name('header-topbar.store');
+Route::post('header-topbar/{id}', [HeaderTopbarController::class, 'update'])->name('header-topbar.update')->where('id', '[0-9]+');
+Route::post('header-topbar/{id}/remove', [HeaderTopbarController::class, 'destroy'])->name('header-topbar.destroy')->where('id', '[0-9]+');
+
+/*Supplies To*/
+Route::get('filter-settings', [FilterSettingController::class, 'index'])->name('filter-settings.index');
+Route::post('filter-settings', [FilterSettingController::class, 'update'])->name('filter-settings.update');
+Route::get('supply-countries', [SupplyCountryController::class, 'index'])->name('supply-countries.index');
+Route::post('supply-countries', [SupplyCountryController::class, 'store'])->name('supply-countries.store');
+Route::post('supply-countries/{id}', [SupplyCountryController::class, 'update'])->name('supply-countries.update')->where('id', '[0-9]+');
+Route::post('supply-countries/{id}/remove', [SupplyCountryController::class, 'destroy'])->name('supply-countries.destroy')->where('id', '[0-9]+');
+
 /*Occasion Tags*/
 Route::any('occasions', [OccasionController::class, 'index']);
 Route::any('add-occasion', [OccasionController::class, 'add'])->name('addoccasion');
@@ -614,6 +671,7 @@ Route::any('add-tier-pricing', [ProductController::class, 'addTierPricing'])->na
 Route::any('find-tier-pricing', [ProductController::class, 'findTierPricing'])->name('find_tier_pricing');
 Route::any('update-tier-pricing', [ProductController::class, 'updateTierPricing'])->name('update_tier_pricing');
 Route::any('delete-tier-pricing', [ProductController::class, 'deleteTierPricing'])->name('delete_tier_pricing');
+Route::post('apply-tier-pricing', [ProductController::class, 'applyTierPricing'])->name('apply_tier_pricing');
 
 
 /*Admins */
@@ -644,6 +702,16 @@ Route::any('instock-notifier', [Instock_notifierController::class, 'list'])->nam
 /* Reports (the three old URLs open admin/reports) */
 Route::get('admin/reports', [ReportController::class, 'index'])->name('reports.index');
 Route::get('admin/reports/export', [ReportController::class, 'export'])->name('reports.export');
+Route::get('admin/planner-logs', [PlannerLogController::class, 'index'])->name('planner-logs.index');
+Route::get('admin/planner-recommendations', [PlannerLibraryController::class, 'recommendations'])->name('planner-recommendations.index');
+Route::post('admin/planner-recommendations/{id}/delete', [PlannerLibraryController::class, 'destroyRecommendation'])->name('planner-recommendations.destroy')->where('id', '[0-9]+');
+Route::get('admin/planner-pictures', [PlannerLibraryController::class, 'pictures'])->name('planner-pictures.index');
+Route::post('admin/planner-pictures/{id}/delete', [PlannerLibraryController::class, 'destroyPicture'])->name('planner-pictures.destroy')->where('id', '[0-9]+');
+
+/* Email templates: previews and a test send to the logged-in admin */
+Route::get('admin/email-templates', [EmailTemplateController::class, 'index'])->name('email-templates.index');
+Route::get('admin/email-templates/{key}', [EmailTemplateController::class, 'show'])->name('email-templates.show')->where('key', '[a-z_]+');
+Route::post('admin/email-templates/{key}/test', [EmailTemplateController::class, 'test'])->name('email-templates.test')->where('key', '[a-z_]+')->middleware('throttle:10,1');
 Route::any('date_report', [ReportController::class, 'date_report'])->name('date_report');
 Route::any('user_report', [ReportController::class, 'user_report'])->name('user_report');
 Route::any('product_report', [ReportController::class, 'product_report'])->name('product_report');
@@ -651,6 +719,10 @@ Route::any('product_report', [ReportController::class, 'product_report'])->name(
 /*Orders - Backend Store Enquiries */
 Route::any('admin/orders', [OrderController::class, 'index'])->name('orders.index');
 Route::get('admin/orders/{order}', [OrderWorkflowController::class, 'show'])->name('orders.show')->where('order', '[0-9]+');
+Route::post('admin/orders/{order}/invoices/{type}', [OrderWorkflowController::class, 'issueInvoice'])->name('orders.invoice.issue')
+    ->where(['order' => '[0-9]+', 'type' => 'advance|balance']);
+Route::get('admin/orders/{order}/invoices/{invoice}', [OrderWorkflowController::class, 'showInvoice'])->name('orders.invoice.show')
+    ->where(['order' => '[0-9]+', 'invoice' => '[0-9]+']);
 Route::post('admin/orders/{order}/steps/{step}/{action}', [OrderWorkflowController::class, 'act'])->name('orders.act')
     ->where(['order' => '[0-9]+', 'step' => '[0-9]+', 'action' => '[a-z]+']);
 Route::any('abandoned_order', [OrderController::class, 'abandoned_order'])->name('abandoned_order');

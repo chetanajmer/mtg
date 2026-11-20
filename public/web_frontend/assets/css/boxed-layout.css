@@ -1,0 +1,166 @@
+/* Boxed layout for every page except the home page (client's design, 19 Nov):
+   grey page, 12px around the content, every section in a white box with square corners and no border,
+   8px between boxes. Pages get body.mtg-boxed and their content sits in .mtg-page (layouts app, home, frontapp).
+   Rules start with body.mtg-boxed so they win over each page's own stylesheet. */
+
+body.mtg-boxed { --mb-bg: #efefef; --mb-box: #fff; --mb-gap: 8px; --mb-edge: 12px; --mb-radius: 0; background: var(--mb-bg); }
+body.mtg-boxed .mtg-page { display: flex; flex-direction: column; gap: var(--mb-gap); padding: var(--mb-edge); background: var(--mb-bg); }
+body.mtg-boxed .mtg-page > * { margin-top: 0; margin-bottom: 0; }
+
+/* Page wrappers that painted the whole page white: transparent, their sections become boxes */
+body.mtg-boxed .compare-body,
+body.mtg-boxed .bp,
+body.mtg-boxed .membership-wrapper,
+body.mtg-boxed .cp-page,
+body.mtg-boxed .contact_section { background: transparent; }
+
+/* The box */
+body.mtg-boxed .mb-box,
+/* Breadcrumb rows (product, cart, track order, order details, quote sent) */
+body.mtg-boxed .mtg-page > .container-fluid:has(> .breadcrumb-row),
+/* Search results, request a quote, policies, contact */
+body.mtg-boxed .mh-results,
+body.mtg-boxed .co-head, body.mtg-boxed .co-card,
+body.mtg-boxed .about-section, body.mtg-boxed .breadcrumb-section,
+body.mtg-boxed .breadcrumb_section, body.mtg-boxed .contact_section,
+/* About Us */
+body.mtg-boxed .ab-hero, body.mtg-boxed .ab-section,
+/* Budget Planner */
+body.mtg-boxed .bp > section,
+/* Compare Gifts */
+body.mtg-boxed .compare-body .act,
+/* Annual Contract */
+body.mtg-boxed .membership-wrapper > .plans,
+/* Category pages */
+body.mtg-boxed .cp-filters, body.mtg-boxed .cp-results,
+/* Product page */
+body.mtg-boxed .product-section .product-gallery, body.mtg-boxed .product-section .product-info,
+body.mtg-boxed .product-section .pricing-card, body.mtg-boxed .details-card,
+/* Track order, order details, cart, quote sent */
+body.mtg-boxed .ot-card, body.mtg-boxed .op-card,
+body.mtg-boxed .cart-section .cart-header, body.mtg-boxed .cart-item, body.mtg-boxed .empty-cart, body.mtg-boxed .order-summary,
+body.mtg-boxed .es-card, body.mtg-boxed .es-bottom,
+/* Customer portal: sidebar parts, page header, panels and cards */
+body.mtg-boxed .dashboard-wrapper .company, body.mtg-boxed .dashboard-wrapper .sidebar nav, body.mtg-boxed .dashboard-wrapper .help,
+body.mtg-boxed .dashboard-wrapper .content > .hero,
+body.mtg-boxed .dashboard-wrapper .stat, body.mtg-boxed .dashboard-wrapper .quick, body.mtg-boxed .dashboard-wrapper .panel,
+body.mtg-boxed .dashboard-wrapper .quote-card,
+body.mtg-boxed .dashboard-wrapper .opl-empty, body.mtg-boxed .dashboard-wrapper .address-card,
+body.mtg-boxed .dashboard-wrapper .collections-toolbar, body.mtg-boxed .dashboard-wrapper .collection-card,
+body.mtg-boxed .dashboard-wrapper .em-panel, body.mtg-boxed .dashboard-wrapper .em-tabs, body.mtg-boxed .dashboard-wrapper .em-toolbar,
+body.mtg-boxed .dashboard-wrapper .rp-filters, body.mtg-boxed .dashboard-wrapper .rp-cards > article, body.mtg-boxed .dashboard-wrapper .rp-panel,
+body.mtg-boxed .dashboard-wrapper .branding-toolbar, body.mtg-boxed .dashboard-wrapper .empty-state, body.mtg-boxed .dashboard-wrapper .asset-card,
+body.mtg-boxed .branding-assets-page > div:has(> .assets-grid) {
+  background: var(--mb-box); border: 0; border-radius: var(--mb-radius); box-shadow: none;
+}
+
+/* Sharp corners on every box and card inside the boxed pages (buttons, fields, pills and round icons keep theirs) */
+body.mtg-boxed .mtg-page :is(section, article, aside, .card, .panel, .stat, .hero, .cp-hero, .bp-hero, .bp-card, .bp-example, .bp-results,
+  .mh-product, .cp-empty, .cp-filters, .cp-results, .opl-empty, .address-card, .collection-card, .asset-card, .empty-state, .em-panel,
+  .rp-panel, .rp-cards > article, .op-card, .op-files, .op-quote, .ot-card, .es-card, .es-hero, .order-summary, .cart-item, .empty-cart,
+  .co-card, .details-card, .pricing-card, .product-gallery, .main-image, .ab-steps > li, .ab-card, .ab-cta, .ab-tile, .ab-tile-img, .ab-hero-img, .tbl, .sav > div,
+  .strip, .info, .plan, .quick-grid > a, .quote-card, .collections-toolbar, .branding-toolbar, .contact-map, .empty-cmp, .bulk) { border-radius: 0 !important; }
+
+/* Every other box-like element on inner pages, including ones that only appear with data (order rows, toasts' boxes, previews).
+   Buttons, fields, pills, chips, badges, icons, dots and step markers keep their own shape. */
+body.mtg-boxed .mtg-page :is(article, section, aside, li, form, details, table, fieldset, .opl-row, .rp-download-grid > a, .asset-logo, .asset-doc,
+  [class*="card"], [class*="panel"], [class*="box"], [class*="-row"], [class*="item"], [class*="empty"], [class*="tile"],
+  [class*="preview"], [class*="summary"], [class*="toolbar"], [class*="filter"], [class*="gallery"], [class*="quantity"], [class*="modal-content"]):not([class*="btn"]):not([class*="icon"]):not([class*="pill"]):not([class*="badge"]):not([class*="chip"]):not([class*="dot"]):not([class*="avatar"]):not([class*="tag"]):not([class*="check"]):not([class*="step"]):not([class*="swatch"]):not(input):not(button):not(select):not(textarea) {
+  border-radius: 0 !important;
+}
+
+/* ---------- Customer portal ---------- */
+body.mtg-boxed .dashboard-wrapper { display: flex; align-items: stretch; gap: var(--mb-gap); margin: 0; padding: 0; }
+body.mtg-boxed .dashboard-wrapper .sidebar { position: static; flex: 0 0 210px; width: 210px; display: flex; flex-direction: column; gap: var(--mb-gap); padding: 0; background: transparent; border: 0; border-radius: 0; }
+body.mtg-boxed .dashboard-wrapper .company { height: auto; min-height: 79px; margin: 0; padding: 14px 18px; }
+body.mtg-boxed .dashboard-wrapper .sidebar nav { flex: 1 1 auto; padding: 10px 6px; }
+body.mtg-boxed .dashboard-wrapper .help { margin-top: 0; }
+body.mtg-boxed .dashboard-wrapper .help .help-link { display: flex; align-items: center; justify-content: center; }
+body.mtg-boxed .dashboard-wrapper .help .help-call { grid-column: 1 / -1; text-align: center; font-size: 10px; color: #687181; text-decoration: none; }
+body.mtg-boxed .branding-assets-page > div:has(> .assets-grid) { padding: 14px 16px 16px; }
+body.mtg-boxed .dashboard-wrapper .content { flex: 1 1 auto; display: flex; flex-direction: column; gap: var(--mb-gap); margin: 0; padding: 0; }
+body.mtg-boxed .dashboard-wrapper .content > * { margin-top: 0 !important; margin-bottom: 0 !important; }
+body.mtg-boxed .dashboard-wrapper .content > .hero { min-height: 0; }
+body.mtg-boxed .dashboard-wrapper .stats, body.mtg-boxed .dashboard-wrapper .middle, body.mtg-boxed .dashboard-wrapper .bottom,
+body.mtg-boxed .dashboard-wrapper .right-stack, body.mtg-boxed .dashboard-wrapper .rp-cards, body.mtg-boxed .dashboard-wrapper .rp-grid,
+body.mtg-boxed .dashboard-wrapper .collections-grid, body.mtg-boxed .dashboard-wrapper .assets-grid { gap: var(--mb-gap); }
+body.mtg-boxed .dashboard-wrapper .quick { padding: 14px 16px; }
+body.mtg-boxed .dashboard-wrapper .addresses-section { padding: 0; display: flex; flex-direction: column; gap: var(--mb-gap); }
+body.mtg-boxed .dashboard-wrapper .addresses-section > * { margin: 0; }
+body.mtg-boxed .dashboard-wrapper .addresses-section > .saved-heading { padding: 14px 16px 0; }
+body.mtg-boxed .dashboard-wrapper .em-tabs, body.mtg-boxed .dashboard-wrapper .em-toolbar, body.mtg-boxed .dashboard-wrapper .branding-toolbar { padding: 10px 14px; }
+body.mtg-boxed .dashboard-wrapper .em-tabs { border-bottom: 0; }
+body.mtg-boxed .dashboard-wrapper .rp-range { margin: 0; padding: 0 4px; }
+
+/* ---------- Product, cart, track order, order details, quote sent ---------- */
+body.mtg-boxed .mtg-page > .container-fluid { padding-left: 0; padding-right: 0; }
+body.mtg-boxed .mtg-page > .container-fluid:has(> .breadcrumb-row) { padding: 0 16px; }
+body.mtg-boxed .product-section, body.mtg-boxed .cart-section, body.mtg-boxed .ot, body.mtg-boxed .op, body.mtg-boxed .es-section { padding-top: 0; padding-bottom: 0; }
+body.mtg-boxed .product-section > .row, body.mtg-boxed .cart-section > .row { --bs-gutter-x: var(--mb-gap); --bs-gutter-y: var(--mb-gap); margin: 0; }
+body.mtg-boxed .product-section > .row > [class*="col-"], body.mtg-boxed .cart-section > .row > [class*="col-"] { padding-left: 0; padding-right: 0; }
+body.mtg-boxed .product-section > .row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--mb-gap); }
+body.mtg-boxed .product-section > .row > [class*="col-"] { width: auto; max-width: none; display: flex; }
+body.mtg-boxed .product-section .product-gallery, body.mtg-boxed .product-section .product-info, body.mtg-boxed .product-section .pricing-card { flex: 1 1 auto; padding: 16px; }
+body.mtg-boxed .cart-section > .row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: var(--mb-gap); align-items: start; }
+body.mtg-boxed .cart-section > .row > [class*="col-"] { width: auto; max-width: none; display: flex; flex-direction: column; gap: var(--mb-gap); }
+body.mtg-boxed .cart-section .cart-header { margin: 0; padding: 14px 16px; }
+body.mtg-boxed .cart-items-container { display: flex; flex-direction: column; gap: var(--mb-gap); }
+body.mtg-boxed .cart-item { margin: 0; }
+body.mtg-boxed .ot-card { max-width: none; width: 100%; overflow: hidden; }
+body.mtg-boxed .op-grid, body.mtg-boxed .op-main, body.mtg-boxed .op-side { gap: var(--mb-gap); }
+body.mtg-boxed .op-head { margin-bottom: var(--mb-gap); }
+body.mtg-boxed .op > * + * { margin-top: var(--mb-gap); }
+body.mtg-boxed .es-section { display: flex; flex-direction: column; gap: var(--mb-gap); }
+body.mtg-boxed .es-section > * { margin: 0; }
+body.mtg-boxed .es-bottom { padding: 16px; }
+
+/* ---------- Category pages and search ---------- */
+body.mtg-boxed .cp-page { display: flex; flex-direction: column; gap: var(--mb-gap); }
+body.mtg-boxed .cp-hero { border-radius: var(--mb-radius); }
+body.mtg-boxed .cp-body { padding: 0; gap: var(--mb-gap); }
+body.mtg-boxed .cp-results { padding: 14px 16px 16px; }
+body.mtg-boxed .mh-results { padding: 24px 16px 32px; }
+
+/* ---------- Budget Planner, Compare Gifts, Annual Contract ---------- */
+body.mtg-boxed .bp { display: flex; flex-direction: column; gap: var(--mb-gap); }
+body.mtg-boxed .bp > section { padding-left: 16px; padding-right: 16px; border: 0; }
+body.mtg-boxed .bp .bp-hero { padding: 0; }
+body.mtg-boxed .bp .bp-results { background: var(--mb-box); }
+body.mtg-boxed .compare-body .wrap { display: flex; flex-direction: column; gap: var(--mb-gap); padding: 0; }
+body.mtg-boxed .compare-body .hero { margin: 0; border-radius: var(--mb-radius); }
+body.mtg-boxed .compare-body .cmp { margin-top: 0; gap: var(--mb-gap); }
+body.mtg-boxed .compare-body .card { border: 0; border-radius: var(--mb-radius); }
+body.mtg-boxed .compare-body .tbl { margin-top: var(--mb-gap); border: 0; border-radius: var(--mb-radius); }
+body.mtg-boxed .compare-body .act { padding: 16px; }
+body.mtg-boxed .membership-wrapper { display: flex; flex-direction: column; gap: var(--mb-gap); }
+body.mtg-boxed .membership-wrapper > .hero { border-radius: var(--mb-radius); }
+body.mtg-boxed .membership-wrapper > .plans { padding: 28px 16px 0; }
+
+/* ---------- About, contact, policies, request a quote ---------- */
+body.mtg-boxed .ab-hero { padding-top: 48px; padding-bottom: 44px; }
+body.mtg-boxed .ab-section { padding-top: 36px; padding-bottom: 36px; }
+body.mtg-boxed .ab-cta { border-radius: var(--mb-radius); }
+body.mtg-boxed .breadcrumb_section .breadcrumb_menu { background: transparent; }
+body.mtg-boxed .contact_section { padding: 16px 0 24px; }
+body.mtg-boxed .about-section { min-height: 160px; }
+body.mtg-boxed .co-page { width: 100%; max-width: 860px; margin: 0 auto; padding: 0; display: flex; flex-direction: column; gap: var(--mb-gap); }
+body.mtg-boxed .co-head { margin: 0; padding: 20px 24px; }
+body.mtg-boxed .co-card { width: 100%; }
+
+/* A picture banner at the top of a page fills the full width right under the header: no grey above or beside it */
+body.mtg-boxed .cp-page > .cp-hero:first-of-type,
+body.mtg-boxed .bp > .bp-hero:first-of-type,
+body.mtg-boxed .compare-body .wrap > .hero:first-of-type,
+body.mtg-boxed .membership-wrapper > .hero:first-of-type {
+  margin-top: calc(-1 * var(--mb-edge)) !important; margin-left: calc(-1 * var(--mb-edge)) !important; margin-right: calc(-1 * var(--mb-edge)) !important;
+}
+
+/* ---------- Phones ---------- */
+@media (max-width: 991px) {
+  body.mtg-boxed .dashboard-wrapper { flex-direction: column; }
+  body.mtg-boxed .dashboard-wrapper .sidebar { flex: none; width: 100%; }
+  body.mtg-boxed .product-section > .row, body.mtg-boxed .cart-section > .row { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 767px) {
+  body.mtg-boxed { --mb-edge: 8px; }
+}

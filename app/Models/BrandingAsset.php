@@ -19,6 +19,38 @@ class BrandingAsset extends Model
         'description'
     ];
 
+    // The file's place is not shown to the page; it opens through file_url, which checks the owner
+    protected $hidden = ['file_path'];
+    protected $appends = ['file_url'];
+
+    public function getFileUrlAttribute()
+    {
+        return route('branding-assets.file', $this->id);
+    }
+
+    /**
+     * The stored file: private storage (storage/app/...), or the public folder for a file uploaded before
+     * assets were made private and not moved yet. Null if missing.
+     */
+    public function absolutePath()
+    {
+        foreach ([storage_path('app/' . $this->file_path), storage_path('app/public/' . $this->file_path)] as $path) {
+            if ($this->file_path && is_file($path)) {
+                return $path;
+            }
+        }
+        return null;
+    }
+
+    public function deleteFile()
+    {
+        foreach ([storage_path('app/' . $this->file_path), storage_path('app/public/' . $this->file_path)] as $path) {
+            if ($this->file_path && is_file($path)) {
+                @unlink($path);
+            }
+        }
+    }
+
     public function user()
     {
         return $this->belongsTo(\App\Models\Storeuser::class, 'user_id');

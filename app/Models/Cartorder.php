@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cartorder extends Model
 {
+    /** SKU of a custom order line: a Request a Quote with no catalogue product. */
+    const CUSTOM_MODEL = 'CUSTOM';
+
     use HasFactory;
 
     public function workflow()
