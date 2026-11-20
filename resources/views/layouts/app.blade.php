@@ -469,6 +469,7 @@ figure figcaption {
                                     </li>
 
                                      <li><a href="{{url('banners')}}" >Full Banner</a></li>
+                                     <li><a href="{{ route('page-banners.index') }}" >Page Banners</a></li>
 
                                      @if($role=="superadmin")
 
@@ -548,6 +549,7 @@ figure figcaption {
                                     <li><a href="{{url('filter-settings')}}" >Category Page Filters</a></li>
                                     <li><a href="{{url('home-logos')}}" >Brands &amp; Clients</a></li>
                                     <li><a href="{{url('home-category-cards')}}" >Home Category Cards</a></li>
+                                    <li><a href="{{ route('header-topbar.index') }}" >Header Top Bar</a></li>
                                     <li><a href="{{ route('email-templates.index') }}" >Email Templates</a></li>
                                     <li><a href="{{url('footerlevel1')}}" >Footer L1 Settings </a></li>
                                     <li class="has_sub">

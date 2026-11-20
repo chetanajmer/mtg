@@ -7,12 +7,14 @@
 @include('web_frontend.partials.site-chrome-head')
 </head>
 
-<body class="mat-typography">
+<body class="mat-typography mtg-boxed">
 @include('web_frontend.partials.site-loader')
 
 @include('web_frontend.partials.home-header')
 
+<div class="mtg-page">
 @yield('content')
+</div>
 
 @include('web_frontend.partials.home-footer')
 

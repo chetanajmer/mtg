@@ -47,16 +47,12 @@ class AppServiceProvider extends ServiceProvider
              $view->with('ordersUrl', session()->has('userid') ? url('orders') : route('corporate.login', ['redirect' => '/orders']));
          });
 
-         // Footer Categories: the same cards as the homepage's Search by Category
-         View::composer('web_frontend.partials.home-footer', function ($view) {
-             $view->with('footerCategoryCards', rescue(function () {
-                 return \App\Models\HomeCategoryCard::forHome();
-             }, [], false));
-         });
-
          View::composer('web_frontend.partials.home-header', function ($view) {
              $view->with('supplyCountries', rescue(function () {
                  return \App\Models\SupplyCountry::where('is_active', true)->ordered()->get();
+             }, collect(), false));
+             $view->with('topbarItems', rescue(function () {
+                 return \App\Models\HeaderTopbarItem::where('is_active', true)->ordered()->get();
              }, collect(), false));
              $view->with('navCategories', rescue(function () {
                  return \App\Models\Category::where('is_active', 'online')->orderBy('ranking')->orderBy('id')->get(['catname', 'slug']);

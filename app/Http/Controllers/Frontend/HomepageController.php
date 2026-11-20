@@ -67,9 +67,22 @@ class HomepageController extends Controller
 	{
 		$query=trim(preg_replace('/\s+/u',' ',mb_substr((string)$request->query('q',''),0,100)));
 		$newOnly=$request->boolean('new') && $query==='';
+		// Header product lists (config/home_page.php nav): flags set per product in the admin, or the price per piece
+		$lists=['all'=>'All Products','best-sellers'=>'Best Sellers','new'=>'New Arrivals','sale'=>'On Sale','under-10'=>'Under AED 10','10-50'=>'AED 10 to 50','above-50'=>'Above AED 50'];
+		$list=array_key_exists($request->query('list'),$lists) && $query==='' ? $request->query('list') : null;
+		$price="(CASE WHEN base_price>0 THEN base_price WHEN sprice>0 AND sprice<CAST(price AS DECIMAL(12,2)) THEN sprice ELSE CAST(price AS DECIMAL(12,2)) END)";
 
 		$products=Product::where('is_active','online');
-		if($newOnly)
+		if($list)
+		{
+			if($list==='best-sellers') { $products->where('most_selling','online'); }
+			if($list==='new') { $products->where('newarrival','online'); }
+			if($list==='sale') { $products->where('sale','online'); }
+			if($list==='under-10') { $products->whereRaw("$price<=10"); }
+			if($list==='10-50') { $products->whereRaw("$price>10 AND $price<=50"); }
+			if($list==='above-50') { $products->whereRaw("$price>50"); }
+		}
+		elseif($newOnly)
 		{
 			$products->orderByRaw("newarrival='online' desc");
 		}
@@ -94,7 +107,7 @@ class HomepageController extends Controller
 		}
 
 		$products=$products->orderByDesc('id')->paginate(20)->withQueryString();
-		$heading=$newOnly ? 'New Arrivals' : ($query==='' ? 'Search our gifts' : 'Results for "'.$query.'"');
+		$heading=$list ? $lists[$list] : ($newOnly ? 'New Arrivals' : ($query==='' ? 'Search our gifts' : 'Results for "'.$query.'"'));
 
 		return view('web_frontend.search-results',compact('products','query','heading'));
 	}

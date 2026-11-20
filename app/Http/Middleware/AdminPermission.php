@@ -62,11 +62,11 @@ class AdminPermission
             'subscribers', 'deletesubscribers/*',
         ],
         'banner_status' => [
-            'banners', 'updatebanner', '*small_banners_section*',
+            'banners', 'updatebanner', '*small_banners_section*', 'page-banners', 'page-banners/*',
             'category-section', 'categorysettingupdate', 'tag-section', 'tagsettingupdate', 'content-section', 'contentupdate',
         ],
         'config_status' => [
-            'filter-settings', 'admin/email-templates', 'admin/email-templates/*', 'supply-countries', 'supply-countries/*', 'home-logos', 'home-logos/*', 'home-category-cards', 'home-category-cards/*',
+            'filter-settings', 'admin/email-templates', 'admin/email-templates/*', 'supply-countries', 'supply-countries/*', 'home-logos', 'home-logos/*', 'home-category-cards', 'home-category-cards/*', 'header-topbar', 'header-topbar/*',
             'cms-settings', 'update-cms-settings', 'seo-settings', 'updateseo-settings', 'header-settings', 'updateheader-settings',
             'footerlevel1', 'updatefooterlevel1', 'footer-section*', 'footer-updatesection*', 'homepage-settings', 'homepage-update',
             'addprivacy', 'updateprivacy', 'addreturn', 'updatereturn', 'addshippment', 'updateshippment',

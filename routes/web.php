@@ -21,6 +21,8 @@ use App\Http\Controllers\Backend\OccasionController;
 use App\Http\Controllers\Backend\SupplyCountryController;
 use App\Http\Controllers\Backend\FilterSettingController;
 use App\Http\Controllers\Backend\HomeLogoController;
+use App\Http\Controllers\Backend\HeaderTopbarController;
+use App\Http\Controllers\Backend\PageBannerController;
 use App\Http\Controllers\Backend\HomeCategoryCardController;
 use App\Http\Controllers\Backend\PreferenceController;
 use App\Http\Controllers\Backend\ExhibitionEventController;
@@ -481,6 +483,10 @@ Route::any('delete_childsubcategory_banner', [ChildsubcategoryController::class,
 
 /*Banners*/
 Route::any('banners', [CategorybannerController::class, 'banners']);
+Route::get('page-banners', [PageBannerController::class, 'index'])->name('page-banners.index');
+Route::post('page-banners', [PageBannerController::class, 'store'])->name('page-banners.store');
+Route::post('page-banners/{id}', [PageBannerController::class, 'update'])->name('page-banners.update')->where('id', '[0-9]+');
+Route::post('page-banners/{id}/remove', [PageBannerController::class, 'destroy'])->name('page-banners.destroy')->where('id', '[0-9]+');
 Route::any('updatebanner', [CategorybannerController::class, 'updatebanner'])->name('updatebanner');
 Route::any('small_banners_section1',[CategorybannerController::class,'small_banners_section1']);
 Route::any('updatesmall_banners_section1', [CategorybannerController::class, 'updatesmall_banners_section1'])->name('updatesmall_banners_section1');
@@ -625,6 +631,10 @@ Route::get('home-category-cards', [HomeCategoryCardController::class, 'index'])-
 Route::post('home-category-cards', [HomeCategoryCardController::class, 'store'])->name('home-category-cards.store');
 Route::post('home-category-cards/{id}', [HomeCategoryCardController::class, 'update'])->name('home-category-cards.update')->where('id', '[0-9]+');
 Route::post('home-category-cards/{id}/remove', [HomeCategoryCardController::class, 'destroy'])->name('home-category-cards.destroy')->where('id', '[0-9]+');
+Route::get('header-topbar', [HeaderTopbarController::class, 'index'])->name('header-topbar.index');
+Route::post('header-topbar', [HeaderTopbarController::class, 'store'])->name('header-topbar.store');
+Route::post('header-topbar/{id}', [HeaderTopbarController::class, 'update'])->name('header-topbar.update')->where('id', '[0-9]+');
+Route::post('header-topbar/{id}/remove', [HeaderTopbarController::class, 'destroy'])->name('header-topbar.destroy')->where('id', '[0-9]+');
 
 /*Supplies To*/
 Route::get('filter-settings', [FilterSettingController::class, 'index'])->name('filter-settings.index');

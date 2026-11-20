@@ -20,7 +20,7 @@ $footer_categories=\App\Models\Category::where('is_active','online')->where('fea
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 @include('web_frontend.partials.site-chrome-head')
 </head>
-<body>
+<body class="mtg-boxed">
 @include('web_frontend.partials.site-loader')
 
 <div id="loading" style="display: none">
@@ -29,7 +29,9 @@ $footer_categories=\App\Models\Category::where('is_active','online')->where('fea
 
 @include('web_frontend.partials.home-header')
 
+<div class="mtg-page">
     @yield('content')
+</div>
 
 
 

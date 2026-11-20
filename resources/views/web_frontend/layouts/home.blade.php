@@ -7,12 +7,18 @@
 @include('web_frontend.partials.site-chrome-head')
 </head>
 
-<body class="mat-typography mh-body">
+<body class="mat-typography mh-body{{ request()->is('/') ? '' : ' mtg-boxed' }}">
 @include('web_frontend.partials.site-loader')
 
 @include('web_frontend.partials.home-header')
 
+@if(request()->is('/'))
 @yield('content')
+@else
+<div class="mtg-page">
+@yield('content')
+</div>
+@endif
 
 @include('web_frontend.partials.home-footer')
 
