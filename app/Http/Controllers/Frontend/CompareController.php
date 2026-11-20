@@ -233,11 +233,18 @@ class CompareController extends Controller
     public function saveSelection(Request $request)
     {
         $request->validate([
-            'product_ids' => 'required|array',
+            // "present" (not "required"): an empty list is valid and clears the selection,
+            // otherwise unticking the last product left it in the session
+            'product_ids' => 'present|array|max:3',
             'product_ids.*' => 'integer|exists:products,id',
         ]);
 
-        session()->put('compare_products', $request->get('product_ids'));
+        $ids = array_values(array_unique(array_map('intval', $request->input('product_ids', []))));
+        if ($ids) {
+            session()->put('compare_products', $ids);
+        } else {
+            session()->forget('compare_products');
+        }
 
         return response()->json([
             'success' => true,

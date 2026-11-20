@@ -91,6 +91,28 @@
     </div>
   </main>
 </div>
+
+{{-- Plan selection toast (uses the site-wide .toaster-notification styles from style.css) --}}
+<div class="toaster-notification mem-toast" id="memToast" role="status" aria-live="polite">
+  <div class="toaster-icon"><i class="bi bi-award"></i></div>
+  <div class="toaster-message">
+    <h4 id="memToastTitle"></h4>
+    <p id="memToastText"></p>
+  </div>
+  <button type="button" class="toaster-close" id="memToastClose" aria-label="Close"><i class="bi bi-x"></i></button>
+  <span class="mem-toast-bar" aria-hidden="true"></span>
+</div>
+<style>
+.mem-toast{overflow:hidden;align-items:center;border-color:#ead9b8;background:linear-gradient(135deg,#fffdf8 0%,#fbf3e3 100%);box-shadow:0 14px 40px rgba(138,95,26,.16),0 2px 6px rgba(0,0,0,.05);font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif;width:min(380px,calc(100vw - 32px))}
+.mem-toast .toaster-icon{border-radius:14px;background:linear-gradient(135deg,#f3d48a,#a47624);box-shadow:0 6px 14px rgba(164,118,36,.3)}
+.mem-toast .toaster-message h4{color:#3d2a0e;font-size:15px}
+.mem-toast .toaster-message p{color:#7a6038}
+.mem-toast .toaster-close{align-self:flex-start;color:#a08455}
+.mem-toast .mem-toast-bar{position:absolute;left:0;bottom:0;height:3px;width:100%;background:linear-gradient(90deg,#a47624,#f3d48a);transform-origin:left;transform:scaleX(0)}
+.mem-toast.show .mem-toast-bar{animation:memToastBar 4s linear forwards}
+@keyframes memToastBar{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@media(max-width:600px){.mem-toast{top:12px;right:16px;left:16px;width:auto;max-width:none;transform:translateY(-140%)}.mem-toast.show{transform:translateY(0)}}
+</style>
 @endsection
 
 @section('scripts')
@@ -154,9 +176,32 @@ document.addEventListener('DOMContentLoaded', function() {
       e.stopPropagation();
       const planCard = this.closest('.plan');
       const planName = planCard.querySelector('h3').textContent;
-      alert(`You selected the ${planName} plan. Proceeding to registration...`);
+      // Mark this card as the selected one too
+      planCards.forEach(p => p.classList.remove('selected'));
+      planCard.classList.add('selected');
+      localStorage.setItem('selectedMembershipPlan', planName);
+      showPlanToast(`${planName} plan selected`, `You selected the ${planName} plan. Proceeding to registration...`);
       // Here you would navigate to the registration/checkout flow
     });
   });
+
+  // Toast: slides in, closes by itself after 4s or on the close button
+  const toast = document.getElementById('memToast');
+  // Directly under <body>, so "fixed" is measured from the screen and not a transformed page wrapper
+  document.body.appendChild(toast);
+  let toastTimer = null;
+  function hidePlanToast() {
+    clearTimeout(toastTimer);
+    toast.classList.remove('show');
+  }
+  function showPlanToast(title, text) {
+    document.getElementById('memToastTitle').textContent = title;
+    document.getElementById('memToastText').textContent = text;
+    hidePlanToast();
+    void toast.offsetWidth; // restart the slide-in and the countdown bar
+    toast.classList.add('show');
+    toastTimer = setTimeout(hidePlanToast, 4000);
+  }
+  document.getElementById('memToastClose').addEventListener('click', hidePlanToast);
 });
 </script>

@@ -88,7 +88,62 @@
   .membership-wrapper .grid,.membership-wrapper .two{grid-template-columns:1fr}
   .membership-wrapper .strip{grid-template-columns:repeat(2,1fr);row-gap:16px}
   .membership-wrapper .tag{display:none}
-  .membership-wrapper .hero{height:auto;padding-bottom:30px}
+  .membership-wrapper .hero{height:auto;padding-bottom:30px;background-image:linear-gradient(90deg,rgba(248,240,230,.94) 0%,rgba(248,240,230,.82) 55%,rgba(248,240,230,.25) 100%),url('/web_frontend/assets/images/membership-hero.png');background-position:center,right center}
   .membership-wrapper .hero h1{font-size:38px}
   .membership-wrapper .stats{flex-wrap:wrap;row-gap:12px}
+  /* Info cards and benefits read left-aligned (the plans section centres its text) */
+  .membership-wrapper .strip div,.membership-wrapper .info{text-align:left}
+}
+
+/* Phones */
+@media(max-width:600px){
+  .membership-wrapper .wrap{padding:0 16px}
+
+  /* Hero: soft light overlay so the text stays readable over the photo */
+  .membership-wrapper .hero{min-height:0;padding-bottom:28px;background-image:linear-gradient(180deg,rgba(248,240,230,.92) 0%,rgba(248,240,230,.85) 60%,rgba(248,240,230,.6) 100%),url('/web_frontend/assets/images/membership-hero.png');background-position:center,70% center}
+  .membership-wrapper .hero-in{padding:26px 16px 0}
+  .membership-wrapper .eyebrow{font-size:9px;letter-spacing:1.8px}
+  .membership-wrapper .hero h1{font-size:32px;line-height:1.05;letter-spacing:-.6px;margin:12px 0 10px}
+  .membership-wrapper .hero .lead{font-size:16.5px;line-height:1.35;margin-bottom:8px}
+  .membership-wrapper .hero .copy{font-size:13.5px;color:#4a4a4a}
+  .membership-wrapper .btns{flex-direction:column;gap:10px;margin:20px 0 22px}
+  .membership-wrapper .btns .btn{width:100%;height:44px;justify-content:center;font-size:13.5px}
+  .membership-wrapper .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;background:rgba(255,255,255,.7);border-radius:8px;padding:12px 4px}
+  .membership-wrapper .stats div,.membership-wrapper .stats div:first-child{padding:0 6px;border-left:1px solid #d8d0c4;text-align:center}
+  .membership-wrapper .stats div:first-child{border:0}
+  .membership-wrapper .stats b{font-size:17px}
+  .membership-wrapper .stats span{font-size:11px;line-height:1.25;display:block}
+
+  /* Plans */
+  .membership-wrapper .plans h2{font-size:23px;line-height:1.2}
+  .membership-wrapper .plans .sub2{font-size:13.5px;margin-bottom:22px}
+  .membership-wrapper .grid{gap:22px}
+  .membership-wrapper .head{gap:14px;min-height:0}
+  .membership-wrapper .medal{width:60px;height:78px}
+  .membership-wrapper .medal i{width:54px;height:54px;left:3px}
+  .membership-wrapper .medal u{left:15px;top:44px;width:30px;height:30px}
+  .membership-wrapper .head h3{font-size:22px}
+  .membership-wrapper .rows div{height:auto;min-height:28px;padding:5px 8px;gap:10px}
+  .membership-wrapper .rows b{text-align:right}
+  .membership-wrapper .foot{flex-wrap:wrap;gap:12px}
+  .membership-wrapper .price{font-size:18px}
+  .membership-wrapper .sel{width:auto;flex:1 1 140px;height:42px}
+
+  /* Benefits: 2 per row, icon on the left */
+  .membership-wrapper .strip{padding:14px 0;row-gap:0}
+  .membership-wrapper .strip div,.membership-wrapper .strip div:first-child{gap:10px;padding:12px 12px;border:0;font-size:12px}
+  .membership-wrapper .strip div:nth-child(even){border-left:1px solid #dcd9d4}
+  .membership-wrapper .strip div:nth-child(n+3){border-top:1px solid #e7e4df}
+  .membership-wrapper .strip svg{width:24px;height:24px}
+
+  /* Info cards: icon + text, toggle/calendar on the right */
+  .membership-wrapper .two{gap:12px}
+  .membership-wrapper .info{gap:12px;padding:16px;align-items:flex-start}
+  .membership-wrapper .circ,.membership-wrapper .cal{width:46px;height:46px}
+  .membership-wrapper .circ svg,.membership-wrapper .cal svg{width:24px;height:24px}
+  .membership-wrapper .info h4{font-size:14.5px;margin-bottom:4px}
+  .membership-wrapper .info p{font-size:12.5px}
+
+  .membership-wrapper .cta{padding:22px 0 34px}
+  .membership-wrapper .cta .btn{height:44px;width:100%;justify-content:center;font-size:13.5px}
 }

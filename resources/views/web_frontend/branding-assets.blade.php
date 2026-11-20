@@ -769,7 +769,7 @@
           </div>
           <p class="upload-title">Drop files here</p>
           <p class="upload-subtitle">Drag files here or click to select</p>
-          <input type="file" id="assetFile" name="file" required accept="image/*,.pdf,.ai,.svg" style="display: none;">
+          <input type="file" id="assetFile" name="file" accept="image/*,.pdf,.ai,.svg" style="display: none;">
         </div>
       </div>
       <div class="form-group">
@@ -916,9 +916,15 @@ $(document).ready(function() {
     var $area = $(areaId);
     var $input = $(inputId);
 
-    // Click to select file
-    $area.on('click', function() {
-      $input.click();
+    // Click to select file. The input sits inside the area, so its own click bubbles
+    // back up here: ignore that one, otherwise it re-opens itself in an endless loop
+    // ("Maximum call stack size exceeded") and the file picker never opens.
+    $input.on('click', function(e) {
+      e.stopPropagation();
+    });
+    $area.on('click', function(e) {
+      if (e.target === $input[0]) return;
+      $input[0].click();
     });
 
     // Handle file selection
@@ -964,8 +970,23 @@ $(document).ready(function() {
   }
 
   // Upload Form
+  // First validation message from a 422 answer, else the fallback text
+  function ajaxErrorMessage(xhr, fallback) {
+    var json = xhr && xhr.responseJSON;
+    if (json && json.errors) {
+      var first = Object.values(json.errors)[0];
+      if (first && first.length) return first[0];
+    }
+    return (json && json.message && xhr.status !== 500) ? json.message : fallback;
+  }
+
   $('#uploadForm').on('submit', function(e) {
     e.preventDefault();
+    // The file input is hidden, so the browser cannot point at it: check it here
+    if (!$('#assetFile')[0].files.length) {
+      showToaster('Please choose a file to upload');
+      return;
+    }
     var formData = new FormData(this);
 
     $.ajax({
@@ -984,8 +1005,8 @@ $(document).ready(function() {
           showToaster(response.message);
         }
       },
-      error: function() {
-        showToaster('Error uploading asset');
+      error: function(xhr) {
+        showToaster(ajaxErrorMessage(xhr, 'Error uploading asset'));
       }
     });
   });
@@ -994,6 +1015,7 @@ $(document).ready(function() {
   $('#closeEditModal, #cancelEdit').on('click', function() {
     $('#editModal').removeClass('active');
     $('#editForm')[0].reset();
+    resetFileUploadArea('#editFileArea');
   });
 
   // Edit Form
@@ -1019,8 +1041,8 @@ $(document).ready(function() {
           showToaster(response.message);
         }
       },
-      error: function() {
-        showToaster('Error updating asset');
+      error: function(xhr) {
+        showToaster(ajaxErrorMessage(xhr, 'Error updating asset'));
       }
     });
   });
@@ -1056,6 +1078,9 @@ $(document).ready(function() {
       $('#editAssetPath').val(data.file_path);
       $('#editAssetName').val(data.asset_name);
       $('#editAssetDescription').val(data.description || '');
+      // Fresh file box: no file picked from a previous edit
+      $('#editAssetFile').val('');
+      resetFileUploadArea('#editFileArea');
 
       // Show image preview if it's an image file
       if (['PNG', 'JPG', 'JPEG', 'WEBP'].includes(data.file_type)) {

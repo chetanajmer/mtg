@@ -32,7 +32,7 @@ h1{font-size:50px;font-weight:800;letter-spacing:-1.5px;line-height:1.1}
 .bulk p{font-size:14.5px;margin:0;color:#555;font-weight:400;line-height:1.35}
 
 /* compare grid */
-.cmp{display:grid;grid-template-columns:278px repeat(3,1fr);gap:4px;margin-top:17px;transition:grid-template-columns 0.3s ease;align-items:stretch}
+.cmp{display:grid;grid-template-columns:278px repeat(var(--n,3),1fr);gap:4px;margin-top:17px;transition:grid-template-columns 0.3s ease;align-items:stretch}
 .card{border:1px solid var(--line);border-radius:3px;background:#fff;padding:14px 14px 10px}
 .sel h4{font-size:15px;font-weight:600}
 .sel small{display:block;font-size:14px;color:#444;margin:2px 0 11px}
@@ -96,7 +96,7 @@ a.pimg{text-decoration:none;cursor:pointer}
 .empty-cmp .ec-steps span{width:24px;height:24px;border-radius:50%;background:#111;color:#fff;display:grid;place-items:center;font-size:12px;font-weight:700}
 
 /* table */
-.tbl{display:grid;grid-template-columns:278px repeat(6,1fr);margin-top:6px;border:1px solid var(--line);border-bottom:0;background:#fff}
+.tbl{display:grid;grid-template-columns:278px repeat(var(--n,3),1fr);margin-top:6px;border:1px solid var(--line);border-bottom:0;background:#fff}
 .tbl>div{height:32px;display:flex;align-items:center;justify-content:center;font-size:14.5px;border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
 .tbl>.q{justify-content:flex-start;padding-left:22px}
 .tbl>.h{background:#f4f4f4;font-weight:600;min-height:48px;height:auto;padding:6px 10px;font-size:14.5px;flex-direction:column;text-align:center;line-height:1.3}
@@ -107,12 +107,14 @@ a.pimg{text-decoration:none;cursor:pointer}
 .tbl>div{cursor:pointer}.tbl>.h{cursor:default}
 .tbl>div:not(.h):hover{background:#fff8ee}
 
-.sav{display:grid;grid-template-columns:278px repeat(3,1fr);gap:2px;margin-top:10px}
+.sav{display:grid;grid-template-columns:278px repeat(var(--n,3),1fr);gap:2px;margin-top:10px}
 .sav>div{background:var(--green);height:72px;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .sav>div:first-child{flex-direction:row;gap:20px;justify-content:flex-start;padding-left:14px;font-weight:600;font-size:14px;color:#222}
 .sav .ico{font-size:34px;color:#1d6b2a;stroke-width:1.5}
 .sav b{font-size:17px;font-weight:600;margin-bottom:5px}
 .sav span{color:var(--gtext);font-size:14.5px}
+/* Fewer than 3 products: hide the unused savings boxes */
+.sav>div:has(> b:empty){display:none}
 
 /* actions */
 .act{display:flex;align-items:center;gap:40px;padding:34px 0 40px;position:relative}
@@ -165,6 +167,54 @@ a.pimg{text-decoration:none;cursor:pointer}
  .nav,.sub .r,.bulk{display:none}
  .cmp,.tbl,.sav{min-width:1100px}
  .scroll{overflow-x:auto}
+}
+
+/* Tablets and phones: stack the layout instead of a 1100px wide grid
+   (that grid made the whole page, header included, wider than the screen) */
+@media(max-width:900px){
+ .wrap{padding:0 16px}
+ .hero{margin:0 -16px;padding:26px 16px}
+ .scroll{overflow:visible}
+ .cmp,.tbl,.sav{min-width:0}
+
+ /* Selector on top, product cards below (2 per row on tablets, 1 on phones) */
+ .cmp{grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+ .cmp>.sel,.empty-cmp{grid-column:1 / -1}
+ .empty-cmp{padding:28px 16px}
+ .empty-cmp .ec-steps{flex-direction:column;align-items:flex-start;gap:10px}
+ .prod{padding:12px 14px 12px}
+ .pt{padding-top:30px;gap:14px}
+ .pimg{width:90px;height:120px}
+
+ /* Price table scrolls sideways on its own; the quantity column stays visible */
+ .tbl{grid-template-columns:96px repeat(var(--n,3),minmax(120px,1fr));overflow-x:auto;-webkit-overflow-scrolling:touch;margin-top:10px}
+ .tbl>div{font-size:13px;padding:0 8px;text-align:center}
+ .tbl>.q,.tbl>.h.q,.tbl>.sel.q{padding-left:10px;position:sticky;left:0;z-index:1;background:#fff;box-shadow:1px 0 0 var(--line)}
+ .tbl>.h.q{background:#f4f4f4}
+ .tbl>.sel.q{background:var(--gold);gap:5px}
+ .tbl>.h{font-size:13px;min-height:56px}
+ .tbl>div:not(.h){height:auto;min-height:40px;padding:5px 8px;flex-direction:column;line-height:1.25}
+ .tbl>div:not(.h).q{flex-direction:row}
+ .tbl>div:not(.h) span{margin-left:0!important}
+
+ /* Savings: label on its own row, one box per product under it */
+ .sav{grid-template-columns:repeat(var(--n,3),minmax(0,1fr))}
+ .sav>div{height:auto;min-height:64px;padding:10px 6px;text-align:center}
+ .sav>div:first-child{grid-column:1 / -1;gap:12px;padding:10px 14px;text-align:left}
+ .sav .ico{font-size:28px}
+ .sav b{font-size:14px}
+ .sav span{font-size:13px}
+
+ /* Buttons full width, one under the other */
+ .act{flex-direction:column;align-items:stretch;gap:12px;padding:24px 0 32px}
+ .btn,.btn.dark{width:100%;justify-content:center;height:auto;min-height:46px;padding:10px 16px;text-align:center}
+}
+@media(max-width:480px){
+ h1{font-size:30px;letter-spacing:-.6px}
+ .hero p{font-size:15px}
+ .eyebrow{font-size:11px;letter-spacing:1.6px}
+ .pi h3{font-size:15.5px}
+ .pi p{font-size:13.5px}
 }
 </style>
 
@@ -351,7 +401,7 @@ function renderComparisonCards() {
     container.innerHTML = '';
 
     if (selectedProductIds.length === 0) {
-        grid.style.gridTemplateColumns = '278px repeat(3, 1fr)';
+        grid.style.setProperty('--n', 3);
         container.innerHTML = `
             <div class="card empty-cmp">
                 <div class="ec-icon"><svg viewBox="0 0 24 24"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.500 2.500 0 1 1 0-5C11 2 12 7 12 7zM12 7h4.500a2.500 2.500 0 1 0 0-5C13 2 12 7 12 7z"/></svg></div>
@@ -368,7 +418,7 @@ function renderComparisonCards() {
 
     // Update grid columns based on number of selected products
     const numProducts = selectedProductIds.length;
-    grid.style.gridTemplateColumns = `278px repeat(${numProducts}, 1fr)`;
+    grid.style.setProperty('--n', numProducts);
 
     selectedProductIds.forEach(productId => {
         const product = productDetails[productId];
@@ -460,7 +510,7 @@ function renderPricingTable() {
     if (!products.length) return;
 
     // One column per product, same widths as the product boxes above
-    table.style.gridTemplateColumns = `278px repeat(${products.length}, 1fr)`;
+    table.style.setProperty('--n', products.length);
 
     const rows = quantityRows(products);
     const star = '<svg viewBox="0 0 24 24"><path d="M12 2l3 6.500 7 .8-5.200 4.800 1.400 7L12 17.600 5.800 21.100l1.400-7L2 9.300l7-.8z"/></svg>';
@@ -522,7 +572,7 @@ function renderSavings() {
     if (selectedProductIds.length === 0) {
         label.textContent = 'Your Savings';
         // Reset to default 3 columns
-        container.style.gridTemplateColumns = '278px repeat(3, 1fr)';
+        container.style.setProperty('--n', 3);
         // Clear all savings elements
         for (let i = 0; i < 3; i++) {
             const sEl = document.getElementById(`s${i}`);
@@ -534,7 +584,7 @@ function renderSavings() {
     }
 
     const numProducts = selectedProductIds.length;
-    container.style.gridTemplateColumns = `278px repeat(${numProducts}, 1fr)`;
+    container.style.setProperty('--n', numProducts);
 
     const products = selectedProductIds.map(id => productDetails[id]).filter(Boolean);
     const selectedRow = quantityRows(products).find(r => selectedQuantity >= r.min && (r.max === null || selectedQuantity <= r.max));
