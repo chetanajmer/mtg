@@ -32,11 +32,14 @@ return [
     
     'google' => [
 
-        'client_id' => env('Google_client_id'),
+        // GOOGLE_* is the usual name; the older Google_* names still work (Linux treats them as different variables)
+        'client_id' => env('GOOGLE_CLIENT_ID', env('Google_client_id')),
 
-        'client_secret' => env('Google_client_secret'),
+        'client_secret' => env('GOOGLE_CLIENT_SECRET', env('Google_client_secret')),
 
-        'redirect' => env('Google_redirect'),
+        // Callback sent to Google (must be listed in Google Console). Empty = <site>/corporate/auth/google/callback
+
+        'redirect' => env('GOOGLE_REDIRECT_URI', env('Google_redirect')),
 
     ],
 

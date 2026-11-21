@@ -271,6 +271,8 @@ Route::post('/cart/register', [UsersController::class, 'storeCartRegister'])->na
 Route::get('/enquiry/success/{id}', [CartController::class, 'enquirySuccess'])->name('enquiry.success');
 Route::get('/corporate/auth/google', [UsersController::class, 'redirectToGoogleCorporate'])->name('corporate.google');
 Route::get('/corporate/auth/google/callback', [UsersController::class, 'handleGoogleCallback'])->name('corporate.google.callback');
+// Same handler: lets GOOGLE_REDIRECT_URI point at /auth/google/callback if that is what Google Console has
+Route::get('/auth/google/callback', [UsersController::class, 'handleGoogleCallback'])->name('google.callback');
 Route::get('/track-order', [CustomerOrderController::class, 'trackForm'])->name('track.form');
 Route::post('/track-order', [CustomerOrderController::class, 'trackLookup'])->name('track.lookup')->middleware('throttle:order-lookup');
 Route::get('/track-order/{orderid}', [CustomerOrderController::class, 'trackShow'])->name('track.show')->where('orderid', '[0-9]+');

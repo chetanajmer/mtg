@@ -77,7 +77,7 @@ class CorporateTeamSession
 
     private function isLoginOrLogout(Request $request)
     {
-        return $request->is('corporate/logout', 'store/dologout', 'logout', 'corporate/auth/google/callback')
+        return $request->is('corporate/logout', 'store/dologout', 'logout', 'corporate/auth/google/callback', 'auth/google/callback')
             || (!$request->isMethodSafe() && $request->is('corporate/login', 'corporate/register', 'store/dologin', 'store/doregister', 'cart/register'));
     }
 }

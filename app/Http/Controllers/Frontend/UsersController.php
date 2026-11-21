@@ -477,12 +477,26 @@ class UsersController extends Controller
             return redirect()->back();
         }
 
+        // On a local machine the same site opens as localhost and 127.0.0.1, but Google only accepts the exact
+        // callback in GOOGLE_REDIRECT_URI. Move to that address first, so the callback and the login cookie match.
+        $callbackOrigin = $this->localCallbackOrigin($request);
+        if ($callbackOrigin) {
+            $here = $request->getSchemeAndHttpHost();
+            $query = $request->query();
+            if (isset($query['redirect']) && is_string($query['redirect']) && strpos($query['redirect'], $here) === 0) {
+                $query['redirect'] = $callbackOrigin . substr($query['redirect'], strlen($here));
+            }
+
+            return redirect()->away($callbackOrigin . $request->getBaseUrl() . $request->getPathInfo()
+                . ($query ? '?' . http_build_query($query) : ''));
+        }
+
         if ($request->input('redirect')) {
             session()->put('google_redirect', $this->safeRedirect($request->input('redirect'), route('corporate.portal')));
         }
 
         return Socialite::driver('google')
-            ->redirectUrl(route('corporate.google.callback'))
+            ->redirectUrl($this->googleCallbackUrl($request))
             ->redirect();
     }
 
@@ -492,18 +506,26 @@ class UsersController extends Controller
 
         try {
             $googleUser = Socialite::driver('google')
-                ->redirectUrl(route('corporate.google.callback'))
+                ->redirectUrl($this->googleCallbackUrl($request))
                 ->user();
         } catch (\Exception $e) {
+            \Log::warning('Google login failed: ' . $e->getMessage());
             $request->session()->flash('error', 'Google login failed. Please try again.');
             $request->session()->flash('auth_form', 'login');
-            return redirect($redirectTo);
+            return redirect($this->googleFailRedirect($redirectTo));
         }
 
         if (empty($googleUser->email)) {
             $request->session()->flash('error', 'Could not get your email from Google. Please login with email.');
             $request->session()->flash('auth_form', 'login');
-            return redirect($redirectTo);
+            return redirect($this->googleFailRedirect($redirectTo));
+        }
+
+        // An existing account is matched by email, so only accept addresses Google has verified
+        if (array_key_exists('email_verified', (array) $googleUser->user) && !$googleUser->user['email_verified']) {
+            $request->session()->flash('error', 'Your Google email is not verified. Please login with email and password.');
+            $request->session()->flash('auth_form', 'login');
+            return redirect($this->googleFailRedirect($redirectTo));
         }
 
         $user = Storeuser::where('google_id', $googleUser->id)
@@ -541,6 +563,66 @@ class UsersController extends Controller
             $request->session()->flash('account_created', ['name' => strtok((string) $user->fname, ' ')]); // welcome pop-up
         }
         return redirect($redirectTo);
+    }
+
+    /**
+     * The callback URL sent to Google; it must match an "Authorized redirect URI" in Google Console exactly.
+     * GOOGLE_REDIRECT_URI is used when it is on this site (so a localhost value left in a live .env is ignored),
+     * otherwise <site>/corporate/auth/google/callback.
+     */
+    private function googleCallbackUrl(Request $request)
+    {
+        $configured = config('services.google.redirect');
+
+        if (is_string($configured) && $configured !== ''
+            && parse_url($configured, PHP_URL_HOST) === $request->getHost()
+            && (int) (parse_url($configured, PHP_URL_PORT) ?: 80) === (int) $request->getPort()) {
+            return $configured;
+        }
+
+        return route('corporate.google.callback');
+    }
+
+    /**
+     * scheme://host:port of GOOGLE_REDIRECT_URI when this request came in on a different local address
+     * (e.g. 127.0.0.1 vs localhost); null otherwise. Only loopback addresses, so a live site never jumps to localhost.
+     */
+    private function localCallbackOrigin(Request $request)
+    {
+        $configured = config('services.google.redirect');
+        if (!is_string($configured) || $configured === '') {
+            return null;
+        }
+
+        $parts = parse_url($configured);
+        $loopback = ['localhost', '127.0.0.1', '::1', '[::1]'];
+        if (empty($parts['host']) || !in_array($parts['host'], $loopback, true) || !in_array($request->getHost(), $loopback, true)) {
+            return null;
+        }
+
+        $scheme = $parts['scheme'] ?? 'http';
+        $port = $parts['port'] ?? ($scheme === 'https' ? 443 : 80);
+        if ($parts['host'] === $request->getHost() && (int) $port === (int) $request->getPort()) {
+            return null;
+        }
+
+        return $scheme . '://' . $parts['host'] . (isset($parts['port']) ? ':' . $parts['port'] : '');
+    }
+
+    /**
+     * Where to send someone whose Google login failed. The customer portal needs a login and would bounce to the
+     * login page a second time, losing the error message, so go to the login page directly (the cart shows its own pop-up).
+     */
+    private function googleFailRedirect($redirectTo)
+    {
+        $portal = route('corporate.portal');
+        $path = parse_url($redirectTo, PHP_URL_PATH) ?: '/';
+
+        if ($redirectTo === $portal || $path === parse_url($portal, PHP_URL_PATH)) {
+            return route('corporate.login');
+        }
+
+        return $redirectTo;
     }
 
     public function corporateAddresses(Request $request)
