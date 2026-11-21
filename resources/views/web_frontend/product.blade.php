@@ -680,19 +680,37 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(function (data) {
                 const cartCount = document.getElementById('cartCount');
                 if (data.success && cartCount) cartCount.textContent = data.items;
-                showQuoteMessage(data.success ? 'Added to Quote!' : (data.message || 'Could not add to quote'), data.success);
+                if (data.already) {
+                    showQuoteMessage(data.message || 'This product is already in your quote.', 'info', data.cart_url);
+                } else {
+                    showQuoteMessage(data.success ? 'Added to Quote!' : (data.message || 'Could not add to quote'), data.success ? 'ok' : 'error');
+                }
             })
-            .catch(function () { showQuoteMessage('Could not add to quote. Please try again.', false); })
+            .catch(function () { showQuoteMessage('Could not add to quote. Please try again.', 'error'); })
             .finally(function () { addToQuoteBtn.disabled = false; });
         });
     }
 
-    function showQuoteMessage(message, ok) {
+    // type: 'ok' (green), 'info' (gold, e.g. already in the quote) or 'error' (red); link = optional "View Quote" link
+    function showQuoteMessage(message, type, link) {
+        const colours = { ok: '#22c55e', info: '#9a6b16', error: '#dc2626' };
+        document.querySelectorAll('.quote-note').forEach(function (n) { n.remove(); });
         const note = document.createElement('div');
-        note.style.cssText = 'position:fixed;top:20px;right:20px;color:#fff;padding:12px 24px;border-radius:8px;z-index:2000;background:' + (ok ? '#22c55e' : '#dc2626');
-        note.textContent = message;
+        note.className = 'quote-note';
+        note.setAttribute('role', 'status');
+        note.style.cssText = 'position:fixed;top:20px;right:20px;max-width:calc(100vw - 40px);display:flex;align-items:center;gap:14px;color:#fff;padding:12px 18px 12px 24px;border-radius:8px;z-index:2000;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.18);background:' + (colours[type] || colours.error);
+        const text = document.createElement('span');
+        text.textContent = message;
+        note.appendChild(text);
+        if (link) {
+            const a = document.createElement('a');
+            a.href = link;
+            a.textContent = 'View Quote';
+            a.style.cssText = 'flex:none;padding:6px 12px;border-radius:5px;background:#fff;color:#15171a;font-size:13px;font-weight:700;text-decoration:none;';
+            note.appendChild(a);
+        }
         document.body.appendChild(note);
-        setTimeout(function () { note.remove(); }, 2500);
+        setTimeout(function () { note.remove(); }, link ? 4000 : 2500);
     }
 });
 </script>

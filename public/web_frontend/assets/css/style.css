@@ -1331,21 +1331,85 @@ input {
   transform: translateY(-2px);
 }
 
-.enquiry-btn {
-  background: white;
-  color: #111;
-  border: 1px solid #d9dee4;
-  padding: 14px 20px;
-  border-radius: 6px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
+/* Cart summary buttons, in the site's look (dark button + outline button, like the home page and Budget Planner) */
+.cart-action-form {
+  width: 100%;
+  margin: 0;
 }
 
-.enquiry-btn:hover {
-  background: #f5f5f5;
-  border-color: #9a9ea4;
+.cart-actions .cart-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 50px;
+  padding: 12px 20px;
+  border-radius: 6px;
+  font-family: 'Nunito Sans', Arial, Helvetica, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: .2px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+.cart-actions .cart-btn i {
+  font-size: 16px;
+  line-height: 1;
+  transition: transform .2s ease;
+}
+
+/* Send Enquiry: the main action */
+.cart-actions .enquiry-btn {
+  background: #15171a;
+  border: 1px solid #15171a;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(21, 23, 26, .18);
+}
+
+.cart-actions .enquiry-btn:hover,
+.cart-actions .enquiry-btn:focus-visible {
+  background: #b98a35;
+  border-color: #b98a35;
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(185, 138, 53, .35);
+  transform: translateY(-1px);
+}
+
+.cart-actions .enquiry-btn:hover i {
+  transform: translateX(3px);
+}
+
+/* Continue Shopping: secondary, outline */
+.cart-actions .continue-btn {
+  background: #fff;
+  border: 1px solid #15171a;
+  color: #15171a;
+}
+
+.cart-actions .continue-btn:hover,
+.cart-actions .continue-btn:focus-visible {
+  background: #fbf5ea;
+  border-color: #b98a35;
+  color: #9a6b16;
+}
+
+.cart-actions .continue-btn:hover i {
+  transform: translateX(-3px);
+}
+
+.cart-actions .cart-btn:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.cart-actions .cart-btn:focus-visible {
+  outline: 2px solid #9a6b16;
+  outline-offset: 2px;
 }
 
 .help-box {

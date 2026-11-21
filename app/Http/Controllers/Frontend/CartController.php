@@ -99,6 +99,20 @@ class CartController extends Controller
         if ($product->is_active !== 'online') {
             return response()->json(['success' => false, 'message' => 'This product is no longer available.'], 422);
         }
+
+        // Adding the same product again doesn't add it twice; the quantity is changed on the quote cart page
+        if ($this->cartQuery()->where('product_id', $product->id)->exists()) {
+            $lines = $this->lineCount();
+            return response()->json([
+                'success' => false,
+                'already' => true,
+                'message' => 'This product is already in your quote.',
+                'cart_url' => route('cart.index'),
+                'count' => $lines,
+                'items' => $lines,
+            ]);
+        }
+
         $this->addProductToCart($product, $request->quantity);
 
         // Both are the number of lines, which is what the header cart badge shows
