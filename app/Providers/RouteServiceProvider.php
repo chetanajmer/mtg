@@ -67,5 +67,13 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('order-answer', function (Request $request) {
             return Limit::perMinute(20)->by('answer|' . $request->ip());
         });
+
+        // Budget planner: own counters, because one Show Recommendations asks for up to three pictures
+        RateLimiter::for('planner-recommend', function (Request $request) {
+            return Limit::perMinute(30)->by('planner-recommend|' . $request->ip());
+        });
+        RateLimiter::for('planner-image', function (Request $request) {
+            return Limit::perMinute(12)->by('planner-image|' . $request->ip());
+        });
     }
 }

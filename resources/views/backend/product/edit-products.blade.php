@@ -1029,6 +1029,8 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                             </div>
 
+@include('backend.product.delivery-time-field', ['value' => $items->estimated_delivery_time])
+
                                         </div>
 
                                 </div>
@@ -1061,9 +1063,11 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                 <div class="col-md-2">Max Qty</div>
 
-                                                <div class="col-md-3">Price / Piece</div>
+                                                <div class="col-md-2">% of Cost</div>
 
-                                                <div class="col-md-3">Savings</div>
+                                                <div class="col-md-2">Price / Piece</div>
+
+                                                <div class="col-md-2">Savings</div>
 
                                                 <div class="col-md-2"></div>
 
@@ -1081,9 +1085,9 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                         <div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control tier-input" value="{{$tier->max_qty}}" placeholder="Unlimited"></div>
 
-                                                        <div class="col-md-3"><input type="number" step="0.01" min="0.01" name="tier_price[]" class="form-control tier-input" value="{{$tier->price}}" placeholder="e.g : 45">@if($tier->price <= 0)<small class="text-danger">Needs a price above 0</small>@endif</div>
+                                                        <div class="col-md-2"><input type="number" step="0.01" min="0.01" class="form-control tier-percent" placeholder="%" aria-label="Percent of Cost Price"></div><div class="col-md-2"><input type="number" step="0.01" min="0.01" name="tier_price[]" class="form-control tier-input" value="{{$tier->price}}" placeholder="e.g : 45">@if($tier->price <= 0)<small class="text-danger">Needs a price above 0</small>@endif</div>
 
-                                                        <div class="col-md-3 tier-savings" style="padding-top:8px;">-</div>
+                                                        <div class="col-md-2 tier-savings" style="padding-top:8px;">-</div>
 
                                                         <div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div>
 
@@ -1097,7 +1101,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                             <a href="javascript:void(0);" id="add_tier_row" class="btn btn-purple btn-sm waves-effect waves-light">Add Tier</a>
 
-                                            <p style="color:blue;margin-top:10px;">Leave Max Qty blank for "Unlimited". Savings % is auto-calculated against the base product price.</p>
+                                            <p style="color:blue;margin-top:10px;">Leave Max Qty blank on the last tier so it covers every larger order. Tiers must follow on from each other, with no gaps or overlaps. Type a % of Cost Price or a price, and the other fills in. Savings % is compared with the first tier.</p>
 
                                         </div>
 
@@ -3160,11 +3164,20 @@ function delete_variation_image($value)
         row.next('.spec-row').after(row);
     });
 
-    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control tier-input" placeholder="e.g : 50"></div><div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control tier-input" placeholder="Unlimited"></div><div class="col-md-3"><input type="number" step="0.01" min="0.01" name="tier_price[]" class="form-control tier-input" placeholder="e.g : 45"></div><div class="col-md-3 tier-savings" style="padding-top:8px;">-</div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
+    var tierRowHtml = '<div class="row tier-row" style="margin-bottom:10px;"><div class="col-md-2"><input type="number" min="1" name="tier_min[]" class="form-control tier-input" placeholder="e.g : 50"></div><div class="col-md-2"><input type="number" min="1" name="tier_max[]" class="form-control tier-input" placeholder="Unlimited"></div><div class="col-md-2"><input type="number" step="0.01" min="0.01" class="form-control tier-percent" placeholder="%" aria-label="Percent of Cost Price"></div><div class="col-md-2"><input type="number" step="0.01" min="0.01" name="tier_price[]" class="form-control tier-input" placeholder="e.g : 45"></div><div class="col-md-2 tier-savings" style="padding-top:8px;">-</div><div class="col-md-2"><a href="javascript:void(0);" class="tier-remove btn btn-danger btn-sm" title="Remove">X</a></div></div>';
 
+    // Savings are measured against the first tier, the same as on the product page
     function tierBasePrice(){
-        var p = parseFloat($('input[name="price"]').val());
-        return (!isNaN(p) && p > 0) ? p : 0;
+        var firstMin = null, base = 0;
+        $('.tier-row').each(function(){
+            var min = parseInt($(this).find('input[name="tier_min[]"]').val(), 10);
+            var p = parseFloat($(this).find('input[name="tier_price[]"]').val());
+            if(!isNaN(min) && !isNaN(p) && p > 0 && (firstMin === null || min < firstMin)){
+                firstMin = min;
+                base = p;
+            }
+        });
+        return base;
     }
 
     function recalcTierSavings(){
@@ -3184,7 +3197,8 @@ function delete_variation_image($value)
         if($('input[name="tier_pricing_enabled"]').is(':checked')){
             $('#tier_pricing_body').show();
             // Enable all tier inputs and add required
-            $('.tier-input').prop('disabled', false).prop('required', true);
+            $('.tier-input').prop('disabled', false);
+            $('.tier-input').not('[name="tier_max[]"]').prop('required', true);
             if($('#tier_rows .tier-row').length === 0){ $('#tier_rows').append(tierRowHtml); }
         } else {
             $('#tier_pricing_body').hide();
@@ -3197,7 +3211,7 @@ function delete_variation_image($value)
         $('#tier_rows').append(tierRowHtml);
         // Ensure new inputs follow the current tier pricing state
         if($('input[name="tier_pricing_enabled"]').is(':checked')){
-            $('#tier_rows .tier-row:last .tier-input').prop('required', true);
+            $('#tier_rows .tier-row:last .tier-input').not('[name="tier_max[]"]').prop('required', true);
         } else {
             $('#tier_rows .tier-row:last .tier-input').prop('disabled', true).prop('required', false);
         }
@@ -3206,6 +3220,7 @@ function delete_variation_image($value)
 
     $(document).on('click', '.tier-remove', function(){
         $(this).closest('.tier-row').remove();
+        recalcTierSavings();
     });
 
     $(document).on('input change', '.tier-row input, input[name="price"]', function(){
@@ -3225,13 +3240,15 @@ function delete_variation_image($value)
 
     // Initialize tier inputs based on initial state
     if($('input[name="tier_pricing_enabled"]').is(':checked')){
-        $('.tier-input').prop('required', true);
+        $('.tier-input').not('[name="tier_max[]"]').prop('required', true);
     } else {
         $('.tier-input').prop('disabled', true).prop('required', false);
     }
 
     toggleTierBody();
     recalcTierSavings();
+
+    @include('backend.product.partials.tier-check')
 
     $('input[name="occasion_tags"], input[name="preferences"], input[name="ai_tags"]').tagsinput();
 

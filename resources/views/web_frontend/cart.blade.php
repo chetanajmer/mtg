@@ -40,11 +40,10 @@
         @foreach($items as $item)
         <div class="cart-item">
           <div class="item-image">
-            @if($item->image)
-              <img src="{{ asset('upload/product/' . $item->image) }}" alt="{{ $item->name }}">
-            @else
-              <img src="{{ asset('web_frontend/assets/images/product-main.jpg') }}" alt="{{ $item->name }}">
+            @if($item->image_url)
+              <img src="{{ $item->image_url }}" alt="{{ $item->name }}" onerror="this.remove()">
             @endif
+            <i class="bi bi-gift" aria-hidden="true"></i>
           </div>
           <div class="item-details">
             <h4>{{ $item->name }}</h4>
@@ -105,17 +104,17 @@
         <div class="cart-actions">
           @if(session()->has('userid'))
             @if($items->count() > 0)
-              <form action="{{ route('cart.send-enquiry') }}" method="POST" style="width: 100%;">
+              <form action="{{ route('cart.send-enquiry') }}" method="POST" class="cart-action-form">
                 @csrf
-                <button type="submit" class="btn btn-outline-secondary enquiry-btn" style="width: 100%;">Send Enquiry</button>
+                <button type="submit" class="cart-btn enquiry-btn"><i class="bi bi-send" aria-hidden="true"></i> Send Enquiry</button>
               </form>
             @else
-              <button type="button" class="btn btn-outline-secondary enquiry-btn" onclick="showCartToast()">Send Enquiry</button>
+              <button type="button" class="cart-btn enquiry-btn" onclick="showCartToast()"><i class="bi bi-send" aria-hidden="true"></i> Send Enquiry</button>
             @endif
           @else
-            <button type="button" class="btn btn-outline-secondary enquiry-btn" onclick="openAuthModal('login')">Send Enquiry</button>
+            <button type="button" class="cart-btn enquiry-btn" onclick="openAuthModal('login')"><i class="bi bi-send" aria-hidden="true"></i> Send Enquiry</button>
           @endif
-          <a href="/" class="btn btn-outline-secondary" style="width: 100%; text-align: center; margin-top: 10px; display: block;">Continue Shopping</a>
+          <a href="{{ url('/') }}" class="cart-btn continue-btn"><i class="bi bi-arrow-left" aria-hidden="true"></i> Continue Shopping</a>
         </div>
 
         <div class="help-box">

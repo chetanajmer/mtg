@@ -12,32 +12,8 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-
-        'storeuser',
-        'addtocart',
-        'getcatproducts',
-        'getsubcatproducts',
-        'addsubscriber',
-        'getproductdetails',
-        'getbrandproducts',
-        'searchproduct',
+        // PayTabs posts these from its own pages and servers (the callback is checked by its signature)
         'paytab_returnurl',
-        'return_url',
         'callback',
-        'registeruser',
-        'registersocialuser',
-        'loginuser',
-        'loginsocialuser',
-        'getuserdetails',
-        'getuserorderdetails',
-        'updateuserdetails',
-        'stocknotify',
-        'b2benquiry',
-        'addtocompare',
-        'getcomparelist',
-        'abandancart',
-        'headerfilter',
-        'gethomedata'
-        //
     ];
 }

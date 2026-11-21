@@ -23,6 +23,14 @@ class BrandingOptionController extends Controller
 
        $item=new Branding_option;
        $item->name=$request->name;
+
+       if($request->hasFile('image')){
+           $image = $request->file('image');
+           $filename = time() . '.' . $image->getClientOriginalExtension();
+           $image->move(public_path('upload/branding_options'), $filename);
+           $item->image = $filename;
+       }
+
        $item->save();
 
        $msg="Successfully Added !";
@@ -44,9 +52,18 @@ class BrandingOptionController extends Controller
     {
 
         $id=(int)$request->id;
+        $updateData = ['name' => $request->name];
+
+        if($request->hasFile('image')){
+            $image = $request->file('image');
+            $filename = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('upload/branding_options'), $filename);
+            $updateData['image'] = $filename;
+        }
+
         DB::table('branding_options')
         ->where('id',$id)
-        ->update(['name' => $request->name]);
+        ->update($updateData);
 
         $msg="Updated !";
        return $msg;

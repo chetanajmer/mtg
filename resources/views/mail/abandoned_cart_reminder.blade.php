@@ -1,23 +1,17 @@
-<!DOCTYPE html>
-<html>
-<body style="margin:0;padding:24px;background:#f9fafb;font-family:Arial,Helvetica,sans-serif;color:#111827;">
-  <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:8px;padding:24px;">
-    <h2 style="margin:0 0 12px;">You left some items in your quote cart</h2>
-    <p style="margin:0 0 16px;">Hi {{ $customer->fname }}, your cart is saved. Send it to us whenever you're ready and we'll prepare a quote.</p>
+@extends('mail.layouts.brand')
 
-    <table width="100%" cellpadding="8" cellspacing="0" style="border-collapse:collapse;font-size:14px;margin:0 0 16px;">
-      @foreach($items as $item)
-      <tr>
-        <td style="border-bottom:1px solid #f3f4f6;">{{ $item->name }}</td>
-        <td style="border-bottom:1px solid #f3f4f6;text-align:right;">{{ $item->quantity }} pcs</td>
-      </tr>
-      @endforeach
-    </table>
+@section('title', 'You left some items in your quote cart')
+@section('preheader', 'Your cart is saved. Send it to us whenever you are ready.')
 
-    <p style="margin:0 0 16px;">
-      <a href="{{ url('/cart') }}" style="display:inline-block;background:#111827;color:#ffffff;padding:10px 18px;border-radius:6px;text-decoration:none;">Open my cart</a>
-    </p>
-    <p style="margin:0;">Kind regards,<br>More Than Giftz</p>
-  </div>
-</body>
-</html>
+@section('content')
+  <p style="margin:0 0 14px;">Hi {{ $customer->fname ?: 'there' }}, your cart is saved. Send it to us whenever you're ready and we'll prepare a quote.</p>
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;font-family:Arial,Helvetica,sans-serif;font-size:14px;margin:0 0 4px;">
+    @foreach($items as $item)
+    <tr>
+      <td style="padding:10px 8px;border-bottom:1px solid #efe7da;">{{ $item->name }}</td>
+      <td align="right" style="padding:10px 8px;border-bottom:1px solid #efe7da;white-space:nowrap;color:#6a6e75;">{{ $item->quantity }} pcs</td>
+    </tr>
+    @endforeach
+  </table>
+  @include('mail.partials.button', ['url' => url('/cart'), 'label' => 'Open my cart'])
+@endsection

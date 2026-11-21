@@ -1,0 +1,30 @@
+/* Request a Quote: the custom order form */
+.co-page { max-width: 760px; margin: 0 auto; padding: 32px 16px 48px; font-family: 'Nunito Sans', Arial, Helvetica, sans-serif; color: #15171a; }
+.co-page *, .co-page *::before, .co-page *::after { box-sizing: border-box; }
+.co-head { margin-bottom: 20px; }
+.co-head h1 { margin: 0 0 6px; font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: 700; }
+.co-head p { margin: 0; font-size: 15px; line-height: 1.45; color: #4b4f56; }
+.co-card { padding: 24px; background: #fff; border: 1px solid #e8e4dc; border-radius: 10px; box-shadow: 0 2px 10px rgba(40, 30, 10, .06); }
+.co-alert { margin-bottom: 16px; padding: 10px 14px; background: #fdecea; border-radius: 6px; font-size: 14px; color: #b42318; }
+.co-field { margin-bottom: 16px; min-width: 0; }
+.co-field label { display: block; margin-bottom: 6px; font-size: 13.5px; font-weight: 700; }
+.co-field label span { color: #b42318; }
+.co-field input, .co-field select, .co-field textarea { display: block; width: 100%; padding: 10px 12px; background: #fff; border: 1px solid #c9ccd0; border-radius: 6px; font-family: inherit; font-size: 15px; color: #15171a; }
+.co-field input, .co-field select { height: 44px; }
+.co-field textarea { resize: vertical; line-height: 1.4; }
+.co-field input:focus, .co-field select:focus, .co-field textarea:focus { outline: 2px solid #9a6b16; outline-offset: 1px; border-color: #9a6b16; }
+.co-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 16px; }
+.co-contact { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; margin-bottom: 18px; padding-top: 16px; border-top: 1px solid #eee; }
+.co-contact strong { display: block; margin-bottom: 6px; font-size: 13.5px; }
+.co-contact p { margin: 0; font-size: 14px; line-height: 1.45; color: #4b4f56; overflow-wrap: anywhere; }
+.co-contact .co-field { margin-bottom: 0; }
+.co-submit { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; height: 48px; background: #15171a; border: 0; border-radius: 6px; font-family: inherit; font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; }
+.co-submit:hover { background: #33363b; }
+.co-submit:focus-visible { outline: 2px solid #9a6b16; outline-offset: 2px; }
+.co-note { margin: 10px 0 0; font-size: 13px; text-align: center; color: #6a6e75; }
+
+@media (max-width: 600px) {
+  .co-head h1 { font-size: 27px; }
+  .co-card { padding: 18px 16px; }
+  .co-grid, .co-contact { grid-template-columns: minmax(0, 1fr); }
+}

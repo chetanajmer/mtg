@@ -90,6 +90,7 @@ class CategoryController extends Controller
   {
     $parentcategories=DB::Table('parentcategories')->select('*')->get();
     $items =DB::Table('categories')->select('*')->where('slug',$slug)->first();
+    abort_unless($items, 404); // unknown record: not found page, not a crash
     return view('backend.category.edit-categories',compact('items','parentcategories'));
   }
 

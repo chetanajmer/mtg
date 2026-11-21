@@ -23,10 +23,11 @@
     <a href="{{ route('corporate.portal') }}"><i class="bi bi-gift"></i>Dashboard</a>
     <a href="/orders"><i class="bi bi-cart3"></i>Orders</a>
     <a href="/corporate-addresses"><i class="bi bi-geo-alt"></i>Addresses</a>
-    <a href="#branding"><i class="bi bi-image"></i>Branding Assets</a>
+    <a href="{{ route('branding-assets.index') }}"><i class="bi bi-image"></i>Branding Assets</a>
     <a href="/collections-all"><i class="bi bi-bookmark"></i>Saved Collections</a>
-    <a href="#employees"><i class="bi bi-people-fill"></i>Employees</a>
+    <a href="{{ route('corporate.employees') }}"><i class="bi bi-people-fill"></i>Employees</a>
     <a href="{{ route('corporate.reports') }}"><i class="bi bi-bar-chart-line"></i>Reports</a>
+    <a href="{{ route('planner.index') }}"><i class="bi bi-calculator"></i>Budget Planner</a>
     <a class="active" href="/corporate-account-settings"><i class="bi bi-gear"></i>Account Settings</a>
     <a href="{{ route('corporate.logout') }}" style="color: #dc3545;"><i class="bi bi-box-arrow-right"></i>Logout</a>
   </nav>
@@ -45,6 +46,12 @@
     @if(session('success'))
       <div class="alert alert-success">{{ session('success') }}</div>
     @endif
+    @if(session('error'))
+      <div class="alert alert-danger">{{ session('error') }}</div>
+    @endif
+    @if(session('member_id'))
+      <div class="alert alert-info">These are the company account's details. Only the account owner can change them. To change your own password, log out and use "Forgot password" with your email.</div>
+    @endif
     @if($errors->any())
       <div class="alert alert-danger">
         <ul>
@@ -61,6 +68,7 @@
       </div>
       <form action="{{ route('corporate.account-settings.update') }}" method="POST" style="padding: 20px;">
         @csrf
+        <fieldset {{ session('member_id') ? 'disabled' : '' }} style="border: 0; padding: 0; margin: 0; min-width: 0;">
         <div class="settings-grid">
           <div class="form-group">
             <label for="fname">First Name *</label>
@@ -115,6 +123,7 @@
         <div class="form-actions">
           <button type="submit" class="btn btn-primary">Save Changes</button>
         </div>
+        </fieldset>
       </form>
     </div>
   </section>

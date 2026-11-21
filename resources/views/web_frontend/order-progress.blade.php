@@ -85,7 +85,7 @@
       </div>
     </div>
     <div class="op-figs">
-      <div><small>Order value</small><b>AED {{ number_format($order->total, 2) }}</b></div>
+      <div><small>Order value</small><b>{{ $order->totalLabel() }}</b></div>
       <div><small>Items</small><b>{{ $qty }} pcs</b></div>
       <div><small>Progress</small><b>{{ $doneCount }}/10</b></div>
     </div>
@@ -249,6 +249,9 @@
                 </div>
                 @if($detail || $when)
                   <p>{{ $detail }}@if($detail && $when) &middot; @endif<span class="op-when">{{ $when }}</span></p>
+                @endif
+                @if($mode === 'account' && ($stepInvoiceType = \App\Services\OrderInvoices::typeForStep($n)) && ($stepInvoice = $order->invoices->firstWhere('type', $stepInvoiceType)))
+                  <a class="op-invoice" href="{{ route('customer.orders.invoice', [$order->orderid, $stepInvoice->number]) }}"><i class="bi bi-receipt"></i> View invoice {{ $stepInvoice->number }}</a>
                 @endif
               </div>
             </li>

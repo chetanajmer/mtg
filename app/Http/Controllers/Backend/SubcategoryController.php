@@ -88,6 +88,7 @@ class SubcategoryController extends Controller
   {
     $categories=DB::select('select * from categories');
     $items =DB::Table('subcategories')->select('*')->where('slug',$slug)->first();
+    abort_unless($items, 404); // unknown record: not found page, not a crash
     return view('backend.subcategory.edit-categories',compact('items','categories'));
   }
 

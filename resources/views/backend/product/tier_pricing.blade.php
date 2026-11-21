@@ -58,6 +58,8 @@ window.location.href = "{{url('/admin')}}";</script>
 
                         		<div class="card-box">
 
+                        	        @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+                        	        @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
                         	        <div class="row m-t-10 m-b-10">
 
                                         <div class="col-sm-10 col-lg-10">
@@ -68,6 +70,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
 
 
+                        			<p class="text-muted">The customer pays this percentage of the product's Cost Price, so larger quantities need a lower percentage (e.g. 50-99 at 85%). Add Product fills in tier prices from this list. To change products that already exist, use Apply to products below.</p>
                         			<div class="table-responsive">
 
                                         <table class="table table-actions-bar">
@@ -80,7 +83,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                     <th>Max Qty</th>
 
-                                                    <th>Percentage</th>
+                                                    <th>% of Cost Price</th>
 
                                                     <th style="min-width: 80px;">Action</th>
 
@@ -125,6 +128,13 @@ window.location.href = "{{url('/admin')}}";</script>
                                         </table>
 
                                     </div>
+                                    <hr>
+                                    <form method="post" action="{{ route('apply_tier_pricing') }}" onsubmit="return confirm('Replace the tiers on {{ $tierProductCount }} products with tier pricing switched on? Their current tier prices will be overwritten.');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-purple waves-effect waves-light" @if($tierListProblem || !$tierProductCount) disabled @endif>Apply to products</button>
+                                        <span class="m-l-10 text-muted">Sets every product with tier pricing switched on ({{ $tierProductCount }}) to these tiers, using its own Cost Price. Products with tier pricing off are not changed. The last tier becomes Unlimited.</span>
+                                        @if($tierListProblem)<p class="text-danger m-t-10 m-b-0">Can't apply yet: {{ $tierListProblem }}</p>@endif
+                                    </form>
 
                         		</div>
 
@@ -196,7 +206,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                             <div class="form-group">
 
-                                                                <label for="percentage" class="control-label">Percentage</label>
+                                                                <label for="percentage" class="control-label">% of Cost Price</label>
 
                                                                 <input type="number" id="percentage" class="form-control" placeholder="Percentage" step="0.01" min="0">
 
@@ -280,7 +290,7 @@ window.location.href = "{{url('/admin')}}";</script>
 
                                                             <div class="form-group">
 
-                                                                <label for="percentage" class="control-label">Percentage</label>
+                                                                <label for="percentage" class="control-label">% of Cost Price</label>
 
                                                                 <input type="number" id="updatepercentage" class="form-control" placeholder="Percentage" step="0.01" min="0">
 
@@ -321,7 +331,11 @@ window.location.href = "{{url('/admin')}}";</script>
 
 
 <script>
-
+$(document).ajaxError(function(e, xhr) {
+    if (xhr.status === 422) {
+        $.Notification.notify('error', 'top right', 'Not saved', xhr.responseText);
+    }
+});
 $('#savetier').on('click',function(e) {
 
         var min_qty=$("#min_qty").val();

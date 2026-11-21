@@ -620,7 +620,8 @@ class ApiController extends Controller
 	} 
 
 	public function addsubscriber(Request $request)
-	{   
+	{
+		 $request->validate(['email' => 'required|email|max:191']);   
 		 //return $request->email;
 
 		 $checksubscriber=Subscribe::where('email',$request->email)->first();

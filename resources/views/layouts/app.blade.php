@@ -469,6 +469,7 @@ figure figcaption {
                                     </li>
 
                                      <li><a href="{{url('banners')}}" >Full Banner</a></li>
+                                     <li><a href="{{ route('page-banners.index') }}" >Page Banners</a></li>
 
                                      @if($role=="superadmin")
 
@@ -496,9 +497,27 @@ figure figcaption {
                               </li>
                               @endadminCan
 
+                              @adminCan('admin/annual-membership')
+                              <li>
+                                <a href="{{ route('membership.index') }}" class="waves-effect {{ request()->is('admin/annual-membership*') ? 'active' : '' }}"><i class="ti-crown"></i><span> Annual Membership</span></a>
+                              </li>
+                              @endadminCan
+
                              @adminCan('admin/reports')
                              <li>
                                 <a href="{{ route('reports.index') }}" class="waves-effect"><i class="ti-book"></i><span> Reports </span></a>
+                            </li>
+                             @endadminCan
+
+                             @adminCan('admin/planner-logs')
+                             <li>
+                                <a href="{{ route('planner-logs.index') }}" class="waves-effect"><i class="ti-gift"></i><span> Planner Log </span></a>
+                            </li>
+                             <li>
+                                <a href="{{ route('planner-recommendations.index') }}" class="waves-effect"><i class="ti-bookmark-alt"></i><span> Planner Saved Bundles </span></a>
+                            </li>
+                             <li>
+                                <a href="{{ route('planner-pictures.index') }}" class="waves-effect"><i class="ti-image"></i><span> Planner Pictures </span></a>
                             </li>
                              @endadminCan
                             
@@ -526,6 +545,12 @@ figure figcaption {
                                     <li><a href="{{url('cms-settings')}}" >CMS Settings</a></li>
                                     <li><a href="{{url('seo-settings')}}" >SEO Settings</a></li>
                                     <li><a href="{{url('header-settings')}}" >Header Settings</a></li>
+                                    <li><a href="{{url('supply-countries')}}" >Supplies To</a></li>
+                                    <li><a href="{{url('filter-settings')}}" >Category Page Filters</a></li>
+                                    <li><a href="{{url('home-logos')}}" >Brands &amp; Clients</a></li>
+                                    <li><a href="{{url('home-category-cards')}}" >Home Category Cards</a></li>
+                                    <li><a href="{{ route('header-topbar.index') }}" >Header Top Bar</a></li>
+                                    <li><a href="{{ route('email-templates.index') }}" >Email Templates</a></li>
                                     <li><a href="{{url('footerlevel1')}}" >Footer L1 Settings </a></li>
                                     <li class="has_sub">
                                         <a href="javascript:void(0);"class="waves-effect"><span>Footer L2 Settings</span>  <span class="menu-arrow"></span></a>
@@ -600,10 +625,11 @@ figure figcaption {
                               
                             </li>-->
 
-                            <!--  <li>
-                                <a href="{{url('storeaboutus')}}" class="waves-effect"><i class="ti-info-alt"></i><span>About us</span></a>
-                              
-                            </li> -->
+                            @adminCan('storeaboutus')
+                            <li>
+                                <a href="{{url('storeaboutus')}}" class="waves-effect"><i class="ti-info-alt"></i><span>About Us page</span></a>
+                            </li>
+                            @endadminCan
 
                             @if($role=="superadmin")
                              <li>

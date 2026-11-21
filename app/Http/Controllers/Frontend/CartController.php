@@ -8,12 +8,30 @@ use App\Models\CartItem;
 use App\Models\Cartorder;
 use App\Models\Enquiry;
 use App\Models\Product;
+use App\Services\GiftPlanner;
+use Illuminate\Validation\Rule;
 use DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class CartController extends Controller
 {
+    /**
+     * Number of lines in the current cart (the number the header cart badge shows).
+     */
+    public function lineCount()
+    {
+        return $this->cartQuery()->count();
+    }
+
+    /**
+     * Whether the current cart already has a line for this product.
+     */
+    public function hasProduct($productId)
+    {
+        return $this->cartQuery()->where('product_id', $productId)->exists();
+    }
+
     private function cartQuery()
     {
         if (session()->has('userid')) {
@@ -33,6 +51,8 @@ class CartController extends Controller
 
         foreach ($items as $item) {
             $product = $products->get($item->product_id);
+            // The product's own main image (thumbnail / image1 / bulk image / MidOcean URL), or null if it has none
+            $item->image_url = $product ? $product->imageUrl() : null;
             if (!$product) {
                 continue;
             }
@@ -75,14 +95,34 @@ class CartController extends Controller
             'quantity' => 'nullable|integer|min:1',
         ]);
 
-        $this->addProductToCart(Product::find($request->product_id), $request->quantity);
+        $product = Product::find($request->product_id);
+        if ($product->is_active !== 'online') {
+            return response()->json(['success' => false, 'message' => 'This product is no longer available.'], 422);
+        }
 
-        $count = $this->cartQuery()->sum('quantity');
+        // Adding the same product again doesn't add it twice; the quantity is changed on the quote cart page
+        if ($this->cartQuery()->where('product_id', $product->id)->exists()) {
+            $lines = $this->lineCount();
+            return response()->json([
+                'success' => false,
+                'already' => true,
+                'message' => 'This product is already in your quote.',
+                'cart_url' => route('cart.index'),
+                'count' => $lines,
+                'items' => $lines,
+            ]);
+        }
+
+        $this->addProductToCart($product, $request->quantity);
+
+        // Both are the number of lines, which is what the header cart badge shows
+        $lines = $this->lineCount();
 
         return response()->json([
             'success' => true,
             'message' => 'Added to Cart!',
-            'count' => $count,
+            'count' => $lines,
+            'items' => $lines,
         ]);
     }
 
@@ -91,6 +131,42 @@ class CartController extends Controller
      * the product's minimum order quantity, at the tier price for the new total.
      * Also used to send a saved collection to the cart.
      */
+    /**
+     * Budget Planner: a chosen bundle goes into the cart for the team size.
+     * Selecting it again doesn't double what is already there.
+     */
+    public function addBundle(Request $request, GiftPlanner $planner)
+    {
+        if (!session()->has('userid')) {
+            return response()->json(['message' => 'Please log in.'], 401);
+        }
+        $data = $request->validate([
+            'team' => ['required', Rule::in(array_keys(config('gift_planner.team_sizes')))],
+            'product_ids' => 'required|array|min:1|max:10',
+            'product_ids.*' => 'integer',
+        ]);
+        $team = config('gift_planner.team_sizes')[$data['team']];
+
+        $products = Product::whereIn('id', $data['product_ids'])->where('is_active', 'online')->get();
+        if ($products->isEmpty()) {
+            return response()->json(['message' => 'These products are no longer available.'], 422);
+        }
+
+        foreach ($products as $product) {
+            $quantity = $planner->quantityFor($product, $team);
+            $existing = $this->cartQuery()->where('product_id', $product->id)->first();
+            if (!$existing) {
+                $this->addProductToCart($product, $quantity);
+            } elseif ($existing->quantity < $quantity) {
+                $existing->quantity = $quantity;
+                $existing->price = $product->priceForQuantity($quantity);
+                $existing->save();
+            }
+        }
+
+        return response()->json(['redirect' => route('cart.index')]);
+    }
+
     public function addProductToCart(Product $product, $quantity)
     {
         $quantity = max((int) ($quantity ?: 1), $product->minOrderQuantity());
@@ -168,6 +244,16 @@ class CartController extends Controller
             return redirect()->route('cart.index');
         }
 
+        // A product taken offline (or deleted) since it was added can't be quoted: take it out and tell the customer
+        $online = Product::whereIn('id', $items->pluck('product_id'))->where('is_active', 'online')->pluck('id')->all();
+        $gone = $items->reject(function ($item) use ($online) { return in_array($item->product_id, $online); });
+        if ($gone->isNotEmpty()) {
+            $this->cartQuery()->whereIn('id', $gone->pluck('id'))->delete();
+            $request->session()->flash('error', $gone->pluck('name')->implode(', ') . ($gone->count() === 1 ? ' is' : ' are')
+                . ' no longer available and ' . ($gone->count() === 1 ? 'was' : 'were') . ' removed from your cart. Please check your cart and send it again.');
+            return redirect()->route('cart.index');
+        }
+
         $user = DB::table('storeusers')->where('id', session()->get('userid'))->first();
 
         $subtotal = $items->sum(function ($item) {
@@ -179,10 +265,7 @@ class CartController extends Controller
         $customerName = trim(($user->fname ?? '') . ' ' . ($user->lname ?? '')) ?: 'Customer';
 
         $enquiry = DB::transaction(function () use ($request, $items, $user, $customerName, $subtotal, $tax, $total) {
-            // Same order numbers as the old enquiry flow (orderids counter)
-            $last = DB::table('orderids')->lockForUpdate()->max('orderid');
-            $orderid = $last ? ((int) $last + 1) : 10001;
-            DB::table('orderids')->insert(['orderid' => $orderid]);
+            $orderid = \App\Models\Order::nextOrderNumber();
 
             $enquiry = new Enquiry();
             $enquiry->orderid = $orderid;
@@ -249,7 +332,7 @@ class CartController extends Controller
      * Tell staff and the customer about a new quote request. A mail problem is
      * logged but never stops the customer's request.
      */
-    private function sendQuoteEmails(Enquiry $enquiry, $items)
+    public function sendQuoteEmails(Enquiry $enquiry, $items)
     {
         $staff = staff_email();
         $data = ['enquiry' => $enquiry, 'items' => $items];
