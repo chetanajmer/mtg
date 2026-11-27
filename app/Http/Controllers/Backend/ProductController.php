@@ -667,9 +667,12 @@ class ProductController extends Controller
 
         $exhibition_events=\App\Models\ExhibitionEvent::all();
 
+        // Default tiers (Tier Pricing page) for a product that turns tier pricing on
+        $tier_pricing=DB::table('tier_pricing')->orderBy('min_qty')->get();
+
         return view('backend.product.edit-products',compact('items','parentcategory','category','subcategory','brands',
 
-          'installation','paginationid','exhibition_events'));
+          'installation','paginationid','exhibition_events','tier_pricing'));
 
     }
 

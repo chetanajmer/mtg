@@ -3198,8 +3198,20 @@ function delete_variation_image($value)
             $('#tier_pricing_body').show();
             // Enable all tier inputs and add required
             $('.tier-input').prop('disabled', false);
+            if($('#tier_rows .tier-row').length === 0){
+                // No tiers yet: start from the defaults on the Tier Pricing page, as on Add Product
+                @forelse($tier_pricing as $tier)
+                $('#tier_rows').append($(tierRowHtml)
+                    .find('input[name="tier_min[]"]').val('{{ $tier->min_qty }}').end()
+                    .find('input[name="tier_max[]"]').val('{{ $loop->last ? '' : $tier->max_qty }}').end()
+                    .find('.tier-percent').val('{{ $tier->percentage + 0 }}').end());
+                @empty
+                $('#tier_rows').append(tierRowHtml);
+                @endforelse
+                tierPricesFromPercent();
+                recalcTierSavings();
+            }
             $('.tier-input').not('[name="tier_max[]"]').prop('required', true);
-            if($('#tier_rows .tier-row').length === 0){ $('#tier_rows').append(tierRowHtml); }
         } else {
             $('#tier_pricing_body').hide();
             // Disable all tier inputs and remove required attribute
