@@ -40,7 +40,7 @@ a.mh-offer:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 /* Logo box, hanging over both bars */
 .mh-logo { position: absolute; top: 30px; left: 50%; z-index: 20; display: flex; align-items: center; justify-content: center; width: 170px; height: 160px; transform: translateX(-50%); background: #000; }
-.mh-logo img { display: block; width: 66%; }
+.mh-logo img { display: block; width: 100%; } /* the picture has its own black padding; the logo inside fills about two-thirds of the box, as in the design */
 
 /* Black bar: categories and product lists */
 .mh-nav { display: flex; align-items: center; justify-content: space-between; min-height: 52px; padding: 0 4% 0 2.3%; background: #000; font-size: 15px; font-weight: 700; letter-spacing: .3px; }
@@ -147,7 +147,7 @@ a.mh-offer:hover { text-decoration: underline; text-underline-offset: 4px; }
   .mh-account-link i { font-size: 22px; }
   .mh-whatsapp { height: 34px; padding: 0 10px; font-size: 13px; }
   .mh-logo { left: 12px; top: 37px; width: 76px; height: 92px; }
-  .mh-logo img { width: 80%; }
+  .mh-logo img { width: 100%; }
   .mh-nav { padding: 0 12px 0 96px; font-size: 14px; }
   .mh-categories summary { font-size: 17px; }
   .mh-categories summary i { font-size: 24px; }
