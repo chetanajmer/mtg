@@ -47,16 +47,30 @@
     </div>
   </section>
 
+  <section class="bp-modes bp-wrap">
+    <h2 class="bp-step-title">2. What would you like?</h2>
+    <div class="bp-mode-list" role="group" aria-label="What would you like?">
+      <button type="button" class="bp-mode active" data-mode="bundles" aria-pressed="true">
+        <i class="bi bi-box2-heart"></i>
+        <span><strong>Gift Bundles</strong><small>2 to 4 gifts that go together, in one set</small></span>
+      </button>
+      <button type="button" class="bp-mode" data-mode="products" aria-pressed="false">
+        <i class="bi bi-gift"></i>
+        <span><strong>Individual Gifts</strong><small>Single products to choose from</small></span>
+      </button>
+    </div>
+  </section>
+
   <section class="bp-config bp-wrap">
     <div class="bp-config-col bp-config-team">
-      <h2 class="bp-step-title"><label for="teamSize">2. Number of People</label></h2>
+      <h2 class="bp-step-title"><label for="teamSize">3. Number of People</label></h2>
       <div class="bp-select-wrap">
         <i class="bi bi-people"></i>
         <input type="number" class="bp-select bp-input" id="teamSize" min="1" max="{{ $planner['max_people'] }}" step="1" inputmode="numeric" placeholder="e.g. 50">
       </div>
     </div>
     <div class="bp-config-col bp-config-budget">
-      <h2 class="bp-step-title"><label for="budgetAmount">3. Your Budget (AED)</label></h2>
+      <h2 class="bp-step-title"><label for="budgetAmount">4. Your Budget (AED)</label></h2>
       <div class="bp-select-wrap">
         <i class="bi bi-cash-stack"></i>
         <input type="number" class="bp-select bp-input bp-budget-input" id="budgetAmount" min="1" max="{{ $planner['max_budget'] }}" step="any" inputmode="decimal" placeholder="e.g. 150">
@@ -68,7 +82,7 @@
       <p class="bp-budget-hint" id="budgetHint" aria-live="polite"></p>
     </div>
     <div class="bp-config-prefs">
-      <h2 class="bp-step-title">4. Add Preferences <small>(Optional)</small></h2>
+      <h2 class="bp-step-title">5. Add Preferences <small>(Optional)</small></h2>
       <div class="bp-chips">
         @foreach($planner['preferences'] as $key => $preference)
         <button type="button" class="bp-chip" data-pref="{{ $key }}" aria-pressed="false">
@@ -114,30 +128,26 @@
     </div>
     <div class="bp-results-head" id="resultsHead" hidden>
       <div>
-        <h2>Recommendations for <span id="selectedOccasion">{{ reset($planner['occasions'])['label'] }}</span></h2>
+        <h2><span id="resultsKind">Recommended Bundles</span> for <span id="selectedOccasion">{{ reset($planner['occasions'])['label'] }}</span></h2>
         <p class="bp-results-sub" id="plannerSubtitle">Curated options based on your budget, number of people and occasion.</p>
       </div>
       <button type="button" class="bp-btn bp-more" id="viewMore">View More Bundles <i class="bi bi-arrow-right"></i></button>
     </div>
-    <div class="bp-tabs" id="resultsTabs" role="tablist" hidden>
-      <button type="button" class="bp-tab active" role="tab" id="tabBundles" aria-selected="true" aria-controls="panelBundles" data-tab="bundles"><i class="bi bi-box2-heart"></i> Bundles <span id="countBundles">0</span></button>
-      <button type="button" class="bp-tab" role="tab" id="tabProducts" aria-selected="false" aria-controls="panelProducts" data-tab="products" tabindex="-1"><i class="bi bi-gift"></i> Individual Products <span id="countProducts">0</span></button>
-    </div>
-    <div id="panelBundles" role="tabpanel" aria-labelledby="tabBundles">
+    <div id="panelBundles">
       <div class="bp-grid" id="bundlesGrid" aria-live="polite"></div>
       <div class="bp-empty" id="plannerEmpty" hidden>
         <i class="bi bi-search"></i>
         <h3>No ready-made bundle fits these choices yet</h3>
-        <p>Try a higher budget or a different number of people, see the single gifts under Individual Products, or tell us what you need and our team will put a bundle together for you.</p>
+        <p>Try a higher budget or a different number of people, choose Individual Gifts, or tell us what you need and our team will put a bundle together for you.</p>
         <a href="{{ url('contactus') }}" class="bp-btn">Talk to our team</a>
       </div>
     </div>
-    <div id="panelProducts" role="tabpanel" aria-labelledby="tabProducts" hidden>
+    <div id="panelProducts" hidden>
       <div class="bp-products" id="productsGrid"></div>
       <div class="bp-empty" id="productsEmpty" hidden>
         <i class="bi bi-search"></i>
         <h3>No single gift fits these choices yet</h3>
-        <p>Try a higher budget or a different number of people, or tell us what you need and our team will find it for you.</p>
+        <p>Try a higher budget or a different number of people, choose Gift Bundles, or tell us what you need and our team will find it for you.</p>
         <a href="{{ url('contactus') }}" class="bp-btn">Talk to our team</a>
       </div>
     </div>

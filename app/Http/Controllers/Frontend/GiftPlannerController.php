@@ -66,6 +66,7 @@ class GiftPlannerController extends Controller
             'people' => 'required|integer|min:1|max:' . config('gift_planner.max_people'),
             'budget_type' => 'required|in:person,total',
             'budget' => 'required|numeric|min:1|max:' . config('gift_planner.max_budget'),
+            'mode' => 'required|in:bundles,products',
             'preferences' => 'nullable|array|max:10',
             'preferences.*' => [Rule::in(array_keys(config('gift_planner.preferences')))],
             'round' => 'nullable|integer|min:0|max:20',
@@ -85,13 +86,15 @@ class GiftPlannerController extends Controller
 
         $preferences = $data['preferences'] ?? [];
 
-        // Visitors who aren't logged in get the standard bundles for their choices: no AI wording or pictures
-        if (!session()->has('userid')) {
+        // Visitors who aren't logged in get the standard bundles for their choices: no AI wording or pictures.
+        // Individual Gifts need no AI either.
+        if (!session()->has('userid') || $data['mode'] === 'products') {
             $result = $planner->recommend($data['occasion'], $people, $perPerson, $preferences, $round, $custom ?: null);
             unset($result['plan']);
-            $result['guest'] = true;
+            $result = $this->onlyMode($result, $data['mode']);
+            $result['guest'] = !session()->has('userid');
             $result['perPerson'] = $perPerson;
-            $this->logResult(null, $data['occasion'], $custom, $teamLabel, $budgetLabel, $preferences, $round, $result);
+            $this->logResult(session()->get('userid'), $data['occasion'], $custom, $teamLabel, $budgetLabel, $preferences, $round, $result);
             return response()->json($result);
         }
 
@@ -122,6 +125,7 @@ class GiftPlannerController extends Controller
         $result = $planner->recommend($data['occasion'], $people, $perPerson, $preferences, $round, $custom ?: null, $chooser);
         $result['reused'] = $result['aiWritten'] && $source === 'saved';
         $result['perPerson'] = $perPerson;
+        $result = $this->onlyMode($result, 'bundles');
         $this->saveChoice($inputKey, $saved, $result, $source, $data + ['people' => $people, 'per_person' => $perPerson], $occasionLabel, $round);
         unset($result['plan']);
 
@@ -133,6 +137,16 @@ class GiftPlannerController extends Controller
 
         $this->logResult(session()->get('userid'), $data['occasion'], $custom, $teamLabel, $budgetLabel, $preferences, $round, $result);
         return response()->json($result);
+    }
+
+    /**
+     * Only what the customer asked for: bundles or single gifts.
+     */
+    private function onlyMode(array $result, $mode)
+    {
+        $result['mode'] = $mode;
+        $result[$mode === 'products' ? 'bundles' : 'products'] = [];
+        return $result;
     }
 
     /**

@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let round = 0;
   let customOccasion = '';
   let budgetType = 'person';
+  // Gift Bundles or Individual Gifts
+  let mode = 'bundles';
   // The choices the results on screen were made for; adding to the quote uses the same number of people
   let current = null;
   // Bundles appear only after the customer asks for them with Show Recommendations
@@ -33,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
         people: peopleInput.value,
         budget: budgetInput.value,
         budgetType: budgetType,
+        mode: mode,
         preferences: Array.from(document.querySelectorAll('.bp-chip.active')).map(function(chip) { return chip.dataset.pref; })
       }));
     } catch (e) {
@@ -325,7 +328,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function subtitleText(result, occasionLabel) {
     const who = current.people + (current.people === 1 ? ' person' : ' people');
     const parts = ['For ' + who + ', up to ' + money(result.perPerson) + ' per person.'];
-    if (result.guest) {
+    if (result.guest && result.mode === 'bundles') {
       parts.push('Log in to get bundles named for your occasion and pictured with your logo.');
     }
     if (result.broadened) {
@@ -336,31 +339,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return parts.join(' ');
   }
-
-  // Bundles or Individual Products
-  const tabs = document.querySelectorAll('.bp-tab');
-
-  function showTab(name) {
-    tabs.forEach(function(tab) {
-      const active = tab.dataset.tab === name;
-      tab.classList.toggle('active', active);
-      tab.setAttribute('aria-selected', active ? 'true' : 'false');
-      tab.tabIndex = active ? 0 : -1;
-    });
-    document.getElementById('panelBundles').hidden = name !== 'bundles';
-    document.getElementById('panelProducts').hidden = name !== 'products';
-    moreBtn.hidden = name !== 'bundles';
-  }
-
-  tabs.forEach(function(tab, i) {
-    tab.addEventListener('click', function() { showTab(this.dataset.tab); });
-    tab.addEventListener('keydown', function(event) {
-      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') { return; }
-      const next = tabs[(i + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
-      showTab(next.dataset.tab);
-      next.focus();
-    });
-  });
 
   function load(nextRound) {
     const occasion = document.querySelector('.bp-occasion.active');
@@ -374,6 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
       people: c.people,
       budget_type: c.budget_type,
       budget: c.budget,
+      mode: mode,
       preferences: Array.from(document.querySelectorAll('.bp-chip.active')).map(function(chip) { return chip.dataset.pref; }),
       round: nextRound,
       custom_occasion: occasion.dataset.occasion === 'other' ? customOccasion : ''
@@ -386,20 +365,18 @@ document.addEventListener('DOMContentLoaded', function() {
       current = c;
       document.getElementById('plannerWelcome').hidden = true;
       document.getElementById('resultsHead').hidden = false;
-      document.getElementById('resultsTabs').hidden = false;
       document.getElementById('selectedOccasion').textContent = occasionLabel;
+      const bundles = result.mode === 'bundles';
+      document.getElementById('resultsKind').textContent = bundles ? 'Recommended Bundles' : 'Recommended Gifts';
+      document.getElementById('panelBundles').hidden = !bundles;
+      document.getElementById('panelProducts').hidden = bundles;
+      moreBtn.hidden = !bundles;
       grid.replaceChildren();
       result.bundles.forEach(function(bundle) { grid.appendChild(bundleCard(bundle)); });
-      empty.hidden = result.bundles.length > 0;
+      empty.hidden = !bundles || result.bundles.length > 0;
       productsGrid.replaceChildren();
       result.products.forEach(function(item) { productsGrid.appendChild(productCard(item)); });
-      document.getElementById('productsEmpty').hidden = result.products.length > 0;
-      document.getElementById('countBundles').textContent = result.bundles.length;
-      document.getElementById('countProducts').textContent = result.products.length;
-      // A first look opens the tab that has something to show
-      if (nextRound === 0) {
-        showTab(!result.bundles.length && result.products.length ? 'products' : 'bundles');
-      }
+      document.getElementById('productsEmpty').hidden = bundles || result.products.length > 0;
       subtitle.textContent = subtitleText(result, occasionLabel);
       return true;
     });
@@ -537,6 +514,29 @@ document.addEventListener('DOMContentLoaded', function() {
         first.focus();
       }
     }
+  });
+
+  // Gift Bundles or Individual Gifts: after the first results, changing it shows the other kind
+  const modeButtons = document.querySelectorAll('.bp-mode');
+
+  function setMode(value) {
+    mode = value === 'products' ? 'products' : 'bundles';
+    modeButtons.forEach(function(button) {
+      const active = button.dataset.mode === mode;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+  }
+
+  modeButtons.forEach(function(button) {
+    button.addEventListener('click', function() {
+      if (this.dataset.mode === mode) { return; }
+      setMode(this.dataset.mode);
+      if (shown) {
+        resetMore();
+        load(0).catch(function(e) { showError(errorText(e)); });
+      }
+    });
   });
 
   // Budget per person or in total
@@ -697,7 +697,8 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
     showError('');
-    if (loggedIn) {
+    // The logo is only for the bundle pictures
+    if (loggedIn && mode === 'bundles') {
       openBrandModal();
     } else {
       showRecommendations();
@@ -754,6 +755,7 @@ document.addEventListener('DOMContentLoaded', function() {
     peopleInput.value = saved.people || '';
     budgetInput.value = saved.budget || '';
     setBudgetType(saved.budgetType);
+    setMode(saved.mode);
     document.querySelectorAll('.bp-chip').forEach(function(chip) {
       const active = (saved.preferences || []).indexOf(chip.dataset.pref) !== -1;
       chip.classList.toggle('active', active);
