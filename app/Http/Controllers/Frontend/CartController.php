@@ -141,11 +141,10 @@ class CartController extends Controller
             return response()->json(['message' => 'Please log in.'], 401);
         }
         $data = $request->validate([
-            'team' => ['required', Rule::in(array_keys(config('gift_planner.team_sizes')))],
+            'people' => 'required|integer|min:1|max:' . config('gift_planner.max_people'),
             'product_ids' => 'required|array|min:1|max:10',
             'product_ids.*' => 'integer',
         ]);
-        $team = config('gift_planner.team_sizes')[$data['team']];
 
         $products = Product::whereIn('id', $data['product_ids'])->where('is_active', 'online')->get();
         if ($products->isEmpty()) {
@@ -153,7 +152,7 @@ class CartController extends Controller
         }
 
         foreach ($products as $product) {
-            $quantity = $planner->quantityFor($product, $team);
+            $quantity = $planner->quantityFor($product, $data['people']);
             $existing = $this->cartQuery()->where('product_id', $product->id)->first();
             if (!$existing) {
                 $this->addProductToCart($product, $quantity);
@@ -164,7 +163,7 @@ class CartController extends Controller
             }
         }
 
-        return response()->json(['redirect' => route('cart.index')]);
+        return response()->json(['redirect' => route('cart.index'), 'count' => $this->lineCount()]);
     }
 
     public function addProductToCart(Product $product, $quantity)

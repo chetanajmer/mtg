@@ -63,8 +63,9 @@ class GiftPlannerController extends Controller
     {
         $data = $request->validate([
             'occasion' => ['required', Rule::in(array_keys(config('gift_planner.occasions')))],
-            'team' => ['required', Rule::in(array_keys(config('gift_planner.team_sizes')))],
-            'budget' => ['required', Rule::in(array_keys(config('gift_planner.budgets')))],
+            'people' => 'required|integer|min:1|max:' . config('gift_planner.max_people'),
+            'budget_type' => 'required|in:person,total',
+            'budget' => 'required|numeric|min:1|max:' . config('gift_planner.max_budget'),
             'preferences' => 'nullable|array|max:10',
             'preferences.*' => [Rule::in(array_keys(config('gift_planner.preferences')))],
             'round' => 'nullable|integer|min:0|max:20',
@@ -72,26 +73,32 @@ class GiftPlannerController extends Controller
         ], [
             'custom_occasion.regex' => 'Please use only letters and numbers for the occasion.',
         ]);
+        $people = (int) $data['people'];
+        // A total budget is shared by everyone; everything below works per person
+        $perPerson = round($data['budget_type'] === 'total' ? $data['budget'] / $people : (float) $data['budget'], 2);
+        $teamLabel = $people . ' ' . ($people === 1 ? 'person' : 'people');
+        $budgetLabel = 'AED ' . number_format($perPerson, 2) . '/person' . ($data['budget_type'] === 'total' ? ' (AED ' . number_format((float) $data['budget'], 2) . ' total)' : '');
         // Same text, same result: "retirement " and "Retirement" share their saved AI wording
         $custom = $data['occasion'] === 'other' ? trim(preg_replace('/\s+/u', ' ', (string) ($data['custom_occasion'] ?? ''))) : '';
 
         $round = (int) ($data['round'] ?? 0);
 
-        // Visitors who aren't logged in see sample bundles only: no AI, and their own choices aren't used
+        $preferences = $data['preferences'] ?? [];
+
+        // Visitors who aren't logged in get the standard bundles for their choices: no AI wording or pictures
         if (!session()->has('userid')) {
-            $defaults = config('gift_planner.defaults');
-            $result = $planner->recommend($data['occasion'], $defaults['team'], $defaults['budget'], [], $round, $custom ?: null);
+            $result = $planner->recommend($data['occasion'], $people, $perPerson, $preferences, $round, $custom ?: null);
+            unset($result['plan']);
             $result['guest'] = true;
-            $this->logResult(null, $data['occasion'], $custom, $defaults['team'], $defaults['budget'], [], $round, $result);
+            $result['perPerson'] = $perPerson;
+            $this->logResult(null, $data['occasion'], $custom, $teamLabel, $budgetLabel, $preferences, $round, $result);
             return response()->json($result);
         }
 
         // A problem with the AI never costs the customer their bundles
         $occasionLabel = $custom ?: config('gift_planner.occasions')[$data['occasion']]['label'];
-        $teamLabel = config('gift_planner.team_sizes')[$data['team']]['label'];
         // Same inputs as an earlier customer: reuse that AI choice instead of asking the AI again
-        $preferences = $data['preferences'] ?? [];
-        $inputKey = PlannerRecommendation::keyFor($data['occasion'], $custom, $data['team'], $data['budget'], $preferences, $round);
+        $inputKey = PlannerRecommendation::keyFor($data['occasion'], $custom, $people, $perPerson, $preferences, $round);
         $saved = PlannerRecommendation::where('input_key', $inputKey)
             ->where('updated_at', '>=', now()->subDays((int) config('gift_planner.reuse_days')))->first();
         $source = null;
@@ -112,9 +119,10 @@ class GiftPlannerController extends Controller
                 return null;
             }
         };
-        $result = $planner->recommend($data['occasion'], $data['team'], $data['budget'], $preferences, $round, $custom ?: null, $chooser);
+        $result = $planner->recommend($data['occasion'], $people, $perPerson, $preferences, $round, $custom ?: null, $chooser);
         $result['reused'] = $result['aiWritten'] && $source === 'saved';
-        $this->saveChoice($inputKey, $saved, $result, $source, $data, $occasionLabel, $round);
+        $result['perPerson'] = $perPerson;
+        $this->saveChoice($inputKey, $saved, $result, $source, $data + ['people' => $people, 'per_person' => $perPerson], $occasionLabel, $round);
         unset($result['plan']);
 
         try {
@@ -123,7 +131,7 @@ class GiftPlannerController extends Controller
             Log::warning('Budget planner AI: ' . $e->getMessage());
         }
 
-        $this->logResult(session()->get('userid'), $data['occasion'], $custom, $data['team'], $data['budget'], $data['preferences'] ?? [], $round, $result);
+        $this->logResult(session()->get('userid'), $data['occasion'], $custom, $teamLabel, $budgetLabel, $preferences, $round, $result);
         return response()->json($result);
     }
 
@@ -139,7 +147,7 @@ class GiftPlannerController extends Controller
             } elseif ($source === 'ai' && $result['plan']) {
                 PlannerRecommendation::updateOrCreate(['input_key' => $inputKey], [
                     'occasion' => $data['occasion'], 'occasion_label' => mb_substr($occasionLabel, 0, 60),
-                    'team' => $data['team'], 'budget' => $data['budget'], 'preferences' => array_values($data['preferences'] ?? []),
+                    'team' => (string) $data['people'], 'budget' => (string) $data['per_person'], 'preferences' => array_values($data['preferences'] ?? []),
                     'round' => $round, 'plan' => $result['plan'], 'times_reused' => 0, 'last_reused_at' => null,
                 ]);
             }
@@ -151,7 +159,7 @@ class GiftPlannerController extends Controller
     /**
      * Saves what was shown for the admin Planner Log. A problem here never costs the customer their bundles.
      */
-    private function logResult($userId, $occasion, $custom, $team, $budget, array $preferences, $round, array $result)
+    private function logResult($userId, $occasion, $custom, $teamLabel, $budgetLabel, array $preferences, $round, array $result)
     {
         try {
             $config = config('gift_planner');
@@ -159,8 +167,8 @@ class GiftPlannerController extends Controller
                 'storeuser_id' => $userId,
                 'occasion' => $occasion,
                 'occasion_label' => mb_substr($custom ?: $config['occasions'][$occasion]['label'], 0, 60),
-                'team_label' => $config['team_sizes'][$team]['label'],
-                'budget_label' => $config['budgets'][$budget]['label'],
+                'team_label' => mb_substr($teamLabel, 0, 40),
+                'budget_label' => mb_substr($budgetLabel, 0, 40),
                 'preferences' => array_values(array_map(function ($key) use ($config) {
                     return $config['preferences'][$key]['label'];
                 }, $preferences)),

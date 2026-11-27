@@ -34,14 +34,10 @@ return [
         ['occasion' => 'joining', 'image' => 'joining.webp', 'title' => 'New Joiner Welcome Kit', 'items' => 'Canvas tote, ceramic mug, kraft notebook & steel bottle'],
     ],
 
-    // What the page shows on opening, before a team size and budget are chosen
-    'defaults' => ['team' => '51-100', 'budget' => '201-300'],
-
-    // Pictures for a bundle by its badge, in public/web_frontend/assets/images/planner.
-    // Occasions without any show the photos of the bundle's products.
-    'bundle_images' => [
-        'eid' => ['budget' => 'bundle-essentials.jpg', 'popular' => 'bundle-premium.jpg', 'premium' => 'bundle-luxury.jpg'],
-    ],
+    // Fixed pictures for a bundle by its badge, in public/web_frontend/assets/images/planner, e.g.
+    // 'eid' => ['budget' => 'bundle-essentials.jpg']. None are set: a fixed picture shows gifts the bundle may not
+    // contain, so bundles show their own products' photos (or the AI picture made from them).
+    'bundle_images' => [],
 
     // One-click choices in the Other pop-up. They match the products' Occasion Tags like anything typed.
     'other_suggestions' => ['Retirement', 'Promotion', 'Farewell', 'Employee Awards', 'Team Offsite', 'Year-End Thank You', 'Emirati Women\'s Day', 'Mother\'s Day'],
@@ -49,25 +45,10 @@ return [
     // Used when nothing is tagged for the chosen occasion
     'general_tag' => 'Corporate Gifts',
 
-    // min and max people. The price uses min, the larger of min and the product's MOQ.
-    'team_sizes' => [
-        '1-25' => ['label' => '1–25 people', 'min' => 1, 'max' => 25],
-        '26-50' => ['label' => '26–50 people', 'min' => 26, 'max' => 50],
-        '51-100' => ['label' => '51–100 people', 'min' => 51, 'max' => 100],
-        '101-250' => ['label' => '101–250 people', 'min' => 101, 'max' => 250],
-        '251-500' => ['label' => '251–500 people', 'min' => 251, 'max' => 500],
-        '500+' => ['label' => '500+ people', 'min' => 500, 'max' => 100000],
-    ],
-
-    // Budget per person in AED
-    'budgets' => [
-        'under-50' => ['label' => 'Under AED 50', 'max' => 50],
-        '50-100' => ['label' => 'AED 50–100', 'max' => 100],
-        '101-200' => ['label' => 'AED 101–200', 'max' => 200],
-        '201-300' => ['label' => 'AED 201–300', 'max' => 300],
-        '301-500' => ['label' => 'AED 301–500', 'max' => 500],
-        '500+' => ['label' => 'AED 500+', 'max' => 1000],
-    ],
+    // The customer types how many people and a budget, per person or in total (divided by the people).
+    // Every product is priced for that many pieces; products with a larger minimum order are left out.
+    'max_people' => 100000,
+    'max_budget' => 10000000,
 
     // "tags" match the products' Preferences, "keywords" their name and AI tags
     'preferences' => [
@@ -77,9 +58,9 @@ return [
         'branding' => ['label' => 'Custom branding', 'icon' => 'bi-tag', 'branding' => true],
     ],
 
-    // Share of the budget each bundle aims for, and how many items it can hold
+    // Share of the per-person budget each bundle aims for, and how many items it can hold
     'tiers' => [
-        ['badge' => 'budget', 'label' => 'Budget Friendly', 'suffix' => 'Essentials Pack', 'description' => 'A thoughtful way to show you care.', 'share' => 0.6, 'items' => 2],
+        ['badge' => 'budget', 'label' => 'Budget Friendly', 'suffix' => 'Essentials Pack', 'description' => 'A thoughtful way to show you care.', 'share' => 0.7, 'items' => 2],
         ['badge' => 'popular', 'label' => 'Most Popular', 'suffix' => 'Premium Pack', 'description' => 'A perfect balance of elegance and utility.', 'share' => 0.85, 'items' => 3],
         ['badge' => 'premium', 'label' => 'Premium', 'suffix' => 'Luxury Hamper', 'description' => 'Make a lasting impression.', 'share' => 1, 'items' => 4],
     ],
@@ -102,4 +83,10 @@ return [
 
     // Products compared when building bundles
     'shortlist_size' => 12,
+
+    // No bundle costs less than this share of the per-person budget, so it suits the budget chosen
+    'bundle_min_share' => 0.5,
+
+    // Single gifts listed under Individual Products
+    'products_limit' => 24,
 ];

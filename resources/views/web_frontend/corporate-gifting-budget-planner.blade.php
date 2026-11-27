@@ -12,7 +12,7 @@
 @endsection
 
 @section('content')
-<div class="bp" id="budgetPlanner" data-url="{{ route('planner.recommend') }}" data-image-url="{{ route('planner.image') }}" data-cart-url="{{ route('cart.add-bundle') }}" data-logged-in="{{ session()->has('userid') ? '1' : '0' }}" data-login-url="{{ route('corporate.login', ['redirect' => route('planner.index')]) }}" data-default-team="{{ $planner['defaults']['team'] }}" data-default-budget="{{ $planner['defaults']['budget'] }}" data-default-team-label="{{ $planner['team_sizes'][$planner['defaults']['team']]['label'] }}">
+<div class="bp" id="budgetPlanner" data-url="{{ route('planner.recommend') }}" data-image-url="{{ route('planner.image') }}" data-cart-url="{{ route('cart.add-bundle') }}" data-logged-in="{{ session()->has('userid') ? '1' : '0' }}" data-login-url="{{ route('corporate.login', ['redirect' => route('planner.index')]) }}">
 
   <section class="bp-hero">
     <div class="bp-hero-text">
@@ -49,28 +49,23 @@
 
   <section class="bp-config bp-wrap">
     <div class="bp-config-col bp-config-team">
-      <h2 class="bp-step-title"><label for="teamSize">2. Team Size</label></h2>
+      <h2 class="bp-step-title"><label for="teamSize">2. Number of People</label></h2>
       <div class="bp-select-wrap">
         <i class="bi bi-people"></i>
-        <select class="bp-select" id="teamSize">
-          <option value="">Select team size</option>
-          @foreach($planner['team_sizes'] as $key => $team)
-          <option value="{{ $key }}">{{ $team['label'] }}</option>
-          @endforeach
-        </select>
+        <input type="number" class="bp-select bp-input" id="teamSize" min="1" max="{{ $planner['max_people'] }}" step="1" inputmode="numeric" placeholder="e.g. 50">
       </div>
     </div>
     <div class="bp-config-col bp-config-budget">
-      <h2 class="bp-step-title"><label for="budgetRange">3. Budget per Person (AED)</label></h2>
+      <h2 class="bp-step-title"><label for="budgetAmount">3. Your Budget (AED)</label></h2>
       <div class="bp-select-wrap">
-        <i class="bi bi-database"></i>
-        <select class="bp-select" id="budgetRange">
-          <option value="">Select budget range</option>
-          @foreach($planner['budgets'] as $key => $budget)
-          <option value="{{ $key }}">{{ $budget['label'] }}</option>
-          @endforeach
-        </select>
+        <i class="bi bi-cash-stack"></i>
+        <input type="number" class="bp-select bp-input bp-budget-input" id="budgetAmount" min="1" max="{{ $planner['max_budget'] }}" step="any" inputmode="decimal" placeholder="e.g. 150">
+        <div class="bp-budget-type" role="group" aria-label="The budget is">
+          <button type="button" class="active" data-budget-type="person" aria-pressed="true">Per person</button>
+          <button type="button" data-budget-type="total" aria-pressed="false">Total</button>
+        </div>
       </div>
+      <p class="bp-budget-hint" id="budgetHint" aria-live="polite"></p>
     </div>
     <div class="bp-config-prefs">
       <h2 class="bp-step-title">4. Add Preferences <small>(Optional)</small></h2>
@@ -119,23 +114,38 @@
     </div>
     <div class="bp-results-head" id="resultsHead" hidden>
       <div>
-        <h2>Recommended Bundles for <span id="selectedOccasion">{{ reset($planner['occasions'])['label'] }}</span></h2>
-        <p class="bp-results-sub" id="plannerSubtitle">Curated options based on your budget, team size and occasion.</p>
+        <h2>Recommendations for <span id="selectedOccasion">{{ reset($planner['occasions'])['label'] }}</span></h2>
+        <p class="bp-results-sub" id="plannerSubtitle">Curated options based on your budget, number of people and occasion.</p>
       </div>
-      <button type="button" class="bp-btn bp-more" id="viewMore">View More Options <i class="bi bi-arrow-right"></i></button>
+      <button type="button" class="bp-btn bp-more" id="viewMore">View More Bundles <i class="bi bi-arrow-right"></i></button>
     </div>
-    <div class="bp-grid" id="bundlesGrid" aria-live="polite"></div>
-    <div class="bp-empty" id="plannerEmpty" hidden>
-      <i class="bi bi-search"></i>
-      <h3>No ready-made bundle fits these choices yet</h3>
-      <p>Try a higher budget or a different team size, or tell us what you need and our team will put a bundle together for you.</p>
-      <a href="{{ url('contactus') }}" class="bp-btn">Talk to our team</a>
+    <div class="bp-tabs" id="resultsTabs" role="tablist" hidden>
+      <button type="button" class="bp-tab active" role="tab" id="tabBundles" aria-selected="true" aria-controls="panelBundles" data-tab="bundles"><i class="bi bi-box2-heart"></i> Bundles <span id="countBundles">0</span></button>
+      <button type="button" class="bp-tab" role="tab" id="tabProducts" aria-selected="false" aria-controls="panelProducts" data-tab="products" tabindex="-1"><i class="bi bi-gift"></i> Individual Products <span id="countProducts">0</span></button>
+    </div>
+    <div id="panelBundles" role="tabpanel" aria-labelledby="tabBundles">
+      <div class="bp-grid" id="bundlesGrid" aria-live="polite"></div>
+      <div class="bp-empty" id="plannerEmpty" hidden>
+        <i class="bi bi-search"></i>
+        <h3>No ready-made bundle fits these choices yet</h3>
+        <p>Try a higher budget or a different number of people, see the single gifts under Individual Products, or tell us what you need and our team will put a bundle together for you.</p>
+        <a href="{{ url('contactus') }}" class="bp-btn">Talk to our team</a>
+      </div>
+    </div>
+    <div id="panelProducts" role="tabpanel" aria-labelledby="tabProducts" hidden>
+      <div class="bp-products" id="productsGrid"></div>
+      <div class="bp-empty" id="productsEmpty" hidden>
+        <i class="bi bi-search"></i>
+        <h3>No single gift fits these choices yet</h3>
+        <p>Try a higher budget or a different number of people, or tell us what you need and our team will find it for you.</p>
+        <a href="{{ url('contactus') }}" class="bp-btn">Talk to our team</a>
+      </div>
     </div>
   </section>
 
   <section class="bp-benefits bp-wrap">
-    <div class="bp-benefit"><i class="bi bi-gift"></i><div><strong>Multiple Options</strong><span>Get 2–3 curated bundles, not just one.</span></div></div>
-    <div class="bp-benefit"><i class="bi bi-sliders"></i><div><strong>Tailored Recommendations</strong><span>Based on your occasion, budget and team size.</span></div></div>
+    <div class="bp-benefit"><i class="bi bi-gift"></i><div><strong>Multiple Options</strong><span>Curated bundles and single gifts, not just one.</span></div></div>
+    <div class="bp-benefit"><i class="bi bi-sliders"></i><div><strong>Tailored Recommendations</strong><span>Based on your occasion, budget and number of people.</span></div></div>
     <div class="bp-benefit"><i class="bi bi-clock"></i><div><strong>Save Time</strong><span>Ready-to-use templates for common occasions.</span></div></div>
     <div class="bp-benefit"><i class="bi bi-heart"></i><div><strong>Better Relationships</strong><span>Thoughtful gifts create stronger connections.</span></div></div>
   </section>

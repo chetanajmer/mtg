@@ -11,60 +11,70 @@ use App\Models\Product;
 class GiftPlanner
 {
     /**
+     * @param int $people how many people get a gift; a product is ordered for this many, or its minimum order if larger
+     * @param float $perPerson the most a bundle or a single gift may cost per person, in AED
      * @param callable|null $chooser ($shortlist, $tierLimits, $round, $retry) may return the AI's choice of bundles.
      *               Anything it returns is checked here; if it fails, the chooser is asked once more with $retry true,
      *               and a second failure keeps the standard bundles.
-     * @return array bundles, plus broadened (nothing tagged for the occasion), unmatchedPreferences
+     * @return array bundles, products (single gifts), plus broadened (nothing tagged for the occasion), unmatchedPreferences
      *               (labels no product matched), aiWritten, and plan (the accepted choice, or null)
      */
-    public function recommend($occasionKey, $teamKey, $budgetKey, array $preferenceKeys = [], $round = 0, $customOccasion = null, $chooser = null)
+    public function recommend($occasionKey, $people, $perPerson, array $preferenceKeys = [], $round = 0, $customOccasion = null, $chooser = null)
     {
         $occasion = config('gift_planner.occasions')[$occasionKey];
         if ($occasionKey === 'other' && $customOccasion) {
             $occasion['tags'] = [$customOccasion];
         }
-        $team = config('gift_planner.team_sizes')[$teamKey];
-        $budget = config('gift_planner.budgets')[$budgetKey];
+        $people = max(1, (int) $people);
         $preferences = array_intersect_key(config('gift_planner.preferences'), array_flip($preferenceKeys));
 
-        $candidates = $this->candidates($occasion, $team, $budget['max'], $preferences);
+        $all = $this->candidates($occasion, $people, $perPerson, $preferences);
+
+        // Gifts tagged for this occasion when any fit; popular corporate gifts only when none do
+        $exact = array_values(array_filter($all, function ($candidate) { return $candidate['exact']; }));
+        $broadened = !empty($occasion['tags']) && $all && !$exact;
+        if ($exact) {
+            $all = $exact;
+        }
 
         $unmatched = [];
         foreach ($preferences as $key => $preference) {
             $found = false;
-            foreach ($candidates as $candidate) {
+            foreach ($all as $candidate) {
                 $found = $found || in_array($key, $candidate['matched'], true);
             }
             if (!$found) {
                 $unmatched[] = $preference['label'];
             }
         }
-
-        $hasExact = false;
-        foreach ($candidates as $candidate) {
-            $hasExact = $hasExact || $candidate['exact'];
+        // With preferences chosen, only gifts that match at least one of them (all gifts only when none match)
+        $matching = array_values(array_filter($all, function ($candidate) { return (bool) $candidate['matched']; }));
+        if ($matching) {
+            $all = $matching;
         }
 
+        $candidates = array_slice($all, 0, config('gift_planner.shortlist_size'));
         $images = config('gift_planner.bundle_images.' . $occasionKey, []);
-        $bundles = $this->bundles($candidates, $budget['max'], $occasion['name'], $images, $round);
+        $bundles = $this->bundles($candidates, $perPerson, $occasion['name'], $images, $round);
         $chosen = null;
         $plan = null;
         if ($chooser && $bundles) {
             $shortlist = $this->shortlist($candidates);
-            $limits = $this->tierLimits($budget['max']);
+            $limits = $this->tierLimits($perPerson);
             $plan = $chooser($shortlist, $limits, $round, false);
-            $chosen = $plan ? $this->bundlesFromPlan($plan, $candidates, $budget['max'], $images, count($bundles)) : null;
+            $chosen = $plan ? $this->bundlesFromPlan($plan, $candidates, $perPerson, $images, count($bundles)) : null;
             // A choice that no longer fits (a saved one, after product or price changes): the chooser may ask once more
             if (!$chosen && $plan) {
                 $plan = $chooser($shortlist, $limits, $round, true);
-                $chosen = $plan ? $this->bundlesFromPlan($plan, $candidates, $budget['max'], $images, count($bundles)) : null;
+                $chosen = $plan ? $this->bundlesFromPlan($plan, $candidates, $perPerson, $images, count($bundles)) : null;
             }
             $bundles = $chosen ?: $bundles;
         }
 
         return [
             'bundles' => $bundles,
-            'broadened' => !empty($occasion['tags']) && !empty($candidates) && !$hasExact,
+            'products' => $this->products($all, $preferences),
+            'broadened' => $broadened,
             'unmatchedPreferences' => $unmatched,
             'aiWritten' => (bool) $chosen,
             'plan' => $chosen ? $plan : null, // the accepted choice, for saving
@@ -72,11 +82,11 @@ class GiftPlanner
     }
 
     /**
-     * How many of a product to order for this team: never below its MOQ.
+     * How many of a product to order for this many people: never below its MOQ.
      */
-    public function quantityFor(Product $product, $team)
+    public function quantityFor(Product $product, $people)
     {
-        return max((int) $team['min'], $product->minOrderQuantity());
+        return max((int) $people, $product->minOrderQuantity());
     }
 
     private function tags($value)
@@ -85,7 +95,7 @@ class GiftPlanner
         return array_values(array_filter(array_map('mb_strtolower', $tags), 'strlen'));
     }
 
-    private function candidates($occasion, $team, $maxBudget, $preferences)
+    private function candidates($occasion, $people, $maxBudget, $preferences)
     {
         $wanted = array_map('mb_strtolower', $occasion['tags']);
         $general = strtolower(config('gift_planner.general_tag'));
@@ -98,13 +108,11 @@ class GiftPlanner
             if ($wanted && !$exact && !in_array($general, $tags, true)) {
                 continue;
             }
-            // Too large a minimum order for this team
-            if ($product->minOrderQuantity() > $team['max']) {
-                continue;
-            }
-            $quantity = $this->quantityFor($product, $team);
+            $quantity = $this->quantityFor($product, $people);
             $price = $product->priceForQuantity($quantity);
-            if ($price <= 0 || $price > $maxBudget) {
+            // What it costs per person: a minimum order above the number of people is still paid in full
+            $cost = $price * $quantity / $people;
+            if ($price <= 0 || $cost > $maxBudget) {
                 continue;
             }
 
@@ -114,13 +122,13 @@ class GiftPlanner
             if (isset($list[$key]) && $list[$key]['score'] >= $score) {
                 continue; // the same product listed twice
             }
-            $list[$key] = compact('product', 'quantity', 'price', 'matched', 'exact', 'score');
+            $list[$key] = compact('product', 'quantity', 'price', 'cost', 'matched', 'exact', 'score');
         }
 
         usort($list, function ($a, $b) {
-            return $b['score'] <=> $a['score'] ?: $a['price'] <=> $b['price'];
+            return $b['score'] <=> $a['score'] ?: $a['cost'] <=> $b['cost'];
         });
-        return array_slice($list, 0, config('gift_planner.shortlist_size'));
+        return $list;
     }
 
     /**
@@ -165,6 +173,7 @@ class GiftPlanner
     {
         $tiers = config('gift_planner.tiers');
         $sets = $this->combinations($candidates, max(array_column($tiers, 'items')));
+        $floor = $maxBudget * config('gift_planner.bundle_min_share');
 
         // Each round ("View More Options") leaves out the bundles of the rounds before it
         $used = [];
@@ -176,7 +185,7 @@ class GiftPlanner
                 $bestValue = -INF;
                 $target = $maxBudget * $tier['share'];
                 foreach ($sets as $id => $set) {
-                    if ($set['total'] > $target || count($set['items']) > $tier['items'] || isset($picked[$id]) || isset($used[$id])) {
+                    if ($set['total'] > $target || $set['total'] < $floor || count($set['items']) > $tier['items'] || isset($picked[$id]) || isset($used[$id])) {
                         continue;
                     }
                     $value = 10 * $set['total'] / $target + $set['score'] - $set['repeats'];
@@ -216,19 +225,42 @@ class GiftPlanner
             'featured' => $tier['badge'] === 'popular',
             'image' => isset($images[$tier['badge']]) ? asset('web_frontend/assets/images/planner/' . $images[$tier['badge']]) : null,
             'price' => round($total, 2),
+            'total' => round(array_sum(array_map(function ($candidate) { return $candidate['price'] * $candidate['quantity']; }, $items)), 2),
             'items' => array_map(function ($candidate) {
-                $product = $candidate['product'];
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => round($candidate['price'], 2),
-                    'quantity' => $candidate['quantity'],
-                    'moq' => $product->minOrderQuantity(),
-                    'image' => $product->imageUrl(),
-                    'url' => route('web.product', $product->slug),
-                ];
+                return $this->formatItem($candidate);
             }, $items),
         ];
+    }
+
+    private function formatItem($candidate)
+    {
+        $product = $candidate['product'];
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => round($candidate['price'], 2), // per piece
+            'cost' => round($candidate['cost'], 2), // per person
+            'quantity' => $candidate['quantity'],
+            'total' => round($candidate['price'] * $candidate['quantity'], 2),
+            'moq' => $product->minOrderQuantity(),
+            'image' => $product->imageUrl(),
+            'url' => route('web.product', $product->slug),
+        ];
+    }
+
+    /**
+     * Single gifts within the budget: those matching more preferences first, then the ones closest to the budget.
+     */
+    private function products($candidates, $preferences)
+    {
+        usort($candidates, function ($a, $b) {
+            return count($b['matched']) <=> count($a['matched']) ?: $b['cost'] <=> $a['cost'];
+        });
+        return array_map(function ($candidate) use ($preferences) {
+            $item = $this->formatItem($candidate);
+            $item['preferences'] = array_map(function ($key) use ($preferences) { return $preferences[$key]['label']; }, $candidate['matched']);
+            return $item;
+        }, array_slice($candidates, 0, config('gift_planner.products_limit')));
     }
 
     /**
@@ -240,7 +272,7 @@ class GiftPlanner
             return [
                 'id' => $candidate['product']->id,
                 'name' => $candidate['product']->name,
-                'price_per_person' => round($candidate['price'], 2),
+                'price_per_person' => round($candidate['cost'], 2),
                 'suits_occasion' => $candidate['exact'],
                 'matches_preferences' => $candidate['matched'],
             ];
@@ -249,8 +281,9 @@ class GiftPlanner
 
     private function tierLimits($maxBudget)
     {
-        return array_map(function ($tier) use ($maxBudget) {
-            return ['tier' => $tier['label'], 'max_total_per_person' => round($maxBudget * $tier['share'], 2), 'max_items' => $tier['items']];
+        $floor = round($maxBudget * config('gift_planner.bundle_min_share'), 2);
+        return array_map(function ($tier) use ($maxBudget, $floor) {
+            return ['tier' => $tier['label'], 'min_total_per_person' => $floor, 'max_total_per_person' => round($maxBudget * $tier['share'], 2), 'max_items' => $tier['items']];
         }, config('gift_planner.tiers'));
     }
 
@@ -283,7 +316,7 @@ class GiftPlanner
             }
             $seen[$key] = true;
             $items = array_map(function ($id) use ($byId) { return $byId[$id]; }, $ids);
-            $sets[] = ['items' => $items, 'total' => array_sum(array_column($items, 'price')), 'name' => $row['name'], 'description' => $row['description']];
+            $sets[] = ['items' => $items, 'total' => array_sum(array_column($items, 'cost')), 'name' => $row['name'], 'description' => $row['description']];
         }
 
         usort($sets, function ($a, $b) {
@@ -295,7 +328,7 @@ class GiftPlanner
         $bundles = [];
         foreach ($sets as $i => $set) {
             $tier = $labels[$i] ?? null;
-            if (!$tier || count($set['items']) > $tier['items'] || $set['total'] > $maxBudget * $tier['share']) {
+            if (!$tier || count($set['items']) > $tier['items'] || $set['total'] > $maxBudget * $tier['share'] || $set['total'] < $maxBudget * config('gift_planner.bundle_min_share')) {
                 return null;
             }
             $bundles[] = $this->formatBundle($set['items'], $set['total'], $tier, $set['name'], $set['description'], $images);
@@ -317,7 +350,7 @@ class GiftPlanner
                 sort($ids);
                 $sets[implode('-', $ids)] = [
                     'items' => $next,
-                    'total' => array_sum(array_column($next, 'price')),
+                    'total' => array_sum(array_column($next, 'cost')),
                     'score' => array_sum(array_column($next, 'score')) / count($next),
                     'repeats' => count($next) - count(array_unique($categories)),
                 ];

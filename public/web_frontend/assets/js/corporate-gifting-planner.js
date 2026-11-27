@@ -6,8 +6,10 @@ document.addEventListener('DOMContentLoaded', function() {
   const subtitle = document.getElementById('plannerSubtitle');
   const showBtn = document.getElementById('showRecommendations');
   const moreBtn = document.getElementById('viewMore');
-  const teamSelect = document.getElementById('teamSize');
-  const budgetSelect = document.getElementById('budgetRange');
+  const peopleInput = document.getElementById('teamSize');
+  const budgetInput = document.getElementById('budgetAmount');
+  const budgetHint = document.getElementById('budgetHint');
+  const productsGrid = document.getElementById('productsGrid');
   const showLabel = showBtn.innerHTML;
   const moreLabel = moreBtn.innerHTML;
   const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
@@ -15,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const RESUME_KEY = 'plannerResume';
   let round = 0;
   let customOccasion = '';
+  let budgetType = 'person';
+  // The choices the results on screen were made for; adding to the quote uses the same number of people
+  let current = null;
   // Bundles appear only after the customer asks for them with Show Recommendations
   let shown = false;
 
@@ -25,8 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
         action: action,
         occasion: document.querySelector('.bp-occasion.active').dataset.occasion,
         customOccasion: customOccasion,
-        team: teamSelect.value,
-        budget: budgetSelect.value,
+        people: peopleInput.value,
+        budget: budgetInput.value,
+        budgetType: budgetType,
         preferences: Array.from(document.querySelectorAll('.bp-chip.active')).map(function(chip) { return chip.dataset.pref; })
       }));
     } catch (e) {
@@ -55,6 +61,45 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function amount(value) {
     return value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+
+  function money(value) {
+    return 'AED ' + value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  // The typed choices, or null with a message when one is missing
+  function choices() {
+    const people = parseInt(peopleInput.value, 10);
+    const budget = parseFloat(budgetInput.value);
+    if (!(people >= 1) || String(people) !== peopleInput.value.trim()) {
+      return { error: 'Please enter how many people the gifts are for.', field: peopleInput };
+    }
+    if (!(budget > 0)) {
+      return { error: 'Please enter your budget in AED.', field: budgetInput };
+    }
+    const perPerson = budgetType === 'total' ? budget / people : budget;
+    if (perPerson < 1) {
+      return { error: 'That is under AED 1 per person. Please raise the budget.', field: budgetInput };
+    }
+    return { people: people, budget: budget, budget_type: budgetType, perPerson: perPerson };
+  }
+
+  // Under the budget: what it comes to per person, or for everyone
+  function updateHint() {
+    const c = choices();
+    if (c.error) {
+      budgetHint.textContent = budgetType === 'total' ? 'Your whole budget, shared by everyone.' : 'What you want to spend on each person.';
+      return;
+    }
+    const who = c.people + (c.people === 1 ? ' person' : ' people');
+    budgetHint.textContent = budgetType === 'total'
+      ? 'About ' + money(Math.floor(c.perPerson * 100) / 100) + ' per person for ' + who + '.'
+      : money(c.budget * c.people) + ' in total for ' + who + '.';
+  }
+
+  // A missing choice says what to fix; anything else is a general message
+  function errorText(e) {
+    return e && e.message && e.message !== 'Request failed' && e.message !== 'Failed to fetch' ? e.message : 'Something went wrong. Please try again.';
   }
 
   function showError(message) {
@@ -169,6 +214,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const price = el('p', 'bp-card-price', 'AED ');
     price.appendChild(el('strong', '', amount(bundle.price)));
     price.appendChild(document.createTextNode(' / person'));
+    price.appendChild(el('small', 'bp-card-total', money(bundle.total) + ' for ' + current.people + (current.people === 1 ? ' person' : ' people')));
     text.appendChild(price);
 
     const list = el('ul', 'bp-items');
@@ -179,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const link = el('a', '', item.name);
       link.href = item.url;
       body.appendChild(link);
-      if (item.quantity === item.moq && item.moq > 1) {
+      if (item.quantity > current.people) {
         body.appendChild(el('small', '', 'Minimum order ' + item.moq + ' pcs'));
       }
       row.appendChild(body);
@@ -208,15 +254,9 @@ document.addEventListener('DOMContentLoaded', function() {
         askToLogin('select');
         return;
       }
-      if (!teamSelect.value) {
-        showError('Please select your team size first, so we can order the right quantity.');
-        teamSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        teamSelect.focus({ preventScroll: true });
-        return;
-      }
       select.disabled = true;
       select.textContent = 'Adding to your quote...';
-      postJson(planner.dataset.cartUrl, { team: teamSelect.value, product_ids: bundle.items.map(function(item) { return item.id; }) })
+      postJson(planner.dataset.cartUrl, { people: current.people, product_ids: bundle.items.map(function(item) { return item.id; }) })
         .then(function(result) { window.location.href = result.redirect; })
         .catch(function() {
           select.disabled = false;
@@ -227,13 +267,66 @@ document.addEventListener('DOMContentLoaded', function() {
     return card;
   }
 
-  function subtitleText(result, occasionLabel) {
-    if (result.guest) {
-      return 'Sample bundles for ' + occasionLabel + '. Log in to get recommendations for your own team size and budget.';
+  // A single gift, priced for the number of people
+  function productCard(item) {
+    const card = el('article', 'bp-product');
+    const link = el('a', 'bp-product-image');
+    link.href = item.url;
+    link.appendChild(photo(item));
+    card.appendChild(link);
+
+    const body = el('div', 'bp-product-body');
+    const title = el('h3');
+    const name = el('a', '', item.name);
+    name.href = item.url;
+    title.appendChild(name);
+    body.appendChild(title);
+    if (item.preferences.length) {
+      const tags = el('div', 'bp-product-tags');
+      item.preferences.forEach(function(label) { tags.appendChild(el('span', '', label)); });
+      body.appendChild(tags);
     }
-    const parts = ['Curated options based on your budget, team size and occasion.'];
-    if (!teamSelect.value) {
-      parts.push('Prices shown for ' + planner.dataset.defaultTeamLabel + ' until you choose.');
+    const price = el('p', 'bp-product-price', 'AED ');
+    price.appendChild(el('strong', '', amount(item.cost)));
+    price.appendChild(document.createTextNode(' / person'));
+    body.appendChild(price);
+    // A minimum order above the number of people is paid in full, which is why the cost per person is higher
+    body.appendChild(el('p', 'bp-product-total', money(item.total) + ' for ' + item.quantity + ' pcs' + (item.quantity > current.people ? ' (minimum order, ' + money(item.price) + ' each)' : '')));
+
+    const add = el('button', 'bp-btn', 'Add to Quote');
+    add.type = 'button';
+    add.addEventListener('click', function() {
+      if (!loggedIn) {
+        askToLogin('select');
+        return;
+      }
+      add.disabled = true;
+      add.textContent = 'Adding...';
+      postJson(planner.dataset.cartUrl, { people: current.people, product_ids: [item.id] }).then(function(result) {
+        add.textContent = 'Added to your quote';
+        add.classList.add('added');
+        const note = el('p', 'bp-product-added');
+        const view = el('a', '', 'View quote');
+        view.href = result.redirect;
+        note.appendChild(view);
+        body.appendChild(note);
+        const badge = document.getElementById('cartCount');
+        if (badge && result.count !== undefined) { badge.textContent = result.count; }
+      }).catch(function() {
+        add.disabled = false;
+        add.textContent = 'Could not add. Try again';
+      });
+    });
+    body.appendChild(add);
+    card.appendChild(body);
+    return card;
+  }
+
+  function subtitleText(result, occasionLabel) {
+    const who = current.people + (current.people === 1 ? ' person' : ' people');
+    const parts = ['For ' + who + ', up to ' + money(result.perPerson) + ' per person.'];
+    if (result.guest) {
+      parts.push('Log in to get bundles named for your occasion and pictured with your logo.');
     }
     if (result.broadened) {
       parts.push('We don\'t have gifts made just for ' + occasionLabel + ' yet, so these are popular corporate gifts.');
@@ -244,13 +337,43 @@ document.addEventListener('DOMContentLoaded', function() {
     return parts.join(' ');
   }
 
+  // Bundles or Individual Products
+  const tabs = document.querySelectorAll('.bp-tab');
+
+  function showTab(name) {
+    tabs.forEach(function(tab) {
+      const active = tab.dataset.tab === name;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      tab.tabIndex = active ? 0 : -1;
+    });
+    document.getElementById('panelBundles').hidden = name !== 'bundles';
+    document.getElementById('panelProducts').hidden = name !== 'products';
+    moreBtn.hidden = name !== 'bundles';
+  }
+
+  tabs.forEach(function(tab, i) {
+    tab.addEventListener('click', function() { showTab(this.dataset.tab); });
+    tab.addEventListener('keydown', function(event) {
+      if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') { return; }
+      const next = tabs[(i + (event.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+      showTab(next.dataset.tab);
+      next.focus();
+    });
+  });
+
   function load(nextRound) {
     const occasion = document.querySelector('.bp-occasion.active');
     const occasionLabel = occasion.querySelector('.bp-occasion-label').textContent;
+    const c = choices();
+    if (c.error) {
+      return Promise.reject(new Error(c.error));
+    }
     return postJson(planner.dataset.url, {
       occasion: occasion.dataset.occasion,
-      team: teamSelect.value || planner.dataset.defaultTeam,
-      budget: budgetSelect.value || planner.dataset.defaultBudget,
+      people: c.people,
+      budget_type: c.budget_type,
+      budget: c.budget,
       preferences: Array.from(document.querySelectorAll('.bp-chip.active')).map(function(chip) { return chip.dataset.pref; }),
       round: nextRound,
       custom_occasion: occasion.dataset.occasion === 'other' ? customOccasion : ''
@@ -260,12 +383,23 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       round = nextRound;
       shown = true;
+      current = c;
       document.getElementById('plannerWelcome').hidden = true;
       document.getElementById('resultsHead').hidden = false;
+      document.getElementById('resultsTabs').hidden = false;
       document.getElementById('selectedOccasion').textContent = occasionLabel;
       grid.replaceChildren();
       result.bundles.forEach(function(bundle) { grid.appendChild(bundleCard(bundle)); });
       empty.hidden = result.bundles.length > 0;
+      productsGrid.replaceChildren();
+      result.products.forEach(function(item) { productsGrid.appendChild(productCard(item)); });
+      document.getElementById('productsEmpty').hidden = result.products.length > 0;
+      document.getElementById('countBundles').textContent = result.bundles.length;
+      document.getElementById('countProducts').textContent = result.products.length;
+      // A first look opens the tab that has something to show
+      if (nextRound === 0) {
+        showTab(!result.bundles.length && result.products.length ? 'products' : 'bundles');
+      }
       subtitle.textContent = subtitleText(result, occasionLabel);
       return true;
     });
@@ -303,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
     button.addEventListener('click', function() {
       const card = document.querySelector('.bp-occasion[data-occasion="' + this.dataset.occasion + '"]');
       if (!card) { return; }
-      selectOccasion(card).catch(function() { showError('Something went wrong. Please try again.'); });
+      selectOccasion(card).catch(function(e) { showError(errorText(e)); });
       document.getElementById('plannerStart').scrollIntoView({ behavior: 'smooth' });
       card.focus({ preventScroll: true });
     });
@@ -315,7 +449,7 @@ document.addEventListener('DOMContentLoaded', function() {
         openOtherModal();
         return;
       }
-      selectOccasion(this).catch(function() { showError('Something went wrong. Please try again.'); });
+      selectOccasion(this).catch(function(e) { showError(errorText(e)); });
     });
   });
 
@@ -403,6 +537,30 @@ document.addEventListener('DOMContentLoaded', function() {
         first.focus();
       }
     }
+  });
+
+  // Budget per person or in total
+  const budgetTypeButtons = document.querySelectorAll('[data-budget-type]');
+
+  function setBudgetType(type) {
+    budgetType = type === 'total' ? 'total' : 'person';
+    budgetTypeButtons.forEach(function(button) {
+      const active = button.dataset.budgetType === budgetType;
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+    });
+    budgetInput.placeholder = budgetType === 'total' ? 'e.g. 7500' : 'e.g. 150';
+    updateHint();
+  }
+
+  budgetTypeButtons.forEach(function(button) {
+    button.addEventListener('click', function() { setBudgetType(this.dataset.budgetType); });
+  });
+  [peopleInput, budgetInput].forEach(function(input) {
+    input.addEventListener('input', function() { updateHint(); showError(''); });
+    input.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') { showBtn.click(); }
+    });
   });
 
   // Preference chips
@@ -530,18 +688,20 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!brandModal.hidden && event.key === 'Escape') { closeBrandModal(); }
   });
 
-  // Show Recommendations button: checks the choices, then asks for the logo and assets
+  // Show Recommendations button: checks the choices, then asks logged-in customers for the logo and assets
   showBtn.addEventListener('click', function() {
-    if (!loggedIn) {
-      askToLogin('show');
-      return;
-    }
-    if (!teamSelect.value || !budgetSelect.value) {
-      showError('Please select your team size and budget per person.');
+    const c = choices();
+    if (c.error) {
+      showError(c.error);
+      c.field.focus();
       return;
     }
     showError('');
-    openBrandModal();
+    if (loggedIn) {
+      openBrandModal();
+    } else {
+      showRecommendations();
+    }
   });
 
   function showRecommendations() {
@@ -550,8 +710,8 @@ document.addEventListener('DOMContentLoaded', function() {
     showBtn.textContent = 'Finding gifts...';
     load(0).then(function() {
       document.getElementById('recommendations').scrollIntoView({ behavior: 'smooth' });
-    }).catch(function() {
-      showError('Something went wrong. Please try again.');
+    }).catch(function(e) {
+      showError(errorText(e));
     }).finally(function() {
       showBtn.disabled = false;
       showBtn.innerHTML = showLabel;
@@ -591,8 +751,9 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       markOccasion(card);
     }
-    teamSelect.value = saved.team || '';
-    budgetSelect.value = saved.budget || '';
+    peopleInput.value = saved.people || '';
+    budgetInput.value = saved.budget || '';
+    setBudgetType(saved.budgetType);
     document.querySelectorAll('.bp-chip').forEach(function(chip) {
       const active = (saved.preferences || []).indexOf(chip.dataset.pref) !== -1;
       chip.classList.toggle('active', active);
@@ -601,6 +762,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return saved;
   }
 
+  updateHint();
   const resume = restoreChoices();
   if (resume && loggedIn && resume.action === 'show') {
     // Carry on with what they clicked before logging in

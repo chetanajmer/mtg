@@ -49,7 +49,7 @@
                 <tr>
                   <td>
                     <strong>{{ $row->occasion_label }}</strong><br>
-                    {{ $config['team_sizes'][$row->team]['label'] ?? $row->team }} · {{ $config['budgets'][$row->budget]['label'] ?? $row->budget }}
+                    @if(is_numeric($row->team)){{ $row->team }} people · AED {{ number_format((float) $row->budget, 2) }}/person @else{{ $row->team }} · {{ $row->budget }}@endif
                     @if($row->preferences)<br><small class="pl-note">{{ collect($row->preferences)->map(function ($key) use ($config) { return $config['preferences'][$key]['label'] ?? $key; })->implode(', ') }}</small>@endif
                     @if($row->round)<br><span class="pl-tag">View more #{{ $row->round }}</span>@endif
                   </td>
