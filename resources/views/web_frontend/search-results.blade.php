@@ -8,6 +8,7 @@
 @section('content')
 <main id="homePage">
   <section class="mh-section mh-results">
+    <div class="mh-results-head">
     <form class="mh-search mh-results-search" action="{{ route('home.search') }}" method="get" role="search">
       <i class="bi bi-search"></i>
       <input type="search" name="q" value="{{ $query }}" placeholder="Search corporate gifts..." aria-label="Search corporate gifts" maxlength="100">
@@ -15,16 +16,19 @@
     </form>
     <h1>{{ $heading }}</h1>
     <p class="mh-results-count">{{ $products->total() }} {{ $products->total() === 1 ? 'product' : 'products' }}</p>
+    </div>
     @if($products->count())
       <div class="mh-results-grid">
         @foreach($products as $product)
           @include('web_frontend.partials.home-product-card', ['product' => $product])
         @endforeach
       </div>
+      @if($products->hasPages())
       <div class="mh-pagination">
         @if($products->previousPageUrl())<a href="{{ $products->previousPageUrl() }}"><i class="bi bi-arrow-left"></i> Previous</a>@endif
         @if($products->nextPageUrl())<a href="{{ $products->nextPageUrl() }}">Next <i class="bi bi-arrow-right"></i></a>@endif
       </div>
+      @endif
     @else
       <div class="mh-no-results">
         <i class="bi bi-search"></i>

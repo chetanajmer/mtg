@@ -19,7 +19,6 @@ body.mtg-boxed .mb-box,
 /* Breadcrumb rows (product, cart, track order, order details, quote sent) */
 body.mtg-boxed .mtg-page > .container-fluid:has(> .breadcrumb-row),
 /* Search results, request a quote, policies, contact */
-body.mtg-boxed .mh-results,
 body.mtg-boxed .co-head, body.mtg-boxed .co-card,
 body.mtg-boxed .about-section, body.mtg-boxed .breadcrumb-section,
 body.mtg-boxed .breadcrumb_section, body.mtg-boxed .contact_section,
@@ -32,7 +31,7 @@ body.mtg-boxed .compare-body .act,
 /* Annual Contract */
 body.mtg-boxed .membership-wrapper > .plans,
 /* Category pages */
-body.mtg-boxed .cp-filters, body.mtg-boxed .cp-results,
+body.mtg-boxed .cp-filters,
 /* Product page */
 body.mtg-boxed .product-section .product-gallery, body.mtg-boxed .product-section .product-info,
 body.mtg-boxed .product-section .pricing-card, body.mtg-boxed .details-card,
@@ -118,8 +117,19 @@ body.mtg-boxed .es-bottom { padding: 16px; }
 body.mtg-boxed .cp-page { display: flex; flex-direction: column; gap: var(--mb-gap); }
 body.mtg-boxed .cp-hero { border-radius: var(--mb-radius); }
 body.mtg-boxed .cp-body { padding: 0; gap: var(--mb-gap); }
-body.mtg-boxed .cp-results { padding: 14px 16px 16px; }
-body.mtg-boxed .mh-results { padding: 24px 16px 32px; }
+/* Product lists: grey between the products, every product, the toolbar and the page numbers in their own white box */
+body.mtg-boxed .cp-results, body.mtg-boxed .mh-results { display: flex; flex-direction: column; gap: var(--mb-gap); min-height: 0; padding: 0; background: transparent; }
+body.mtg-boxed .cp-toolbar { margin: 0; padding: 12px 16px; background: var(--mb-box); }
+body.mtg-boxed .mh-results-head { padding: 22px 16px 18px; background: var(--mb-box); }
+body.mtg-boxed .mh-results-head h1 { margin-top: 18px; }
+body.mtg-boxed .cp-grid, body.mtg-boxed .mh-results-grid { gap: var(--mb-gap); }
+body.mtg-boxed .cp-card { padding: 14px; background: var(--mb-box); }
+body.mtg-boxed .cp-card-image { background: var(--mb-box); }
+body.mtg-boxed .cp-grid-list .cp-card { border: 0; }
+body.mtg-boxed .cp-grid-list .cp-card-image { background: var(--mb-box); }
+body.mtg-boxed .mh-results .mh-product { padding: 14px 14px 12px; box-shadow: none; }
+body.mtg-boxed .cp-pages, body.mtg-boxed .mh-pagination { margin: 0; padding: 12px 16px; background: var(--mb-box); }
+body.mtg-boxed .cp-empty, body.mtg-boxed .mh-no-results { background: var(--mb-box); }
 
 /* ---------- Budget Planner, Compare Gifts, Annual Contract ---------- */
 body.mtg-boxed .bp { display: flex; flex-direction: column; gap: var(--mb-gap); }
