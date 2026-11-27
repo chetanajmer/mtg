@@ -39,7 +39,7 @@
   <div class="mh-main">
     <nav class="mh-links" aria-label="Company">
       <a href="{{ url('aboutus') }}" class="{{ request()->is('aboutus') ? 'active' : '' }}">About us</a>
-      <a href="{{ url('contactus') }}">Branding</a>
+      <a href="{{ route('branding-assets.index') }}" class="{{ request()->is('branding-assets*') ? 'active' : '' }}">Branding</a>
       <a href="/annual-corporate-membership" class="{{ request()->is('annual-corporate-membership') ? 'active' : '' }}">Annual Contract</a>
       <a href="{{ $ordersUrl }}" class="{{ request()->is('orders') || request()->is('track-order*') ? 'active' : '' }}">Track your Order</a>
     </nav>
